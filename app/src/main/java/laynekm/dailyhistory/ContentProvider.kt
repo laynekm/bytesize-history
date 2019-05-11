@@ -12,7 +12,8 @@ class ContentProvider {
         doAsyncResult {
             val url = buildURL("May_11")
             val result = url.readText()
-            val parsedContent = parseContent(result)
+            Log.wtf("result", result)
+            parseContent(result)
             Log.wtf("result: ", result)
 //            activityUiThread {
 //                longToast(result)
@@ -37,7 +38,10 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
+    // TODO: Add error handling in case content does not exist or API call fails
     private fun parseContent(json: String) {
+        Log.wtf("json", json)
+
         // extract content property from json
         val content = JsonParser().parse(json)
             .asJsonObject.get("query")
@@ -50,6 +54,25 @@ class ContentProvider {
 
         // content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
-        lines.forEach{ Log.wtf("line 1", it) }
+        lines.forEach{ Log.wtf("lines", it) }
+
+        // Split array into events, births, and deaths
+        // Only care about strings starting with an asterisk
+        val events = mutableListOf<String>()
+        val births = mutableListOf<String>()
+        val deaths = mutableListOf<String>()
+        var addTo: MutableList<String>? = null
+        lines.forEach {
+            if (it.contains("==Events==")) addTo = events
+            if (it.contains("==Births==")) addTo = births
+            if (it.contains("==Deaths==")) addTo = deaths
+            if (it.contains("==Holidays and observances==")) addTo = null
+            if (addTo != null && it.contains("*")) addTo!!.add(it)
+
+        }
+
+        events!!.forEach{ Log.wtf("events", it) }
+        births!!.forEach{ Log.wtf("births", it) }
+        deaths!!.forEach{ Log.wtf("deaths", it) }
     }
 }
