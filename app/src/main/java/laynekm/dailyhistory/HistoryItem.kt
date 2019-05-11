@@ -1,15 +1,22 @@
 package laynekm.dailyhistory
 
-// TODO: Implement actual image types
-// HistoryItem consists of a date, text content, image, and links to web pages for further reading
-class HistoryItem {
-    var date: String? = null
-    var content: String? = null
-    var image: String? = null
-    var links: MutableList<Link>? = null
+enum class Type constructor(private val type: String) {
+    EVENT("Event"), BIRTH("Birth"), DEATH("Death");
+    override fun toString(): String = this.type
 }
 
-class Link {
-    var content: String? = null
-    var link: String? = null
+// TODO: Add images, links
+class HistoryItem (
+    val type: Type,
+    val year: String,
+    val description: String) {
+
+    // For debugging purposes
+    override fun toString(): String {
+        return "Type: ${type.toString()}\\nYear: $year\\nDescription: $description"
+    }
 }
+
+class Link (
+    val content: String,
+    val link: String)

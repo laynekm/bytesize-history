@@ -12,12 +12,10 @@ class ContentProvider {
         doAsyncResult {
             val url = buildURL("May_11")
             val result = url.readText()
-            Log.wtf("result", result)
             parseContent(result)
-            Log.wtf("result: ", result)
-//            activityUiThread {
-//                longToast(result)
-//            }
+//          activityUiThread {
+//              longToast(result)
+//          }
         }
     }
 
@@ -38,6 +36,7 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
+    // Builds HistoryItem objects from json string input
     // TODO: Add error handling in case content does not exist or API call fails
     private fun parseContent(json: String) {
         Log.wtf("json", json)
@@ -58,21 +57,41 @@ class ContentProvider {
 
         // Split array into events, births, and deaths
         // Only care about strings starting with an asterisk
-        val events = mutableListOf<String>()
-        val births = mutableListOf<String>()
-        val deaths = mutableListOf<String>()
-        var addTo: MutableList<String>? = null
-        lines.forEach {
-            if (it.contains("==Events==")) addTo = events
-            if (it.contains("==Births==")) addTo = births
-            if (it.contains("==Deaths==")) addTo = deaths
-            if (it.contains("==Holidays and observances==")) addTo = null
-            if (addTo != null && it.contains("*")) addTo!!.add(it)
-
+        // Assumes events, births, deaths proceed each other
+        var historyItems = mutableListOf<HistoryItem>()
+        var type: Type? = null
+        for (line in lines) {
+            if (line.contains("==Events==")) type = Type.EVENT
+            if (line.contains("==Births==")) type = Type.BIRTH
+            if (line.contains("==Deaths==")) type = Type.DEATH
+            if (line.contains("==Holidays and observances==")) break
+            if (type != null && line.contains("*")) historyItems!!.add(buildHistoryItem(line, type!!))
         }
 
-        events!!.forEach{ Log.wtf("events", it) }
-        births!!.forEach{ Log.wtf("births", it) }
-        deaths!!.forEach{ Log.wtf("deaths", it) }
+        historyItems.forEach {
+            Log.wtf("HistoryItems", it.toString())
+        }
     }
+
+    private fun buildHistoryItem(line: String, type: Type): HistoryItem {
+        val year = parseYear(line)
+        val desc = parseDescription(line)
+        return HistoryItem(type, year, desc)
+    }
+
+    // Return year with numbers only
+    private fun parseYear(line: String): String {
+        val numsOnly = Regex("[^0-9]")
+        return numsOnly.replace(line.substringBefore(" &ndash; "), "")
+    }
+
+    // Return description only (ie. remove links)
+    private fun parseDescription(line: String): String {
+        return line.substringAfter(" &ndash; ")
+    }
+
+    // Return links
+//    private fun parseLinks(line: String): Link {
+//
+//    }
 }
