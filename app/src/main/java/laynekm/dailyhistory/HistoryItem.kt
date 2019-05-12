@@ -9,13 +9,13 @@ enum class Type constructor(private val type: String) {
 class HistoryItem (
     val type: Type,
     val year: String,
-    val description: String,
+    val desc: String,
     val links: MutableList<Link>) {
 
     override fun toString(): String {
         var linkString = ""
         links.forEach { linkString += "\n - $it"}
-        return "\nType: $type\nYear: $year\nDescription: $description\nLinks:$linkString\n"
+        return "\nType: $type\nYear: $year\nDescription: $desc\nLinks:$linkString\n"
     }
 }
 
