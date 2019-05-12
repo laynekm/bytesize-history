@@ -13,7 +13,7 @@ class HistoryItem (
 
     // For debugging purposes
     override fun toString(): String {
-        return "Type: ${type.toString()}\\nYear: $year\\nDescription: $description"
+        return "\nType: ${type.toString()}\nYear: $year\nDescription: $description"
     }
 }
 

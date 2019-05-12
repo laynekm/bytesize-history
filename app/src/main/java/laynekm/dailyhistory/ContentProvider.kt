@@ -53,7 +53,6 @@ class ContentProvider {
 
         // content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
-        lines.forEach{ Log.wtf("lines", it) }
 
         // Split array into events, births, and deaths
         // Only care about strings starting with an asterisk
@@ -85,13 +84,31 @@ class ContentProvider {
         return numsOnly.replace(line.substringBefore(" &ndash; "), "")
     }
 
-    // Return description only (ie. remove links)
+    // TODO: Returns the links as well
+    // Return description only (ie. remove brackets and links)
     private fun parseDescription(line: String): String {
-        return line.substringAfter(" &ndash; ")
-    }
+        var desc = line.substringAfter(" &ndash; ")
 
-    // Return links
-//    private fun parseLinks(line: String): Link {
-//
-//    }
+        // Loop until all square brackets are removed
+        // If |, choose the text on the right side (left side is the link)
+        while (desc.contains("[[")) {
+            val innerText = desc.substringAfter("[[").substringBefore("]]")
+            if (innerText.contains("|")) {
+                val textToRemove = innerText.substringAfter("[[").substringBefore("|")
+                desc = desc.replaceFirst(textToRemove, "")
+            }
+            desc = desc.replaceFirst("[[", "").replaceFirst("]]", "")
+        }
+
+        // Loop until all <ref> tags are removed
+        while (desc.contains("<ref")) {
+            val textToRemove = desc.substringAfter("<ref").substringBefore("</ref>")
+            desc = desc.replaceFirst(textToRemove, "").replaceFirst("<ref", "").replaceFirst("</ref>", "")
+        }
+
+        // Remove remaining characters
+        desc = desc.replace("|", "")
+
+        return desc
+    }
 }
