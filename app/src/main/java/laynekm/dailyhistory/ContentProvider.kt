@@ -74,8 +74,8 @@ class ContentProvider {
 
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
         val year = parseYear(line)
-        val desc = parseDescription(line)
-        return HistoryItem(type, year, desc)
+        val (desc, links) = parseDescriptionAndLinks(line)
+        return HistoryItem(type, year, desc, links)
     }
 
     // Return year with numbers only
@@ -84,31 +84,47 @@ class ContentProvider {
         return numsOnly.replace(line.substringBefore(" &ndash; "), "")
     }
 
-    // TODO: Returns the links as well
-    // Return description only (ie. remove brackets and links)
-    private fun parseDescription(line: String): String {
+    // Used to return desc and links from parseDescriptionAndLinks
+    data class ParseResult(val desc: String, val links: MutableList<Link>)
+
+    // TODO: Fetch link content as well as returning the links (or maybe in another function?)
+    // Parse line and return description and links
+    private fun parseDescriptionAndLinks(line: String): ParseResult {
+        Log.wtf("Line", line)
         var desc = line.substringAfter(" &ndash; ")
+        var links = mutableListOf<Link>()
 
         // Loop until all square brackets are removed
-        // If |, choose the text on the right side (left side is the link)
+        // Link text is on the left side, text to display is on the right
         while (desc.contains("[[")) {
             val innerText = desc.substringAfter("[[").substringBefore("]]")
             if (innerText.contains("|")) {
-                val textToRemove = innerText.substringAfter("[[").substringBefore("|")
-                desc = desc.replaceFirst(textToRemove, "")
+                val leftText = innerText.substringAfter("[[").substringBefore("|")
+                desc = desc.replaceFirst(leftText, "")
+                links.add(Link(leftText))
+            } else {
+                links.add(Link(innerText))
             }
             desc = desc.replaceFirst("[[", "").replaceFirst("]]", "")
         }
 
         // Loop until all <ref> tags are removed
+        // URLs are either proceeded by "url=" or directly after "<ref>/" (other cases?)
         while (desc.contains("<ref")) {
-            val textToRemove = desc.substringAfter("<ref").substringBefore("</ref>")
-            desc = desc.replaceFirst(textToRemove, "").replaceFirst("<ref", "").replaceFirst("</ref>", "")
+            val innerText = desc.substringAfter("<ref").substringBefore("</ref>")
+            if (innerText.contains("url=")) {
+                val linkText = innerText.substringAfter("url=").substringBefore(" ")
+                links.add(Link(linkText))
+            } else {
+                val linkText = innerText.substringAfter("/")
+                links.add(Link(linkText))
+            }
+            desc = desc.replaceFirst(innerText, "").replaceFirst("<ref", "").replaceFirst("</ref>", "")
         }
 
         // Remove remaining characters
         desc = desc.replace("|", "")
 
-        return desc
+        return ParseResult(desc, links)
     }
 }
