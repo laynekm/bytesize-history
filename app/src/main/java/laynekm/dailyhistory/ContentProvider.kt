@@ -36,12 +36,25 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
+    private fun buildImageURL(searchParam: String): URL {
+        val uri: Uri = Uri.parse("https://en.wikipedia.org/w/api.php").buildUpon()
+            .appendQueryParameter("action", "query")
+            .appendQueryParameter("prop", "pageimages")
+            .appendQueryParameter("pithumbsize", "100")
+            .appendQueryParameter("format", "json")
+            .appendQueryParameter("formatversion" , "2")
+            .appendQueryParameter("titles", searchParam)
+            .build()
+
+        return URL(uri.toString())
+    }
+
     // Builds HistoryItem objects from json string input
     // TODO: Add error handling in case content does not exist or API call fails
     private fun parseContent(json: String): MutableList<HistoryItem> {
         Log.wtf("json", json)
 
-        // extract content property from json
+        // Extract content property from json
         val content = JsonParser().parse(json)
             .asJsonObject.get("query")
             .asJsonObject.getAsJsonArray("pages").get(0)
@@ -51,7 +64,7 @@ class ContentProvider {
             .asJsonObject.get("content")
             .toString()
 
-        // content itself is not in json format but can be split into an array
+        // Content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
 
         // Split array into events, births, and deaths
@@ -73,13 +86,21 @@ class ContentProvider {
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
         val year = parseYear(line)
         val (desc, links) = parseDescriptionAndLinks(line)
-        return HistoryItem(type, year, desc, links)
+        val image = fetchImage(links)
+        Log.wtf("Image URL", image)
+        return HistoryItem(type, year, desc, image, links)
     }
 
     // Return year with numbers only
     private fun parseYear(line: String): String {
         val numsOnly = Regex("[^0-9]")
         return numsOnly.replace(line.substringBefore(" &ndash; "), "")
+    }
+
+    // Fetches image URL based on provided webpage links
+    private fun fetchImage(links: MutableList<Link>): String {
+        val imageUrl = buildImageURL(links[0].link)
+        return imageUrl.readText()
     }
 
     // Used to return desc and links from parseDescriptionAndLinks

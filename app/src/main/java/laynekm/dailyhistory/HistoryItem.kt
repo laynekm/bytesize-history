@@ -10,6 +10,7 @@ class HistoryItem (
     val type: Type,
     val year: String,
     val desc: String,
+    val image: String,
     val links: MutableList<Link>) {
 
     override fun toString(): String {

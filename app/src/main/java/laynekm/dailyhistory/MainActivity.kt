@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         // Populate recycler view with empty list to initialize
-        val item = HistoryItem(Type.EVENT, "1900", "Test", mutableListOf(Link("test")))
+        val item = HistoryItem(Type.EVENT, "1900", "Test", "", mutableListOf(Link("test")))
         val items = mutableListOf(item)
         populateRecyclerView(items)
 
