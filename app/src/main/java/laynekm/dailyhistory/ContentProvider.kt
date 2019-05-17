@@ -8,6 +8,8 @@ import java.net.URL
 
 class ContentProvider {
 
+    var imageCounter = 0
+
     // After fetching data, calls function in main thread that populates recycler view
     fun getHistoryData(populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
          doAsync {
@@ -87,7 +89,6 @@ class ContentProvider {
         val year = parseYear(line)
         val (desc, links) = parseDescriptionAndLinks(line)
         val image = fetchImage(links)
-        Log.wtf("Image URL", image)
         return HistoryItem(type, year, desc, image, links)
     }
 
@@ -98,15 +99,18 @@ class ContentProvider {
     }
 
     // Fetches image URL based on provided webpage links
+    // TODO: This should probably be done in the HistoryItemAdapter itself
+    // TODO: Remove the imageCounter, only added it so the API calls didn't take forever
     private fun fetchImage(links: MutableList<Link>): String {
+        imageCounter++
+        if (imageCounter >= 11) return ""
         val imageUrl = buildImageURL(links[0].link)
-        return imageUrl.readText()
+        return parseImageURL(imageUrl.readText())
     }
 
     // Used to return desc and links from parseDescriptionAndLinks
     data class ParseResult(val desc: String, val links: MutableList<Link>)
 
-    // TODO: Fetch link content as well as returning the links (or maybe in another function?)
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String): ParseResult {
         Log.wtf("Line", line)
@@ -145,5 +149,25 @@ class ContentProvider {
         desc = desc.replace("|", "")
 
         return ParseResult(desc, links)
+    }
+
+    // Parses result of API call that has image URL embedded in it
+    private fun parseImageURL(json: String): String {
+        var url = ""
+        try {
+            url = JsonParser().parse(json)
+                .asJsonObject.get("query")
+                .asJsonObject.getAsJsonArray("pages").get(0)
+                .asJsonObject.get("thumbnail")
+                .asJsonObject.get("source")
+                .toString()
+
+            // Remove extra quotes
+            url = url.substring(1, url.length - 1)
+        } catch (e: Exception) {
+            Log.e("ContentProvider", "parseImageURL error")
+        }
+
+        return url
     }
 }

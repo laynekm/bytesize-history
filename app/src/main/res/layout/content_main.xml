@@ -43,5 +43,9 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
     </RelativeLayout>
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" tools:srcCompat="@tools:sample/avatars"
+            tools:layout_editor_absoluteY="8dp" tools:layout_editor_absoluteX="245dp" android:id="@+id/test"/>
 
 </android.support.constraint.ConstraintLayout>

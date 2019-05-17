@@ -16,7 +16,7 @@ class HistoryItem (
     override fun toString(): String {
         var linkString = ""
         links.forEach { linkString += "\n - $it"}
-        return "\nType: $type\nYear: $year\nDescription: $desc\nLinks:$linkString\n"
+        return "\nType: $type\nYear: $year\nDescription: $desc\nImage URL: $image\nLinks:$linkString\n"
     }
 }
 

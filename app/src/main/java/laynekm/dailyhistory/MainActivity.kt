@@ -7,6 +7,8 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun populateRecyclerView(items: MutableList<HistoryItem>) {
+        Log.wtf("populateRecyclerView", "populateRecyclerView")
         var historyItemView: RecyclerView = findViewById(R.id.historyItems)
         historyItemAdapter = HistoryItemAdapter(this, items)
         historyItemView.adapter = historyItemAdapter

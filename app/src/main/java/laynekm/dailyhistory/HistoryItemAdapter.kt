@@ -2,11 +2,13 @@ package laynekm.dailyhistory
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.squareup.picasso.Picasso
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
@@ -25,7 +27,15 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
         viewHolder.year.text = items[index].year
         viewHolder.desc.text = items[index].desc
-        viewHolder.image.setImageResource(R.drawable.default_image)
+
+        // Load item if it exists, otherwise use default image
+        val image = items[index].image
+        if (image === "") {
+            viewHolder.image.setImageResource(R.drawable.default_image)
+        } else {
+            Log.wtf("Image URL", image)
+             Picasso.get().load(image).into(viewHolder.image)
+        }
     }
 
     override fun getItemCount(): Int {
