@@ -2,7 +2,6 @@ package laynekm.dailyhistory
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,7 @@ import org.jetbrains.anko.uiThread
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
-    val contentProvider: ContentProvider = ContentProvider()
+    private val contentProvider: ContentProvider = ContentProvider()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal var image: ImageView = itemView.findViewById(R.id.historyImage)
@@ -28,20 +27,17 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         return ViewHolder(view)
     }
 
+    // TODO: This should probably refactored so the image and content is loaded simultaneously
+    // Currently, the content is already there and it takes a moment for the image to load
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
         viewHolder.year.text = items[index].year
         viewHolder.desc.text = items[index].desc
-        Log.wtf("item_links", "${index}: ${items[index].links}")
 
         doAsync {
             val imageURL = contentProvider.fetchImage(items[index].links)
-            Log.wtf("Image_URL", imageURL)
             uiThread {
-                if (imageURL === "") {
-                    viewHolder.image.setImageResource(R.drawable.default_image)
-                } else {
-                    Picasso.get().load(imageURL).into(viewHolder.image)
-                }
+                if (imageURL === "") viewHolder.image.setImageResource(R.drawable.default_image)
+                else Picasso.get().load(imageURL).into(viewHolder.image)
             }
         }
     }

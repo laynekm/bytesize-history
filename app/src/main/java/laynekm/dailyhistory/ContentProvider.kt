@@ -8,29 +8,28 @@ import java.net.URL
 
 class ContentProvider {
 
-    var imageCounter = 0
+    private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
+    private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
     // After fetching data, calls function in main thread that populates recycler view
     fun getHistoryData(date: String, populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
-         doAsync {
+        doAsync {
             val url = buildURL(date)
             val result = url.readText()
             val historyItems = parseContent(result)
-             populateRecyclerView(historyItems)
+            populateRecyclerView(historyItems)
         }
     }
 
-    // Example URL:
-    // https://en.wikipedia.org/w/api.php/w/api.php?action=query&format=json&prop=revisions&titles=May_11&formatversion=2&rvprop=content&rvslots=main&rvlimit=1
     private fun buildURL(searchParam: String): URL {
-        val uri: Uri = Uri.parse("https://en.wikipedia.org/w/api.php").buildUpon()
+        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
             .appendQueryParameter("prop", "revisions")
             .appendQueryParameter("rvprop", "content")
             .appendQueryParameter("rvslots", "main")
             .appendQueryParameter("rvlimit", "1")
             .appendQueryParameter("format", "json")
-            .appendQueryParameter("formatversion" , "2")
+            .appendQueryParameter("formatversion", "2")
             .appendQueryParameter("titles", searchParam)
             .build()
 
@@ -39,12 +38,12 @@ class ContentProvider {
     }
 
     private fun buildImageURL(searchParam: String): URL {
-        val uri: Uri = Uri.parse("https://en.wikipedia.org/w/api.php").buildUpon()
+        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
             .appendQueryParameter("prop", "pageimages")
             .appendQueryParameter("pithumbsize", "100")
             .appendQueryParameter("format", "json")
-            .appendQueryParameter("formatversion" , "2")
+            .appendQueryParameter("formatversion", "2")
             .appendQueryParameter("titles", searchParam)
             .build()
 
@@ -88,7 +87,6 @@ class ContentProvider {
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
         val year = parseYear(line)
         val (desc, links) = parseDescriptionAndLinks(line)
-        val image = fetchImage(links)
         return HistoryItem(type, year, desc, links)
     }
 
@@ -99,11 +97,7 @@ class ContentProvider {
     }
 
     // Fetches image URL based on provided webpage links
-    // TODO: This should probably be done in the HistoryItemAdapter itself
-    // TODO: Remove the imageCounter, only added it so the API calls didn't take forever
     fun fetchImage(links: MutableList<Link>): String {
-        imageCounter++
-        if (imageCounter >= 11) return ""
         val imageUrl = buildImageURL(links[0].link)
         return parseImageURL(imageUrl.readText())
     }

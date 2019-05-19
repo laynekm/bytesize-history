@@ -5,7 +5,6 @@ enum class Type constructor(private val type: String) {
     override fun toString(): String = this.type
 }
 
-// TODO: Add images, links
 class HistoryItem (
     val type: Type,
     val year: String,
@@ -19,7 +18,7 @@ class HistoryItem (
     }
 }
 
-// TODO: Fetch content from links
+// TODO: Add link desc
 class Link (
     val link: String
     /* val desc: String */) {

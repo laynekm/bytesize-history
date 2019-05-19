@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity()  {
     }
 
     fun updateDate(date: Date) {
-        if (date.month !== selectedDate.month || date.day !== selectedDate.day) {
+        if (!datesEqual(date, selectedDate)) {
             selectedDate = date
             var dateLabel: TextView = findViewById(R.id.dateLabel)
             dateLabel.text = buildDateLabel(selectedDate)
