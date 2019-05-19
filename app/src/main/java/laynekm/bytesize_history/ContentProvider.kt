@@ -1,4 +1,4 @@
-package laynekm.dailyhistory
+package laynekm.bytesize_history
 
 import android.net.Uri
 import android.util.Log

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Daily History</string>
+    <string name="app_name">Bytesize History</string>
     <string name="date_settings">Change date</string>
     <string name="time_period_settings">Change time period</string>
     <string name="notification_settings">Notification settings</string>

@@ -1,4 +1,4 @@
-package laynekm.dailyhistory
+package laynekm.bytesize_history
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package laynekm.dailyhistory
+package laynekm.bytesize_history
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

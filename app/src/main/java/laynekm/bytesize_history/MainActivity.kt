@@ -1,18 +1,16 @@
-package laynekm.dailyhistory
+package laynekm.bytesize_history
 
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
-import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity()  {
