@@ -17,20 +17,23 @@ class MainActivity : AppCompatActivity()  {
 
     private val contentProvider: ContentProvider = ContentProvider()
     private lateinit var historyItemAdapter: HistoryItemAdapter
+    private var selectedDate: Date = getToday()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        updateDate(getToday())
+        updateDate(selectedDate)
 
         // Populate recycler view with empty list to initialize
         val item = HistoryItem(Type.EVENT, "1900", "Test", "", mutableListOf(Link("test")))
         val items = mutableListOf(item)
         populateRecyclerView(items)
 
-        // Fetch history data from API and update recycler view
-        contentProvider.getHistoryData(buildDateURL(getToday()), ::updateRecyclerView)
+        // Initialize text view and fetch history content
+        var dateLabel: TextView = findViewById(R.id.dateLabel)
+        dateLabel.text = buildDateLabel(selectedDate)
+        contentProvider.getHistoryData(buildDateURL(selectedDate), ::updateRecyclerView)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -62,32 +65,26 @@ class MainActivity : AppCompatActivity()  {
     }
 
     fun updateDate(date: Date) {
-        var dateLabel: TextView = findViewById(R.id.dateLabel)
-        dateLabel.text = buildDateLabel(date)
+        if (date.month !== selectedDate.month || date.day !== selectedDate.day) {
+            selectedDate = date
+            var dateLabel: TextView = findViewById(R.id.dateLabel)
+            dateLabel.text = buildDateLabel(selectedDate)
+            contentProvider.getHistoryData(buildDateURL(selectedDate), ::updateRecyclerView)
+        }
     }
 
     fun showDatePickerDialog(view: View) {
 
         var date: Calendar = Calendar.getInstance()
-        var thisAYear = date.get(Calendar.YEAR).toInt()
-        var thisAMonth = date.get(Calendar.MONTH).toInt()
-        var thisADay = date.get(Calendar.DAY_OF_MONTH).toInt()
+        var selectedYear = date.get(Calendar.YEAR)
+        var selectedMonth = selectedDate.month
+        var selectedDay = selectedDate.day
 
-        val dpd = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view2, thisYear, thisMonth, thisDay ->
-            // Display Selected date in textbox
-            thisAMonth = thisMonth
-            thisADay = thisDay
-            thisAYear = thisYear
+        // TODO: Hide year label
+        val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, month, day ->
+            updateDate(Date(month, day))
+        }, selectedYear, selectedMonth, selectedDay)
 
-            val newDate: Calendar = Calendar.getInstance()
-            newDate.set(thisYear, thisMonth, thisDay)
-
-            var dateLabel: TextView = findViewById(R.id.dateLabel)
-            dateLabel.text = buildDateLabel(Date(thisAMonth, thisADay))
-
-
-        }, thisAYear, thisAMonth, thisADay)
-
-        dpd.show()
+        datePicker.show()
     }
 }
