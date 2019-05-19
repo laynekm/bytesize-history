@@ -20,6 +20,6 @@ fun buildDateURL(date: Date): String {
 
 fun buildDateLabel(date: Date): String {
     val today = getToday()
-    if (!datesEqual(date, today)) return "Today (${DateFormatSymbols().months[date.month]} ${date.day})"
+    if (datesEqual(date, today)) return "Today (${DateFormatSymbols().months[date.month]} ${date.day})"
     return "${DateFormatSymbols().months[date.month]} ${date.day}"
 }

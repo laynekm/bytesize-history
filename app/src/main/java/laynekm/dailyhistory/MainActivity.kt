@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
+import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity()  {
@@ -26,9 +27,7 @@ class MainActivity : AppCompatActivity()  {
         updateDate(selectedDate)
 
         // Populate recycler view with empty list to initialize
-        val item = HistoryItem(Type.EVENT, "1900", "Test", mutableListOf(Link("test")))
-        val items = mutableListOf(item)
-        populateRecyclerView(items)
+        populateRecyclerView(ArrayList())
 
         // Initialize text view and fetch history content
         var dateLabel: TextView = findViewById(R.id.dateLabel)

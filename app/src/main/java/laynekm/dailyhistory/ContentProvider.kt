@@ -1,15 +1,21 @@
 package laynekm.dailyhistory
 
 import android.net.Uri
+import android.text.Html
 import android.util.Log
 import com.google.gson.JsonParser
 import org.jetbrains.anko.doAsync
 import java.net.URL
+import java.net.URLDecoder
 
 class ContentProvider {
 
+    private val TAG = "ContentProvider"
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
+
+    // Used to return desc and links from parseDescriptionAndLinks
+    data class ParseResult(val desc: String, val links: MutableList<Link>)
 
     // After fetching data, calls function in main thread that populates recycler view
     fun getHistoryData(date: String, populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
@@ -33,7 +39,7 @@ class ContentProvider {
             .appendQueryParameter("titles", searchParam)
             .build()
 
-        Log.wtf("URL", uri.toString())
+        Log.d(TAG, "buildURL: $uri")
         return URL(uri.toString())
     }
 
@@ -47,6 +53,16 @@ class ContentProvider {
             .appendQueryParameter("titles", searchParam)
             .build()
 
+        Log.d(TAG, "buildImageURL: $uri")
+        return URL(uri.toString())
+    }
+
+    private fun buildWebURL(searchParam: String): URL {
+        val uri: Uri = Uri.parse(WEB_BASE_URL).buildUpon()
+            .appendPath(searchParam)
+            .build()
+
+        Log.d(TAG, "buildWebURL: $uri")
         return URL(uri.toString())
     }
 
@@ -97,13 +113,15 @@ class ContentProvider {
     }
 
     // Fetches image URL based on provided webpage links
+    // Some pages might not have images, so keep fetching until one of them does
     fun fetchImage(links: MutableList<Link>): String {
-        val imageUrl = buildImageURL(links[0].link)
-        return parseImageURL(imageUrl.readText())
+        var image = ""
+        links.forEach {
+            image = parseImageURL(buildImageURL(it.title).readText())
+            if (image !== "") return image
+        }
+        return image
     }
-
-    // Used to return desc and links from parseDescriptionAndLinks
-    data class ParseResult(val desc: String, val links: MutableList<Link>)
 
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String): ParseResult {
@@ -118,29 +136,34 @@ class ContentProvider {
             if (innerText.contains("|")) {
                 val leftText = innerText.substringAfter("[[").substringBefore("|")
                 desc = desc.replaceFirst(leftText, "")
-                links.add(Link(leftText))
+                links.add(Link(leftText, buildWebURL(leftText)))
             } else {
-                links.add(Link(innerText))
+                links.add(Link(innerText, buildWebURL(innerText)))
             }
             desc = desc.replaceFirst("[[", "").replaceFirst("]]", "")
         }
 
         // Loop until all <ref> tags are removed
-        // URLs are either proceeded by "url=" or directly after "<ref>/" (other cases?)
+        // These links don't really  matter, only care about wikipedia links
         while (desc.contains("<ref")) {
             val innerText = desc.substringAfter("<ref").substringBefore("</ref>")
-            if (innerText.contains("url=")) {
-                val linkText = innerText.substringAfter("url=").substringBefore(" ")
-                links.add(Link(linkText))
-            } else {
-                val linkText = innerText.substringAfter("/")
-                links.add(Link(linkText))
-            }
-            desc = desc.replaceFirst(innerText, "").replaceFirst("<ref", "").replaceFirst("</ref>", "")
+            desc = desc.replaceFirst(innerText, "")
+            desc = desc.replaceFirst("<ref", "")
+            desc = desc.replaceFirst("</ref>", "")
+        }
+
+        // TODO: Add italics ({{ should be <i> or something, not sure yet)
+        while (desc.contains("{{")) {
+            val innerText = desc.substringAfter("{{").substringBefore("}}")
+            val parsedInnerText = innerText.replace("|", " ")
+            desc = desc.replaceFirst(innerText, parsedInnerText)
+            desc = desc.replaceFirst("{{", "")
+            desc = desc.replaceFirst("}}", "")
         }
 
         // Remove remaining characters
         desc = desc.replace("|", "")
+        desc = desc.replace("\\", "")
 
         return ParseResult(desc, links)
     }
