@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.net.URL
@@ -19,20 +20,22 @@ class MainActivity : AppCompatActivity()  {
     private val contentProvider: ContentProvider = ContentProvider()
     private lateinit var historyItemAdapter: HistoryItemAdapter
     private var selectedDate: Date = getToday()
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         updateDate(selectedDate)
+        progressBar = findViewById(R.id.progressBar)
 
         // Populate recycler view with empty list to initialize
         populateRecyclerView(ArrayList())
 
-        // Initialize text view and fetch history content
+        // Initialize text view with current date and fetch history date
         var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
-        contentProvider.getHistoryData(buildDateURL(selectedDate), ::updateRecyclerView)
+        getHistoryData()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -47,28 +50,33 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
+    // Populate recycler view with initial empty data
     private fun populateRecyclerView(items: MutableList<HistoryItem>) {
-        var historyItemView: RecyclerView = findViewById(R.id.historyItems)
+        val historyItemView: RecyclerView = findViewById(R.id.historyItems)
         historyItemAdapter = HistoryItemAdapter(this, items)
         historyItemView.adapter = historyItemAdapter
         historyItemView.layoutManager = LinearLayoutManager(this)
     }
 
-    private fun updateRecyclerView(items: MutableList<HistoryItem>) {
-        items.forEach{
-            Log.wtf("Got the items", it.toString())
-        }
+    // Fetch data and show progress bar
+    private fun getHistoryData() {
+        progressBar.visibility = View.VISIBLE
+        contentProvider.getHistoryData(buildDateURL(selectedDate), ::updateRecyclerView)
+    }
 
+    // Populate recycler view with fetched data nad hide progress bar
+    private fun updateRecyclerView(items: MutableList<HistoryItem>) {
+        progressBar.visibility = View.GONE
         historyItemAdapter.setItems(items)
         historyItemAdapter.notifyDataSetChanged()
     }
 
-    fun updateDate(date: Date) {
+    private fun updateDate(date: Date) {
         if (!datesEqual(date, selectedDate)) {
             selectedDate = date
             var dateLabel: TextView = findViewById(R.id.dateLabel)
             dateLabel.text = buildDateLabel(selectedDate)
-            contentProvider.getHistoryData(buildDateURL(selectedDate), ::updateRecyclerView)
+            getHistoryData()
         }
     }
 

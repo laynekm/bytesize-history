@@ -1,12 +1,11 @@
 package laynekm.dailyhistory
 
 import android.net.Uri
-import android.text.Html
 import android.util.Log
 import com.google.gson.JsonParser
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.net.URL
-import java.net.URLDecoder
 
 class ContentProvider {
 
@@ -23,7 +22,9 @@ class ContentProvider {
             val url = buildURL(date)
             val result = url.readText()
             val historyItems = parseContent(result)
-            populateRecyclerView(historyItems)
+            uiThread {
+                populateRecyclerView(historyItems)
+            }
         }
     }
 
