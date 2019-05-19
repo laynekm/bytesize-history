@@ -11,9 +11,9 @@ class ContentProvider {
     var imageCounter = 0
 
     // After fetching data, calls function in main thread that populates recycler view
-    fun getHistoryData(populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
+    fun getHistoryData(date: String, populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
          doAsync {
-            val url = buildURL("May_12")
+            val url = buildURL(date)
             val result = url.readText()
             val historyItems = parseContent(result)
              populateRecyclerView(historyItems)

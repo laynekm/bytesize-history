@@ -3,6 +3,7 @@
     <string name="date_settings">Change date</string>
     <string name="time_period_settings">Change time period</string>
     <string name="notification_settings">Notification settings</string>
+    <string name="calendar_view">Calendar</string>
     <string name="default_date">Today</string>
     <string name="default_image">History image</string>
     <string name="default_year">1918</string>
