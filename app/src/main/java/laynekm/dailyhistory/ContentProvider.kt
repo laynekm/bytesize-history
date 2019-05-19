@@ -89,7 +89,7 @@ class ContentProvider {
         val year = parseYear(line)
         val (desc, links) = parseDescriptionAndLinks(line)
         val image = fetchImage(links)
-        return HistoryItem(type, year, desc, image, links)
+        return HistoryItem(type, year, desc, links)
     }
 
     // Return year with numbers only
@@ -101,7 +101,7 @@ class ContentProvider {
     // Fetches image URL based on provided webpage links
     // TODO: This should probably be done in the HistoryItemAdapter itself
     // TODO: Remove the imageCounter, only added it so the API calls didn't take forever
-    private fun fetchImage(links: MutableList<Link>): String {
+    fun fetchImage(links: MutableList<Link>): String {
         imageCounter++
         if (imageCounter >= 11) return ""
         val imageUrl = buildImageURL(links[0].link)

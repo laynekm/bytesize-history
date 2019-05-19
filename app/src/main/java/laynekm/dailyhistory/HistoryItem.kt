@@ -10,13 +10,12 @@ class HistoryItem (
     val type: Type,
     val year: String,
     val desc: String,
-    val image: String,
     val links: MutableList<Link>) {
 
     override fun toString(): String {
         var linkString = ""
         links.forEach { linkString += "\n - $it"}
-        return "\nType: $type\nYear: $year\nDescription: $desc\nImage URL: $image\nLinks:$linkString\n"
+        return "\nType: $type\nYear: $year\nDescription: $desc\nLinks:$linkString\n"
     }
 }
 

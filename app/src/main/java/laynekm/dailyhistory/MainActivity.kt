@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity()  {
         updateDate(selectedDate)
 
         // Populate recycler view with empty list to initialize
-        val item = HistoryItem(Type.EVENT, "1900", "Test", "", mutableListOf(Link("test")))
+        val item = HistoryItem(Type.EVENT, "1900", "Test", mutableListOf(Link("test")))
         val items = mutableListOf(item)
         populateRecyclerView(items)
 
@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity()  {
     }
 
     fun showDatePickerDialog(view: View) {
-
         var date: Calendar = Calendar.getInstance()
         var selectedYear = date.get(Calendar.YEAR)
         var selectedMonth = selectedDate.month
