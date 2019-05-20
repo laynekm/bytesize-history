@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity()  {
         // Populate recycler view with empty list to initialize
         populateRecyclerView(ArrayList())
 
-        // Initialize text view with current date and fetch history date
+        // Initialize text view with current date and fetch history data
         var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
         getHistoryData()

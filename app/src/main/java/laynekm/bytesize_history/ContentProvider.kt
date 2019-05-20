@@ -136,10 +136,14 @@ class ContentProvider {
             val innerText = desc.substringAfter("[[").substringBefore("]]")
             if (innerText.contains("|")) {
                 val leftText = innerText.substringAfter("[[").substringBefore("|")
+                val linkTitle = formatText(leftText)
+                val linkURL = buildWebURL(leftText)
+                links.add(Link(linkTitle, linkURL))
                 desc = desc.replaceFirst(leftText, "")
-                links.add(Link(leftText, buildWebURL(leftText)))
             } else {
-                links.add(Link(innerText, buildWebURL(innerText)))
+                val linkTitle = formatText(innerText)
+                val linkURL = buildWebURL(innerText)
+                links.add(Link(linkTitle, linkURL))
             }
             desc = desc.replaceFirst("[[", "").replaceFirst("]]", "")
         }
@@ -187,5 +191,10 @@ class ContentProvider {
         }
 
         return url
+    }
+
+    // Capitalizes the first letter if it isn't already
+    private fun formatText(text: String): String {
+        return text.capitalize()
     }
 }
