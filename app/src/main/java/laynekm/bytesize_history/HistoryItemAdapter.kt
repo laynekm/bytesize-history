@@ -1,6 +1,7 @@
 package laynekm.bytesize_history
 
 import android.content.Context
+import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     private val contentProvider: ContentProvider = ContentProvider()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        internal var historyItem: ConstraintLayout = itemView.findViewById(R.id.historyItem)
         internal var image: ImageView = itemView.findViewById(R.id.historyImage)
         internal var year: TextView = itemView.findViewById(R.id.yearLabel)
         internal var desc: TextView = itemView.findViewById(R.id.descLabel)
@@ -46,7 +48,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         }
 
         // onClick displays/hides links
-        viewHolder.itemView.setOnClickListener{
+        viewHolder.historyItem.setOnClickListener{
             if (viewHolder.linkView.visibility === View.GONE) viewHolder.linkView.visibility = View.VISIBLE
             else viewHolder.linkView.visibility = View.GONE
         }
