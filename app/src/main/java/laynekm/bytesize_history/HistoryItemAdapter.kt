@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import org.jetbrains.anko.toast
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -45,10 +47,16 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             viewHolder.linkView.addView(link)
             val linkText = link.findViewById<TextView>(R.id.linkText)
             linkText.text = it.title
+            val url = it.link
+
+            // Attach onClick handler to open link
+            link.setOnClickListener {
+                Toast.makeText(context, "$url", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // onClick displays/hides links
-        viewHolder.historyItem.setOnClickListener{
+        viewHolder.historyItem.setOnClickListener {
             if (viewHolder.linkView.visibility === View.GONE) viewHolder.linkView.visibility = View.VISIBLE
             else viewHolder.linkView.visibility = View.GONE
         }
