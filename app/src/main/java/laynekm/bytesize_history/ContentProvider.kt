@@ -13,35 +13,38 @@ class ContentProvider {
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
+    private var allHistoryItems: MutableList<HistoryItem> = ArrayList()
     private var currentHistoryItems: MutableList<HistoryItem> = ArrayList()
-    private val count = 10
+    private val count = 15
     private var index = 0
 
     // Used to return desc and links from parseDescriptionAndLinks
     data class ParseResult(val desc: String, val links: MutableList<Link>)
 
-    fun fetchHistoryItems(date: String, populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
+    fun fetchHistoryItems(newDate: Boolean, date: String, updateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
         doAsync {
-            val url = buildURL(date)
-            val result = url.readText()
-            currentHistoryItems = parseContent(result)
-            val historyItemChunk = currentHistoryItems.subList(index, index + count)
-            index += count
-            historyItemChunk.forEach { it.image = fetchImage(it.links) }
-            uiThread {
-                populateRecyclerView(historyItemChunk)
-            }
-        }
-    }
-
-    fun getNextHistoryItems(updateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
-        if (currentHistoryItems.size > 0) {
-            doAsync {
-                val historyItemChunk = currentHistoryItems.subList(index, index + count)
+            if (index === 0 || newDate) {
+                if (newDate) {
+                    allHistoryItems.clear()
+                    currentHistoryItems.clear()
+                    index = 0
+                }
+                val url = buildURL(date)
+                val result = url.readText()
+                allHistoryItems = parseContent(result)
+                currentHistoryItems = allHistoryItems.subList(index, index + count)
+                index += count
+                currentHistoryItems.forEach { it.image = fetchImage(it.links) }
+                uiThread {
+                    updateRecyclerView(currentHistoryItems)
+                }
+            } else {
+                val historyItemChunk = allHistoryItems.subList(index, index + count)
                 index += count
                 historyItemChunk.forEach { it.image = fetchImage(it.links) }
+                currentHistoryItems.addAll(historyItemChunk)
                 uiThread {
-                    updateRecyclerView(historyItemChunk)
+                    updateRecyclerView(currentHistoryItems)
                 }
             }
         }

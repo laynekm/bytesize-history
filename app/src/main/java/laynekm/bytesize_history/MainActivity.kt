@@ -15,15 +15,12 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
-
-
 class MainActivity : AppCompatActivity()  {
 
     private lateinit var historyItemAdapter: HistoryItemAdapter
     private lateinit var progressBar: ProgressBar
     private val contentProvider: ContentProvider = ContentProvider()
     private var selectedDate: Date = getToday()
-    private var currentItems: MutableList<HistoryItem> = ArrayList()
 
     private val dateString = "selectedDate"
 
@@ -37,10 +34,11 @@ class MainActivity : AppCompatActivity()  {
             selectedDate = stringToDate(savedInstanceState.getString(dateString))
         }
 
-        initializeRecyclerView(currentItems)
+        initializeRecyclerView(ArrayList())
         var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
-        getInitialHistoryItems()
+        progressBar.visibility = View.VISIBLE
+        getHistoryItems(false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -64,37 +62,22 @@ class MainActivity : AppCompatActivity()  {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (!recyclerView.canScrollVertically(1)) {
-                    getNextHistoryItems()
+                    getHistoryItems(false)
                 }
             }
         })
         historyItemView.layoutManager = LinearLayoutManager(this)
     }
 
-    // Fetch data and show progress bar
-    private fun getInitialHistoryItems() {
-        progressBar.visibility = View.VISIBLE
-        contentProvider.fetchHistoryItems(buildDateURL(selectedDate), ::setRecyclerViewItems)
-    }
-
-    // Populate recycler view with fetched data nad hide progress bar
-    private fun setRecyclerViewItems(items: MutableList<HistoryItem>) {
-        progressBar.visibility = View.GONE
-        currentItems = items
-        Log.wtf("setRecyclerViewItems", "${currentItems.size}")
-        historyItemAdapter.setItems(currentItems)
-        historyItemAdapter.notifyDataSetChanged()
-    }
-
     // Functions for adding
-    private fun getNextHistoryItems() {
-        contentProvider.getNextHistoryItems(::addRecyclerViewItems)
+    private fun getHistoryItems(newDate: Boolean) {
+        contentProvider.fetchHistoryItems(newDate, buildDateURL(selectedDate), ::updateRecyclerView)
     }
 
-    private fun addRecyclerViewItems(items: MutableList<HistoryItem>) {
-        currentItems.addAll(items)
-        Log.wtf("addRecyclerViewItems", "${currentItems.size}")
-        historyItemAdapter.setItems(currentItems)
+    // Populate recycler view with fetched data and hide progress bar
+    private fun updateRecyclerView(items: MutableList<HistoryItem>) {
+        if (progressBar.visibility === View.VISIBLE) progressBar.visibility = View.GONE
+        historyItemAdapter.setItems(items)
         historyItemAdapter.notifyDataSetChanged()
     }
 
@@ -103,7 +86,8 @@ class MainActivity : AppCompatActivity()  {
             selectedDate = date
             var dateLabel: TextView = findViewById(R.id.dateLabel)
             dateLabel.text = buildDateLabel(selectedDate)
-            getInitialHistoryItems()
+            progressBar.visibility = View.VISIBLE
+            getHistoryItems(true)
         }
     }
 
