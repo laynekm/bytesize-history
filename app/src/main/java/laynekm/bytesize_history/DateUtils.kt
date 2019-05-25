@@ -23,3 +23,11 @@ fun buildDateLabel(date: Date): String {
     if (datesEqual(date, today)) return "Today (${DateFormatSymbols().months[date.month]} ${date.day})"
     return "${DateFormatSymbols().months[date.month]} ${date.day}"
 }
+
+fun dateToString(date: Date): String {
+    return "${date.month}-${date.day}"
+}
+
+fun stringToDate(date: String): Date {
+    return Date(date.substringBefore("-").toInt(), date.substringAfter("-").toInt())
+}

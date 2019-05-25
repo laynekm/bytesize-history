@@ -16,22 +16,25 @@ import java.util.*
 
 class MainActivity : AppCompatActivity()  {
 
-    private val contentProvider: ContentProvider = ContentProvider()
     private lateinit var historyItemAdapter: HistoryItemAdapter
-    private var selectedDate: Date = getToday()
     private lateinit var progressBar: ProgressBar
+    private val contentProvider: ContentProvider = ContentProvider()
+    private var selectedDate: Date = getToday()
+
+    private val dateString = "selectedDate"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        updateDate(selectedDate)
         progressBar = findViewById(R.id.progressBar)
 
-        // Populate recycler view with empty list to initialize
         populateRecyclerView(ArrayList())
+        if (savedInstanceState !== null) {
+            selectedDate = stringToDate(savedInstanceState.getString(dateString))
+        }
 
-        // Initialize text view with current date and fetch history data
+        populateRecyclerView(ArrayList())
         var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
         getHistoryData()
@@ -100,5 +103,10 @@ class MainActivity : AppCompatActivity()  {
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState);
+        outState.putString(dateString, dateToString(selectedDate))
     }
 }
