@@ -13,17 +13,36 @@ class ContentProvider {
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
+    private var currentHistoryItems: MutableList<HistoryItem> = ArrayList()
+    private val count = 10
+    private var index = 0
+
     // Used to return desc and links from parseDescriptionAndLinks
     data class ParseResult(val desc: String, val links: MutableList<Link>)
 
-    // After fetching data, calls function in main thread that populates recycler view
-    fun getHistoryData(date: String, populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
+    fun fetchHistoryItems(date: String, populateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
         doAsync {
             val url = buildURL(date)
             val result = url.readText()
-            val historyItems = parseContent(result)
+            currentHistoryItems = parseContent(result)
+            val historyItemChunk = currentHistoryItems.subList(index, index + count)
+            index += count
+            historyItemChunk.forEach { it.image = fetchImage(it.links) }
             uiThread {
-                populateRecyclerView(historyItems)
+                populateRecyclerView(historyItemChunk)
+            }
+        }
+    }
+
+    fun getNextHistoryItems(updateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
+        if (currentHistoryItems.size > 0) {
+            doAsync {
+                val historyItemChunk = currentHistoryItems.subList(index, index + count)
+                index += count
+                historyItemChunk.forEach { it.image = fetchImage(it.links) }
+                uiThread {
+                    updateRecyclerView(historyItemChunk)
+                }
             }
         }
     }
@@ -106,7 +125,7 @@ class ContentProvider {
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
         val year = parseYear(line)
         val (desc, links) = parseDescriptionAndLinks(line)
-        return HistoryItem(type, year, desc, links)
+        return HistoryItem(type, year, desc, links, "")
     }
 
     // Return year with numbers only

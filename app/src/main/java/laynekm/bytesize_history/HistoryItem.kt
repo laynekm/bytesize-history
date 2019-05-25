@@ -1,7 +1,5 @@
 package laynekm.bytesize_history
 
-import java.net.URL
-
 enum class Type constructor(private val type: String) {
     EVENT("Event"), BIRTH("Birth"), DEATH("Death");
     override fun toString(): String = this.type
@@ -11,7 +9,8 @@ class HistoryItem (
     val type: Type,
     val year: String,
     val desc: String,
-    val links: MutableList<Link>) {
+    val links: MutableList<Link>,
+    var image: String?) {
 
     override fun toString(): String {
         var linkString = ""

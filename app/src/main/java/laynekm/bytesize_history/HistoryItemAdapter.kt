@@ -22,8 +22,6 @@ import org.jetbrains.anko.uiThread
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
-    private val contentProvider: ContentProvider = ContentProvider()
-
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal var historyItem: ConstraintLayout = itemView.findViewById(R.id.historyItem)
         internal var image: ImageView = itemView.findViewById(R.id.historyImage)
@@ -71,13 +69,11 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             else viewHolder.linkView.visibility = View.GONE
         }
 
-        // Fetch images
-        doAsync {
-            val imageURL = contentProvider.fetchImage(items[index].links)
-            uiThread {
-                if (imageURL === "") viewHolder.image.setImageResource(R.drawable.default_image)
-                else Picasso.get().load(imageURL).into(viewHolder.image)
-            }
+        val image = items[index].image
+        if (image === "") {
+            viewHolder.image.setImageResource(R.drawable.default_image)
+        } else {
+            Picasso.get().load(image).into(viewHolder.image)
         }
     }
 
