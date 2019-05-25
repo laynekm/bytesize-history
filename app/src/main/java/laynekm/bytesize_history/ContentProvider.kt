@@ -26,7 +26,6 @@ class ContentProvider {
             if (index === 0 || newDate) {
                 if (newDate) {
                     allHistoryItems.clear()
-                    currentHistoryItems.clear()
                     index = 0
                 }
                 val url = buildURL(date)
