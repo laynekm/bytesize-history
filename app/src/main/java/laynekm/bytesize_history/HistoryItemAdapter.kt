@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -40,6 +41,9 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     // Currently, the content is already there and it takes a moment for the image to load
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
         val webView = (context as Activity).findViewById(R.id.webView) as WebView
+        webView.settings.javaScriptEnabled = true
+        webView.webViewClient = WebViewClient()
+
         viewHolder.year.text = items[index].year
         viewHolder.desc.text = items[index].desc
 
@@ -55,8 +59,9 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
 
             // Attach onClick handler to open link
             link.setOnClickListener {
-                Toast.makeText(context, "$url", Toast.LENGTH_SHORT).show()
+                webView.visibility = View.VISIBLE
                 webView.loadUrl(url)
+
             }
         }
 

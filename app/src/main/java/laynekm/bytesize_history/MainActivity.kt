@@ -93,8 +93,12 @@ class MainActivity : AppCompatActivity()  {
         datePicker.show()
     }
 
-    fun launchWebView(url: String) {
-        var webView: WebView = findViewById(R.id.webView)
-        webView.loadUrl("https://google.com/")
+    override fun onBackPressed() {
+        val webView: WebView = findViewById(R.id.webView)
+        if (webView.visibility === View.VISIBLE) {
+            webView.visibility = View.GONE
+        } else {
+            super.onBackPressed()
+        }
     }
 }

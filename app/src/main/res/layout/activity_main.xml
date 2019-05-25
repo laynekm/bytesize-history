@@ -22,12 +22,13 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" android:layout_width="match_parent" android:layout_height="match_parent"/>
-
     <WebView
             android:id="@+id/webView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"/>
+            android:visibility="gone"
+            />
+
+    <include layout="@layout/content_main" android:layout_width="match_parent" android:layout_height="match_parent"/>
 
 </LinearLayout>
