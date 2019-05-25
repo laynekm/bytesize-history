@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.webkit.WebView
 import android.widget.ProgressBar
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -90,5 +91,10 @@ class MainActivity : AppCompatActivity()  {
         }, selectedYear, selectedMonth, selectedDay)
 
         datePicker.show()
+    }
+
+    fun launchWebView(url: String) {
+        var webView: WebView = findViewById(R.id.webView)
+        webView.loadUrl("https://google.com/")
     }
 }

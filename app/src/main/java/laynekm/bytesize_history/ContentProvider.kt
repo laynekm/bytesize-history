@@ -44,6 +44,7 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
+    // Image URL needs to be an actual URL since readText() is called on it
     private fun buildImageURL(searchParam: String): URL {
         val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
@@ -58,13 +59,14 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
-    private fun buildWebURL(searchParam: String): URL {
+    // Web URL needs to be a string since it's being passed into webView.loadUrl
+    private fun buildWebURL(searchParam: String): String {
         val uri: Uri = Uri.parse(WEB_BASE_URL).buildUpon()
             .appendPath(searchParam)
             .build()
 
         Log.d(TAG, "buildWebURL: $uri")
-        return URL(uri.toString())
+        return uri.toString()
     }
 
     // Builds HistoryItem objects from json string input

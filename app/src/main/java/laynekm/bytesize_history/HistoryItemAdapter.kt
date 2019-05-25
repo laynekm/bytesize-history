@@ -1,17 +1,20 @@
 package laynekm.bytesize_history
 
+import android.app.Activity
 import android.content.Context
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import org.jetbrains.anko.toast
 import com.squareup.picasso.Picasso
+import org.jetbrains.anko.UI
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
@@ -36,6 +39,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     // TODO: This should probably refactored so the image and content are loaded simultaneously
     // Currently, the content is already there and it takes a moment for the image to load
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
+        val webView = (context as Activity).findViewById(R.id.webView) as WebView
         viewHolder.year.text = items[index].year
         viewHolder.desc.text = items[index].desc
 
@@ -52,6 +56,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             // Attach onClick handler to open link
             link.setOnClickListener {
                 Toast.makeText(context, "$url", Toast.LENGTH_SHORT).show()
+                webView.loadUrl(url)
             }
         }
 

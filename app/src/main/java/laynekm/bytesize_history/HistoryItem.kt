@@ -20,10 +20,9 @@ class HistoryItem (
     }
 }
 
-// TODO: Add link desc
 class Link (
     val title: String,
-    val link: URL) {
+    val link: String) {
 
     override fun toString(): String {
         return "$title ($link)"
