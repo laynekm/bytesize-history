@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity()  {
 
     private lateinit var historyItemAdapter: HistoryItemAdapter
     private lateinit var progressBar: ProgressBar
+    private lateinit var secondaryProgressBar: ProgressBar
     private val contentProvider: ContentProvider = ContentProvider()
     private var selectedDate: Date = getToday()
 
@@ -29,15 +30,17 @@ class MainActivity : AppCompatActivity()  {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         progressBar = findViewById(R.id.progressBar)
+        secondaryProgressBar = findViewById(R.id.secondaryProgressBar)
 
         if (savedInstanceState !== null) {
             selectedDate = stringToDate(savedInstanceState.getString(dateString))
         }
 
-        initializeRecyclerView(ArrayList())
+        initializeRecyclerView()
         var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
         progressBar.visibility = View.VISIBLE
+        secondaryProgressBar.visibility = View.GONE
         getHistoryItems(false)
     }
 
@@ -54,14 +57,15 @@ class MainActivity : AppCompatActivity()  {
     }
 
     // Populate recycler view with initial empty data
-    private fun initializeRecyclerView(items: MutableList<HistoryItem>) {
+    private fun initializeRecyclerView() {
         val historyItemView: RecyclerView = findViewById(R.id.historyItems)
-        historyItemAdapter = HistoryItemAdapter(this, items)
+        historyItemAdapter = HistoryItemAdapter(this, ArrayList())
         historyItemView.adapter = historyItemAdapter
         historyItemView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (!recyclerView.canScrollVertically(1)) {
+                    secondaryProgressBar.visibility = View.VISIBLE
                     getHistoryItems(false)
                 }
             }
@@ -77,6 +81,7 @@ class MainActivity : AppCompatActivity()  {
     // Populate recycler view with fetched data and hide progress bar
     private fun updateRecyclerView(items: MutableList<HistoryItem>) {
         if (progressBar.visibility === View.VISIBLE) progressBar.visibility = View.GONE
+        if (secondaryProgressBar.visibility === View.VISIBLE) secondaryProgressBar.visibility = View.GONE
         historyItemAdapter.setItems(items)
         historyItemAdapter.notifyDataSetChanged()
     }

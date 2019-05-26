@@ -45,7 +45,7 @@ class ContentProvider {
                 historyItemChunk.forEach { it.image = fetchImage(it.links) }
                 currentHistoryItems.addAll(historyItemChunk)
                 uiThread {
-//                    updateRecyclerView(currentHistoryItems)
+                    updateRecyclerView(currentHistoryItems)
                 }
             }
         }
@@ -133,6 +133,7 @@ class ContentProvider {
     }
 
     // Return year with numbers only
+    // TODO: Account for some including "BC"
     private fun parseYear(line: String): String {
         val numsOnly = Regex("[^0-9]")
         return numsOnly.replace(line.substringBefore(" &ndash; "), "")

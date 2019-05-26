@@ -32,7 +32,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="48dp">
+            app:layout_constraintTop_toTopOf="@+id/secondaryProgressBar" android:layout_marginTop="48dp">
         <android.support.v7.widget.RecyclerView
                 android:id="@+id/historyItems"
                 android:layout_width="match_parent"
@@ -60,10 +60,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/progressBar" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp" android:layout_marginTop="8dp"
             app:layout_constraintTop_toTopOf="@+id/recyclerViewContainer" android:visibility="gone"
             tools:visibility="gone"/>
+
+    <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/secondaryProgressBar" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" tools:visibility="gone"/>
 
 </android.support.constraint.ConstraintLayout>
