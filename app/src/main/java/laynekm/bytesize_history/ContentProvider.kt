@@ -21,6 +21,8 @@ class ContentProvider {
     // Used to return desc and links from parseDescriptionAndLinks
     data class ParseResult(val desc: String, val links: MutableList<Link>)
 
+    // If there are no history items or a new date, fetch all history items and image URLs for the first count
+    // Otherwise, fetch image URLs for the next count
     fun fetchHistoryItems(newDate: Boolean, date: String, updateRecyclerView: (MutableList<HistoryItem>) -> Unit) {
         doAsync {
             if (index === 0 || newDate) {
@@ -43,7 +45,7 @@ class ContentProvider {
                 historyItemChunk.forEach { it.image = fetchImage(it.links) }
                 currentHistoryItems.addAll(historyItemChunk)
                 uiThread {
-                    updateRecyclerView(currentHistoryItems)
+//                    updateRecyclerView(currentHistoryItems)
                 }
             }
         }
