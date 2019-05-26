@@ -98,17 +98,16 @@ class MainActivity : AppCompatActivity()  {
         var selectedDay = selectedDate.day
 
         // TODO: Hide year label
-        val datePicker = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, month, day ->
+        DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, month, day ->
             updateDate(Date(month, day))
-        }, selectedYear, selectedMonth, selectedDay)
-
-        datePicker.show()
+        }, selectedYear, selectedMonth, selectedDay).show()
     }
 
     override fun onBackPressed() {
         val webView: WebView = findViewById(R.id.webView)
         if (webView.visibility === View.VISIBLE) {
             webView.visibility = View.GONE
+            webView.loadUrl("about:blank")
         } else {
             super.onBackPressed()
         }
