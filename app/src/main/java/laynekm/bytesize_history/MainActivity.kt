@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var secondaryProgressBar: ProgressBar
     private val contentProvider: ContentProvider = ContentProvider()
     private var selectedDate: Date = getToday()
+    private var updating: Boolean = false
 
     private val dateString = "selectedDate"
 
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity()  {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.action_settings -> true
+            R.id.changeTimePeriod -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -64,7 +65,7 @@ class MainActivity : AppCompatActivity()  {
         historyItemView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(1)) {
+                if (!recyclerView.canScrollVertically(1) && !updating) {
                     secondaryProgressBar.visibility = View.VISIBLE
                     getHistoryItems(false)
                 }
@@ -75,15 +76,20 @@ class MainActivity : AppCompatActivity()  {
 
     // Functions for adding
     private fun getHistoryItems(newDate: Boolean) {
+        updating = true
         contentProvider.fetchHistoryItems(newDate, buildDateURL(selectedDate), ::updateRecyclerView)
     }
 
     // Populate recycler view with fetched data and hide progress bar
-    private fun updateRecyclerView(items: MutableList<HistoryItem>) {
+    private fun updateRecyclerView(items: MutableList<HistoryItem>, offset: Int) {
+        Log.wtf("updateRecyclerView", "called")
         if (progressBar.visibility === View.VISIBLE) progressBar.visibility = View.GONE
         if (secondaryProgressBar.visibility === View.VISIBLE) secondaryProgressBar.visibility = View.GONE
+        val historyItemView: RecyclerView = findViewById(R.id.historyItems)
+        historyItemView.smoothScrollBy(0, offset)
         historyItemAdapter.setItems(items)
         historyItemAdapter.notifyDataSetChanged()
+        updating = false
     }
 
     private fun updateDate(date: Date) {
