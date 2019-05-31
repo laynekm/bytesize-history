@@ -24,25 +24,22 @@ class ContentProvider {
     // If there are no history items or a new date, fetch all history items and image URLs for the first count
     // Otherwise, fetch image URLs for the next count
     fun fetchHistoryItems(newDate: Boolean, date: String, updateRecyclerView: (MutableList<HistoryItem>, Int) -> Unit) {
-        Log.wtf("fetchHistoryItems", "index: $index, count: $count, newDate: $newDate, currentHistoryItems: ${currentHistoryItems.size},  allHistoryItems: ${allHistoryItems.size}")
         doAsync {
             if (index === 0 || newDate) {
                 if (newDate) {
                     allHistoryItems.clear()
                     index = 0
                 }
-                Log.wtf("fetchHistoryItems", "if called")
                 val url = buildURL(date)
                 val result = url.readText()
                 allHistoryItems = parseContent(result)
-                currentHistoryItems = allHistoryItems.subList(index, index + count)
+                currentHistoryItems.addAll(allHistoryItems.subList(index, index + count))
                 index += count
                 currentHistoryItems.forEach { it.image = fetchImage(it.links) }
                 uiThread {
                     updateRecyclerView(currentHistoryItems, 0)
                 }
             } else {
-                Log.wtf("fetchHistoryItems", "else called")
                 val historyItemChunk = allHistoryItems.subList(index, index + count)
                 index += count
                 historyItemChunk.forEach { it.image = fetchImage(it.links) }
