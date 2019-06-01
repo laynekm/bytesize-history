@@ -42,7 +42,8 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = WebViewClient()
 
-        viewHolder.year.text = items[index].year
+        if (items[index].year < 0) viewHolder.year.text = "${items[index].year} BC"
+        else viewHolder.year.text = "${items[index].year}"
         viewHolder.desc.text = items[index].desc
 
         // Dynamically inflate link items

@@ -7,7 +7,7 @@ enum class Type constructor(private val type: String) {
 
 class HistoryItem (
     val type: Type,
-    val year: String,
+    val year: Int,
     val desc: String,
     val links: MutableList<Link>,
     var image: String?) {

@@ -132,11 +132,17 @@ class ContentProvider {
         return HistoryItem(type, year, desc, links, "")
     }
 
-    // Return year with numbers only
-    // TODO: Account for some including "BC"
-    private fun parseYear(line: String): String {
-        val numsOnly = Regex("[^0-9]")
-        return numsOnly.replace(line.substringBefore(" &ndash; "), "")
+    // Parse out unneeded chars and return integer representation of year
+    // BC values will be negative
+    private fun parseYear(line: String): Int {
+        var yearSection = line.substringBefore(" &ndash; ")
+        if (yearSection.contains("(")) {
+            var secondaryYear = yearSection.substringAfter("(").substringBefore(")")
+            yearSection = yearSection.replace(secondaryYear, "")
+        }
+        var yearInt = Regex("[^0-9]").replace(yearSection, "").toInt()
+        if (yearSection.contains("BC")) yearInt *= -1
+        return yearInt
     }
 
     // Fetches image URL based on provided webpage links
