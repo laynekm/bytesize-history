@@ -9,6 +9,10 @@ fun datesEqual(date1: Date, date2: Date): Boolean {
     return date1.month === date2.month && date1.day === date2.day
 }
 
+fun datesEqual(date1: String, date2: String): Boolean {
+    return datesEqual(stringToDate(date1), stringToDate(date2))
+}
+
 fun getToday(): Date {
     val date: Calendar = Calendar.getInstance()
     return Date(date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH))

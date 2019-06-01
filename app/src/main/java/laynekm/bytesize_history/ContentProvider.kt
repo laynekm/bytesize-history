@@ -15,6 +15,7 @@ class ContentProvider {
 
     private var allHistoryItems: MutableList<HistoryItem> = ArrayList()
     private var currentHistoryItems: MutableList<HistoryItem> = ArrayList()
+    private var selectedDate: Date = getToday()
     private val count = 15
     private var index = 0
 
@@ -23,22 +24,24 @@ class ContentProvider {
 
     // If there are no history items or a new date, fetch all history items and image URLs for the first count
     // Otherwise, fetch image URLs for the next count
-    fun fetchHistoryItems(newDate: Boolean, date: String, updateRecyclerView: (MutableList<HistoryItem>, Int) -> Unit, options: FilterOptions) {
+    fun fetchHistoryItems(date: Date, updateRecyclerView: (MutableList<HistoryItem>, Boolean) -> Unit, options: FilterOptions) {
         doAsync {
-            if (index === 0 || newDate) {
-                if (newDate) {
-                    allHistoryItems.clear()
-                    currentHistoryItems.clear()
-                    index = 0
-                }
-                val url = buildURL(date)
+            if (!datesEqual(selectedDate, date)) {
+                allHistoryItems.clear()
+                currentHistoryItems.clear()
+                index = 0
+            }
+
+            selectedDate = date
+            if (index === 0) {
+                val url = buildURL(buildDateURL(date))
                 val result = url.readText()
                 allHistoryItems = filterAndSort(parseContent(result), options)
                 currentHistoryItems.addAll(getAvailableItems())
                 index += count
                 currentHistoryItems.forEach { it.image = fetchImage(it.links) }
                 uiThread {
-                    updateRecyclerView(currentHistoryItems, 0)
+                    updateRecyclerView(currentHistoryItems, isLastItem())
                 }
             } else {
                 val historyItemChunk = getAvailableItems()
@@ -46,7 +49,7 @@ class ContentProvider {
                 historyItemChunk.forEach { it.image = fetchImage(it.links) }
                 currentHistoryItems.addAll(historyItemChunk)
                 uiThread {
-                    updateRecyclerView(currentHistoryItems, 250)
+                    updateRecyclerView(currentHistoryItems, isLastItem())
                 }
             }
         }
@@ -54,13 +57,16 @@ class ContentProvider {
 
     private fun filterAndSort(items: MutableList<HistoryItem>, options: FilterOptions): MutableList<HistoryItem> {
         items.retainAll { options.eras.contains(it.era) && options.types.contains(it.type) }
-        items.forEach { Log.wtf("filteredItems", "${it.year}")}
         return items
     }
 
     private fun getAvailableItems(): MutableList<HistoryItem> {
         if (allHistoryItems.size >= index + count) return allHistoryItems.subList(index, index + count)
         return allHistoryItems.subList(index, allHistoryItems.size)
+    }
+
+    private fun isLastItem(): Boolean {
+        return allHistoryItems.size === currentHistoryItems.size
     }
 
     private fun buildURL(searchParam: String): URL {
@@ -107,7 +113,6 @@ class ContentProvider {
     // Builds HistoryItem objects from json string input
     // TODO: Add error handling in case content does not exist or API call fails
     private fun parseContent(json: String): MutableList<HistoryItem> {
-        Log.wtf("json", json)
 
         // Extract content property from json
         val content = JsonParser().parse(json)
@@ -121,7 +126,6 @@ class ContentProvider {
 
         // Content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
-
         // Split array into events, births, and deaths
         // Only care about strings starting with an asterisk
         // Assumes events, births, deaths proceed each other
@@ -138,6 +142,7 @@ class ContentProvider {
         return historyItems
     }
 
+    // TODO: Add support for sublists (see June 1)
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
         val year = parseYear(line)
         val (desc, links) = parseDescriptionAndLinks(line)
@@ -147,7 +152,11 @@ class ContentProvider {
     // Parse out unneeded chars and return integer representation of year
     // BC values will be negative
     private fun parseYear(line: String): Int {
-        var yearSection = line.substringBefore(" &ndash; ")
+        var yearSection = "";
+        if (line.contains(" &ndash; ")) yearSection = line.substringBefore(" &ndash; ")
+        else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
+        if (yearSection === "") return 0
+
         if (yearSection.contains("(")) {
             var secondaryYear = yearSection.substringAfter("(").substringBefore(")")
             yearSection = yearSection.replace(secondaryYear, "")
@@ -159,7 +168,7 @@ class ContentProvider {
 
     // Fetches image URL based on provided webpage links
     // Some pages might not have images, so keep fetching until one of them does
-    fun fetchImage(links: MutableList<Link>): String {
+    private fun fetchImage(links: MutableList<Link>): String {
         var image = ""
         links.forEach {
             image = parseImageURL(buildImageURL(it.title).readText())
@@ -170,7 +179,6 @@ class ContentProvider {
 
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String): ParseResult {
-        Log.wtf("Line", line)
         var desc = line.substringAfter(" &ndash; ")
         var links = mutableListOf<Link>()
 

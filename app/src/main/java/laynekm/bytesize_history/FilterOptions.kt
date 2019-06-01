@@ -7,6 +7,7 @@ enum class Order constructor(private val type: String) {
 
 class FilterOptions {
     var order: Order = Order.ASCENDING
-    var eras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.EARLYMODERN)
+//    var eras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
+    var eras: MutableList<Era> = mutableListOf(Era.TWOTHOUSANDS)
     var types: MutableList<Type> = mutableListOf(Type.EVENT)
 }
