@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity()  {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.changeTimePeriod -> true
+            R.id.changeNotification -> true
             else -> super.onOptionsItemSelected(item)
         }
     }

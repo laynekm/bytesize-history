@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="laynekm.bytesize_history.MainActivity" >
 
-    <item android:id="@+id/changeTimePeriod"
-          android:title="@string/time_period_settings"
+    <item android:id="@+id/changeNotification"
+          android:title="@string/notification_settings"
           android:orderInCategory="100"
           app:showAsAction="never"/>
 
-    <item android:id="@+id/changeNotification"
-          android:title="@string/notification_settings"
+    <item android:id="@+id/changeTheme"
+          android:title="@string/theme_settings"
           android:orderInCategory="100"
           app:showAsAction="never"/>
 </menu>
