@@ -42,7 +42,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = WebViewClient()
 
-        if (items[index].year < 0) viewHolder.year.text = "${items[index].year} BC"
+        if (items[index].year < 0) viewHolder.year.text = "${items[index].year * -1} BC"
         else viewHolder.year.text = "${items[index].year}"
         viewHolder.desc.text = items[index].desc
 

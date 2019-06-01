@@ -23,24 +23,25 @@ class ContentProvider {
 
     // If there are no history items or a new date, fetch all history items and image URLs for the first count
     // Otherwise, fetch image URLs for the next count
-    fun fetchHistoryItems(newDate: Boolean, date: String, updateRecyclerView: (MutableList<HistoryItem>, Int) -> Unit) {
+    fun fetchHistoryItems(newDate: Boolean, date: String, updateRecyclerView: (MutableList<HistoryItem>, Int) -> Unit, options: FilterOptions) {
         doAsync {
             if (index === 0 || newDate) {
                 if (newDate) {
                     allHistoryItems.clear()
+                    currentHistoryItems.clear()
                     index = 0
                 }
                 val url = buildURL(date)
                 val result = url.readText()
-                allHistoryItems = parseContent(result)
-                currentHistoryItems.addAll(allHistoryItems.subList(index, index + count))
+                allHistoryItems = filterAndSort(parseContent(result), options)
+                currentHistoryItems.addAll(getAvailableItems())
                 index += count
                 currentHistoryItems.forEach { it.image = fetchImage(it.links) }
                 uiThread {
                     updateRecyclerView(currentHistoryItems, 0)
                 }
             } else {
-                val historyItemChunk = allHistoryItems.subList(index, index + count)
+                val historyItemChunk = getAvailableItems()
                 index += count
                 historyItemChunk.forEach { it.image = fetchImage(it.links) }
                 currentHistoryItems.addAll(historyItemChunk)
@@ -49,6 +50,17 @@ class ContentProvider {
                 }
             }
         }
+    }
+
+    private fun filterAndSort(items: MutableList<HistoryItem>, options: FilterOptions): MutableList<HistoryItem> {
+        items.retainAll { options.eras.contains(it.era) && options.types.contains(it.type) }
+        items.forEach { Log.wtf("filteredItems", "${it.year}")}
+        return items
+    }
+
+    private fun getAvailableItems(): MutableList<HistoryItem> {
+        if (allHistoryItems.size >= index + count) return allHistoryItems.subList(index, index + count)
+        return allHistoryItems.subList(index, allHistoryItems.size)
     }
 
     private fun buildURL(searchParam: String): URL {

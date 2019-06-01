@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var progressBar: ProgressBar
     private lateinit var secondaryProgressBar: ProgressBar
     private val contentProvider: ContentProvider = ContentProvider()
+    private var filterOptions: FilterOptions = FilterOptions()
     private var selectedDate: Date = getToday()
     private var updating: Boolean = false
 
@@ -77,12 +78,11 @@ class MainActivity : AppCompatActivity()  {
     // Functions for adding
     private fun getHistoryItems(newDate: Boolean) {
         updating = true
-        contentProvider.fetchHistoryItems(newDate, buildDateURL(selectedDate), ::updateRecyclerView)
+        contentProvider.fetchHistoryItems(newDate, buildDateURL(selectedDate), ::updateRecyclerView, filterOptions)
     }
 
     // Populate recycler view with fetched data and hide progress bar
     private fun updateRecyclerView(items: MutableList<HistoryItem>, offset: Int) {
-        Log.wtf("updateRecyclerView", "called")
         if (progressBar.visibility === View.VISIBLE) progressBar.visibility = View.GONE
         if (secondaryProgressBar.visibility === View.VISIBLE) secondaryProgressBar.visibility = View.GONE
         val historyItemView: RecyclerView = findViewById(R.id.historyItems)
