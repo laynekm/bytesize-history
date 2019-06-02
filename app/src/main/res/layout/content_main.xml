@@ -32,7 +32,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/secondaryProgressBar" android:layout_marginTop="48dp">
+            app:layout_constraintTop_toTopOf="@+id/secondaryProgressBar" android:layout_marginTop="96dp">
         <android.support.v7.widget.RecyclerView
                 android:id="@+id/historyItems"
                 android:layout_width="match_parent"
@@ -42,6 +42,17 @@
                 app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="0dp"
                 android:layout_alignParentTop="true"/>
     </RelativeLayout>
+
+    <ImageView
+            android:layout_width="36dp"
+            android:layout_height="32dp" app:srcCompat="@drawable/filter"
+            android:id="@+id/dropdownFilter"
+            android:contentDescription="@string/filter_view"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/calendarView" android:layout_marginRight="8dp"
+    />
+
     <ImageView
             android:layout_width="42dp"
             android:layout_height="38dp"
@@ -53,6 +64,14 @@
             app:layout_constraintTop_toTopOf="parent" android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="8dp"
     />
+
+    <include layout="@layout/history_item_types" android:layout_width="match_parent" android:layout_height="40dp"
+             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/dateLabel"/>
+
+    <include android:id="@+id/dropdownView" layout="@layout/filter_dropdown" android:layout_width="match_parent" android:layout_height="wrap_content"
+             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/dateLabel"
+             android:visibility="gone"/>
+
     <ProgressBar
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
@@ -60,9 +79,10 @@
             android:id="@+id/progressBar" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="@+id/recyclerViewContainer" android:visibility="gone"
-            tools:visibility="gone"/>
+            android:layout_marginStart="8dp"
+            android:visibility="gone"
+            tools:visibility="gone" app:layout_constraintHorizontal_bias="0.504"
+            app:layout_constraintTop_toTopOf="@+id/recyclerViewContainer"/>
 
     <ProgressBar
             style="?android:attr/progressBarStyle"
@@ -72,14 +92,5 @@
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp" tools:visibility="gone"/>
-    <ImageView
-            android:layout_width="36dp"
-            android:layout_height="32dp" app:srcCompat="@drawable/filter"
-            android:id="@+id/filterView"
-            android:contentDescription="@string/filter_view"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/calendarView" android:layout_marginRight="8dp"
-    />
 
 </android.support.constraint.ConstraintLayout>

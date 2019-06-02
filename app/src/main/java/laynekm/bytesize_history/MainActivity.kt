@@ -10,18 +10,27 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 class MainActivity : AppCompatActivity()  {
 
     private lateinit var historyItemAdapter: HistoryItemAdapter
+    private lateinit var dropdownFilter: ImageView
+    private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
     private lateinit var secondaryProgressBar: ProgressBar
+
+    private val defaultOrder: Order = Order.ASCENDING
+    private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT)
+    private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
+
     private val contentProvider: ContentProvider = ContentProvider()
-    private var filterOptions: FilterOptions = FilterOptions()
+    private var filterOptions: FilterOptions = FilterOptions(defaultOrder, defaultTypes, defaultEras)
     private var selectedDate: Date = getToday()
     private var updating: Boolean = false
     private var endOfList: Boolean = false
@@ -32,8 +41,25 @@ class MainActivity : AppCompatActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        dropdownFilter = findViewById(R.id.dropdownFilter)
+        dropdownView = findViewById(R.id.dropdownView)
         progressBar = findViewById(R.id.progressBar)
         secondaryProgressBar = findViewById(R.id.secondaryProgressBar)
+
+        dropdownFilter.setOnClickListener {
+            if (dropdownView.visibility === View.GONE) {
+                dropdownView.visibility = View.VISIBLE
+                filterOptions.setViewContent(dropdownView)
+            }
+            else {
+                dropdownView.visibility = View.GONE
+                val filtersChanged = filterOptions.setFilterOptions(dropdownView)
+                if (filtersChanged) {
+                    progressBar.visibility = View.VISIBLE
+                    getHistoryItems()
+                }
+            }
+        }
 
         if (savedInstanceState !== null) {
             selectedDate = stringToDate(savedInstanceState.getString(dateString))

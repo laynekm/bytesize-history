@@ -16,6 +16,7 @@ class ContentProvider {
     private var allHistoryItems: MutableList<HistoryItem> = ArrayList()
     private var currentHistoryItems: MutableList<HistoryItem> = ArrayList()
     private var selectedDate: Date = getToday()
+    private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
     private val count = 15
     private var index = 0
 
@@ -26,13 +27,16 @@ class ContentProvider {
     // Otherwise, fetch image URLs for the next count
     fun fetchHistoryItems(date: Date, updateRecyclerView: (MutableList<HistoryItem>, Boolean) -> Unit, options: FilterOptions) {
         doAsync {
-            if (!datesEqual(selectedDate, date)) {
+            Log.wtf("selectedFilters", selectedFilters.eras.toString())
+            if (!datesEqual(selectedDate, date) || !options.equals(selectedFilters)) {
                 allHistoryItems.clear()
                 currentHistoryItems.clear()
                 index = 0
             }
 
             selectedDate = date
+            selectedFilters = options.copy()
+
             if (index === 0) {
                 val url = buildURL(buildDateURL(date))
                 val result = url.readText()

@@ -9,4 +9,23 @@
     <string name="default_image">History image</string>
     <string name="default_year">1918</string>
     <string name="default_desc">The end of WW1. The end of WW1.</string>
+    <string name="events_text">Events</string>
+    <string name="births_text">Births</string>
+    <string name="deaths_text">Deaths</string>
+
+    <!-- Filter dropdown -->
+    <string name="order_header">Order</string>
+    <string name="order_ascending">Ascending</string>
+    <string name="order_descending">Descending</string>
+    <string name="type_header">Types</string>
+    <string name="type_events">Events</string>
+    <string name="type_births">Births</string>
+    <string name="type_deaths">Deaths</string>
+    <string name="era_header">Time Periods</string>
+    <string name="era_ancient">Ancient (before 500 AD)</string>
+    <string name="era_medieval">Medieval (500-1500 AD)</string>
+    <string name="era_modern">Early Modern (1500-1800 AD)</string>
+    <string name="era_1800s">1800s</string>
+    <string name="era_1900s">1900s</string>
+    <string name="era_2000s">2000s</string>
 </resources>
