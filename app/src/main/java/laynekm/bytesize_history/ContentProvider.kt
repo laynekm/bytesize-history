@@ -50,9 +50,12 @@ class ContentProvider {
                 val url = buildURL(buildDateURL(date))
                 val result = url.readText()
                 val allHistoryItems = parseContent(result)
-                allItems[Type.EVENT] = filter(allHistoryItems, Type.EVENT)
-                allItems[Type.BIRTH] = filter(allHistoryItems, Type.BIRTH)
-                allItems[Type.DEATH] = filter(allHistoryItems, Type.DEATH)
+                for ((type) in allItems) {
+                    if (selectedFilters.types.contains(type)) {
+                        allItems[type] = filter(allHistoryItems, type)
+                    }
+                }
+
                 hasItems = true
             }
 
@@ -69,6 +72,7 @@ class ContentProvider {
     private fun filter(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
         var filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach { if (it.type === type && selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
+        if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
         return filteredItems
     }
 

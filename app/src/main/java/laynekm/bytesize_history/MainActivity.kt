@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var secondaryProgressBar: ProgressBar
 
     private val defaultOrder: Order = Order.ASCENDING
-    private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT)
+    private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
     private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
 
     private val contentProvider: ContentProvider = ContentProvider()
@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity()  {
     private var selectedDate: Date = getToday()
     private var selectedType: Type = filterOptions.types[0]
     private var updating: Boolean = false
+    private var shouldScroll: Boolean = false
     private var endOfList: Boolean = false
 
     private val dateString = "selectedDate"
@@ -68,6 +69,8 @@ class MainActivity : AppCompatActivity()  {
                 val filtersChanged = filterOptions.setFilterOptions(dropdownView)
                 if (filtersChanged) {
                     progressBar.visibility = View.VISIBLE
+                    if (!filterOptions.types.contains(selectedType)) setSelectedType(filterOptions.types[0])
+                    updateTypeSelectors()
                     getHistoryItems()
                 }
             }
@@ -123,6 +126,7 @@ class MainActivity : AppCompatActivity()  {
                     super.onScrollStateChanged(recyclerView, newState)
                     if (!recyclerView.canScrollVertically(1) && !updating && !endOfList) {
                         secondaryProgressBar.visibility = View.VISIBLE
+                        shouldScroll = true
                         getHistoryItems()
                     }
                 }
@@ -142,9 +146,10 @@ class MainActivity : AppCompatActivity()  {
         if (secondaryProgressBar.visibility === View.VISIBLE) secondaryProgressBar.visibility = View.GONE
 
         for ((type, adapter) in historyAdapters.adapters) {
-            if (adapter.itemCount !== 0) historyViews.views.get(type)!!.smoothScrollBy(0, 250)
+            if (shouldScroll) historyViews.views.get(type)!!.smoothScrollBy(0, 250)
             adapter.setItems(items.get(type)!!)
             adapter.notifyDataSetChanged()
+            shouldScroll = false
         }
 
         updating = false
@@ -160,6 +165,15 @@ class MainActivity : AppCompatActivity()  {
             progressBar.visibility = View.VISIBLE
             getHistoryItems()
         }
+    }
+
+    private fun updateTypeSelectors() {
+        if (filterOptions.types.contains(Type.EVENT)) eventFilter.visibility = View.VISIBLE
+        else { eventFilter.visibility = View.GONE }
+        if (filterOptions.types.contains(Type.BIRTH)) birthFilter.visibility = View.VISIBLE
+        else { birthFilter.visibility = View.GONE }
+        if (filterOptions.types.contains(Type.DEATH)) deathFilter.visibility = View.VISIBLE
+        else { deathFilter.visibility = View.GONE }
     }
 
     private fun setSelectedType(type: Type) {
