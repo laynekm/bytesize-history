@@ -3,15 +3,16 @@ package laynekm.bytesize_history
 import android.view.View
 import android.widget.Switch
 
-enum class Order constructor(private val type: String) {
-    ASCENDING("Event"), DESCENDING("Birth");
-    override fun toString(): String = this.type
-}
-
 class FilterOptions(var order: Order, var types: MutableList<Type>, var eras: MutableList<Era>) {
 
     // Sets view content based on filter options
     fun setViewContent(view: View) {
+        if (order === Order.DESCENDING) (view.findViewById(R.id.switchOrder) as Switch).setChecked(true)
+
+        if (types.contains(Type.EVENT)) (view.findViewById(R.id.switchEvents) as Switch).setChecked(true)
+        if (types.contains(Type.BIRTH)) (view.findViewById(R.id.switchBirths) as Switch).setChecked(true)
+        if (types.contains(Type.DEATH)) (view.findViewById(R.id.switchDeaths) as Switch).setChecked(true)
+
         if (eras.contains(Era.ANCIENT)) (view.findViewById(R.id.switchAncient) as Switch).setChecked(true)
         if (eras.contains(Era.MEDIEVAL)) (view.findViewById(R.id.switchMedieval) as Switch).setChecked(true)
         if (eras.contains(Era.EARLYMODERN)) (view.findViewById(R.id.switchEarlyModern) as Switch).setChecked(true)
@@ -22,8 +23,16 @@ class FilterOptions(var order: Order, var types: MutableList<Type>, var eras: Mu
 
     // Applies amended view content to filter options
     fun setFilterOptions(view: View): Boolean {
+        var newOrder = Order.ASCENDING
+        var newTypes: MutableList<Type> = mutableListOf()
         var newEras: MutableList<Era> = mutableListOf()
         var changed = false
+
+        if ((view.findViewById(R.id.switchAncient) as Switch).isChecked) newOrder = Order.DESCENDING
+
+        if ((view.findViewById(R.id.switchEvents) as Switch).isChecked) newTypes.add(Type.EVENT)
+        if ((view.findViewById(R.id.switchBirths) as Switch).isChecked) newTypes.add(Type.BIRTH)
+        if ((view.findViewById(R.id.switchDeaths) as Switch).isChecked) newTypes.add(Type.DEATH)
 
         if ((view.findViewById(R.id.switchAncient) as Switch).isChecked) newEras.add(Era.ANCIENT)
         if ((view.findViewById(R.id.switchMedieval) as Switch).isChecked) newEras.add(Era.MEDIEVAL)
@@ -31,6 +40,16 @@ class FilterOptions(var order: Order, var types: MutableList<Type>, var eras: Mu
         if ((view.findViewById(R.id.switch1800s) as Switch).isChecked) newEras.add(Era.EIGHTEENS)
         if ((view.findViewById(R.id.switch1900s) as Switch).isChecked) newEras.add(Era.NINETEENS)
         if ((view.findViewById(R.id.switch2000s) as Switch).isChecked) newEras.add(Era.TWOTHOUSANDS)
+
+        if (order !== newOrder) {
+            order = newOrder
+            changed = true
+        }
+
+        if (!listsEqual(types, newTypes)) {
+            types = newTypes
+            changed = true
+        }
 
         if (!listsEqual(eras, newEras)) {
             eras = newEras

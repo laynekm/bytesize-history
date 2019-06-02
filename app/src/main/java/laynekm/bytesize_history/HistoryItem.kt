@@ -1,5 +1,10 @@
 package laynekm.bytesize_history
 
+enum class Order constructor(private val type: String) {
+    ASCENDING("Ascending"), DESCENDING("Descending");
+    override fun toString(): String = this.type
+}
+
 enum class Type constructor(private val type: String) {
     EVENT("Event"), BIRTH("Birth"), DEATH("Death");
     override fun toString(): String = this.type

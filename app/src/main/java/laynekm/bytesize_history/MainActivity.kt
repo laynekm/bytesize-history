@@ -1,6 +1,7 @@
 package laynekm.bytesize_history
 
 import android.app.DatePickerDialog
+import android.media.Image
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -17,11 +18,18 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
+class HistoryViews(var views: MutableMap<Type, RecyclerView>)
+class HistoryAdapters(var adapters: MutableMap<Type, HistoryItemAdapter>)
+
 class MainActivity : AppCompatActivity()  {
 
-    private lateinit var historyItemAdapter: HistoryItemAdapter
+    private lateinit var historyViews: HistoryViews
+    private lateinit var historyAdapters: HistoryAdapters
     private lateinit var dropdownFilter: ImageView
     private lateinit var dropdownView: View
+    private lateinit var eventFilter: TextView
+    private lateinit var birthFilter: TextView
+    private lateinit var deathFilter: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var secondaryProgressBar: ProgressBar
 
@@ -32,6 +40,7 @@ class MainActivity : AppCompatActivity()  {
     private val contentProvider: ContentProvider = ContentProvider()
     private var filterOptions: FilterOptions = FilterOptions(defaultOrder, defaultTypes, defaultEras)
     private var selectedDate: Date = getToday()
+    private var selectedType: Type = filterOptions.types[0]
     private var updating: Boolean = false
     private var endOfList: Boolean = false
 
@@ -43,6 +52,9 @@ class MainActivity : AppCompatActivity()  {
         setSupportActionBar(toolbar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         dropdownView = findViewById(R.id.dropdownView)
+        eventFilter = findViewById(R.id.eventBtn)
+        birthFilter = findViewById(R.id.birthBtn)
+        deathFilter = findViewById(R.id.deathBtn)
         progressBar = findViewById(R.id.progressBar)
         secondaryProgressBar = findViewById(R.id.secondaryProgressBar)
 
@@ -61,11 +73,15 @@ class MainActivity : AppCompatActivity()  {
             }
         }
 
+        eventFilter.setOnClickListener { setSelectedType(Type.EVENT) }
+        birthFilter.setOnClickListener { setSelectedType(Type.BIRTH) }
+        deathFilter.setOnClickListener { setSelectedType(Type.DEATH) }
+
         if (savedInstanceState !== null) {
             selectedDate = stringToDate(savedInstanceState.getString(dateString))
         }
 
-        initializeRecyclerView()
+        initializeRecyclerViews()
         var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
         progressBar.visibility = View.VISIBLE
@@ -86,36 +102,51 @@ class MainActivity : AppCompatActivity()  {
     }
 
     // Populate recycler view with initial empty data
-    private fun initializeRecyclerView() {
-        val historyItemView: RecyclerView = findViewById(R.id.historyItems)
-        historyItemAdapter = HistoryItemAdapter(this, ArrayList())
-        historyItemView.adapter = historyItemAdapter
-        historyItemView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (!recyclerView.canScrollVertically(1) && !updating && !endOfList) {
-                    secondaryProgressBar.visibility = View.VISIBLE
-                    getHistoryItems()
+    private fun initializeRecyclerViews() {
+        historyViews = HistoryViews(mutableMapOf(
+            Type.EVENT to findViewById(R.id.eventItems),
+            Type.BIRTH to findViewById(R.id.birthItems),
+            Type.DEATH to findViewById(R.id.deathItems)
+        ))
+
+        historyAdapters = HistoryAdapters(mutableMapOf(
+            Type.EVENT to HistoryItemAdapter(this, mutableListOf()),
+            Type.BIRTH to HistoryItemAdapter(this, mutableListOf()),
+            Type.DEATH to HistoryItemAdapter(this, mutableListOf())
+        ))
+
+        for ((type, adapter) in historyViews.views) {
+            adapter.adapter = historyAdapters.adapters.get(type)
+            adapter.layoutManager = LinearLayoutManager(this)
+            adapter.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (!recyclerView.canScrollVertically(1) && !updating && !endOfList) {
+                        secondaryProgressBar.visibility = View.VISIBLE
+                        getHistoryItems()
+                    }
                 }
-            }
-        })
-        historyItemView.layoutManager = LinearLayoutManager(this)
+            })
+        }
     }
 
     // Functions for adding
     private fun getHistoryItems() {
         updating = true
-        contentProvider.fetchHistoryItems(selectedDate, ::updateRecyclerView, filterOptions)
+        contentProvider.fetchHistoryItems(selectedDate, ::updateRecyclerView, filterOptions, selectedType)
     }
 
     // Populate recycler view with fetched data and hide progress bar
-    private fun updateRecyclerView(items: MutableList<HistoryItem>, lastItem: Boolean) {
+    private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>, lastItem: Boolean) {
         if (progressBar.visibility === View.VISIBLE) progressBar.visibility = View.GONE
         if (secondaryProgressBar.visibility === View.VISIBLE) secondaryProgressBar.visibility = View.GONE
-        val historyItemView: RecyclerView = findViewById(R.id.historyItems)
-        if (historyItemAdapter.itemCount === 0) historyItemView.smoothScrollBy(0, 250)
-        historyItemAdapter.setItems(items)
-        historyItemAdapter.notifyDataSetChanged()
+
+        for ((type, adapter) in historyAdapters.adapters) {
+            if (adapter.itemCount !== 0) historyViews.views.get(type)!!.smoothScrollBy(0, 250)
+            adapter.setItems(items.get(type)!!)
+            adapter.notifyDataSetChanged()
+        }
+
         updating = false
         endOfList = lastItem
 
@@ -128,6 +159,28 @@ class MainActivity : AppCompatActivity()  {
             dateLabel.text = buildDateLabel(selectedDate)
             progressBar.visibility = View.VISIBLE
             getHistoryItems()
+        }
+    }
+
+    private fun setSelectedType(type: Type) {
+        selectedType = type
+        getHistoryItems()
+        when (selectedType) {
+            Type.EVENT -> {
+                findViewById<RecyclerView>(R.id.eventItems).visibility = View.VISIBLE
+                findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
+                findViewById<RecyclerView>(R.id.deathItems).visibility = View.GONE
+            }
+            Type.BIRTH -> {
+                findViewById<RecyclerView>(R.id.eventItems).visibility = View.GONE
+                findViewById<RecyclerView>(R.id.birthItems).visibility = View.VISIBLE
+                findViewById<RecyclerView>(R.id.deathItems).visibility = View.GONE
+            }
+            Type.DEATH -> {
+                findViewById<RecyclerView>(R.id.eventItems).visibility = View.GONE
+                findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
+                findViewById<RecyclerView>(R.id.deathItems).visibility = View.VISIBLE
+            }
         }
     }
 

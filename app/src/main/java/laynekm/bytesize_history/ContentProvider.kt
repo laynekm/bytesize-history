@@ -7,70 +7,75 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.net.URL
 
+// Used to return desc and links from parseDescriptionAndLinks
+data class ParseResult(val desc: String, val links: MutableList<Link>)
+
 class ContentProvider {
 
     private val TAG = "ContentProvider"
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
-    private var allHistoryItems: MutableList<HistoryItem> = ArrayList()
-    private var currentHistoryItems: MutableList<HistoryItem> = ArrayList()
+    private var allItems = mutableMapOf<Type, MutableList<HistoryItem>>(
+        Type.EVENT to mutableListOf(),
+        Type.BIRTH to mutableListOf(),
+        Type.DEATH to mutableListOf()
+    )
+
+    private var currentItems = mutableMapOf<Type, MutableList<HistoryItem>>(
+        Type.EVENT to mutableListOf(),
+        Type.BIRTH to mutableListOf(),
+        Type.DEATH to mutableListOf()
+    )
+
     private var selectedDate: Date = getToday()
     private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
     private val count = 15
-    private var index = 0
-
-    // Used to return desc and links from parseDescriptionAndLinks
-    data class ParseResult(val desc: String, val links: MutableList<Link>)
+    private var hasItems = false
 
     // If there are no history items or a new date, fetch all history items and image URLs for the first count
     // Otherwise, fetch image URLs for the next count
-    fun fetchHistoryItems(date: Date, updateRecyclerView: (MutableList<HistoryItem>, Boolean) -> Unit, options: FilterOptions) {
+    fun fetchHistoryItems(date: Date, updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>, Boolean) -> Unit, options: FilterOptions, type: Type) {
         doAsync {
-            Log.wtf("selectedFilters", selectedFilters.eras.toString())
             if (!datesEqual(selectedDate, date) || !options.equals(selectedFilters)) {
-                allHistoryItems.clear()
-                currentHistoryItems.clear()
-                index = 0
+                for ((type, list) in allItems) list.clear()
+                for ((type, list) in currentItems) list.clear()
+                hasItems = false
             }
 
             selectedDate = date
             selectedFilters = options.copy()
 
-            if (index === 0) {
+            if (!hasItems) {
                 val url = buildURL(buildDateURL(date))
                 val result = url.readText()
-                allHistoryItems = filterAndSort(parseContent(result), options)
-                currentHistoryItems.addAll(getAvailableItems())
-                index += count
-                currentHistoryItems.forEach { it.image = fetchImage(it.links) }
-                uiThread {
-                    updateRecyclerView(currentHistoryItems, isLastItem())
-                }
-            } else {
-                val historyItemChunk = getAvailableItems()
-                index += count
-                historyItemChunk.forEach { it.image = fetchImage(it.links) }
-                currentHistoryItems.addAll(historyItemChunk)
-                uiThread {
-                    updateRecyclerView(currentHistoryItems, isLastItem())
-                }
+                val allHistoryItems = parseContent(result)
+                allItems[Type.EVENT] = filter(allHistoryItems, Type.EVENT)
+                allItems[Type.BIRTH] = filter(allHistoryItems, Type.BIRTH)
+                allItems[Type.DEATH] = filter(allHistoryItems, Type.DEATH)
+                hasItems = true
+            }
+
+            currentItems[type]!!.addAll(getAvailableItems(allItems[type]!!, currentItems[type]!!, count))
+            currentItems[type]!!.forEach { it.image = fetchImage(it.links)}
+            val isLastItem = allItems[type]!!.size === currentItems[type]!!.size
+
+            uiThread {
+                updateRecyclerView(currentItems, isLastItem)
             }
         }
     }
 
-    private fun filterAndSort(items: MutableList<HistoryItem>, options: FilterOptions): MutableList<HistoryItem> {
-        items.retainAll { options.eras.contains(it.era) && options.types.contains(it.type) }
-        return items
+    private fun filter(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
+        var filteredItems: MutableList<HistoryItem> = mutableListOf()
+        items.forEach { if (it.type === type && selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
+        return filteredItems
     }
 
-    private fun getAvailableItems(): MutableList<HistoryItem> {
-        if (allHistoryItems.size >= index + count) return allHistoryItems.subList(index, index + count)
-        return allHistoryItems.subList(index, allHistoryItems.size)
-    }
-
-    private fun isLastItem(): Boolean {
-        return allHistoryItems.size === currentHistoryItems.size
+    fun <T> getAvailableItems(allItems: MutableList<T>, currentItems: MutableList<T>, count: Int): MutableList<T> {
+        val index = currentItems.size
+        if (allItems.size >= index + count) return allItems.subList(index, index + count)
+        return allItems.subList(index, allItems.size)
     }
 
     private fun buildURL(searchParam: String): URL {
