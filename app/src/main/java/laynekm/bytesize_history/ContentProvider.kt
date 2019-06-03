@@ -33,24 +33,42 @@ class ContentProvider {
     private val count = 15
     private var hasItems = false
 
-    // If there are no history items or a new date, fetch all history items and image URLs for the first count
-    // Otherwise, fetch image URLs for the next count
-    fun fetchHistoryItems(date: Date, updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>, Boolean) -> Unit, options: FilterOptions, type: Type) {
+    // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
+    // TODO: Add in handling for no when there's no internet connectivity (just display an error)
+    fun fetchHistoryItems(
+        date: Date,
+        options: FilterOptions,
+        type: Type?,
+        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>, Boolean) -> Unit) {
+
+        if (type === null) {
+            updateRecyclerView(mutableMapOf(
+                Type.EVENT to mutableListOf(),
+                Type.BIRTH to mutableListOf(),
+                Type.DEATH to mutableListOf()
+            ), true)
+        }
+
         doAsync {
+
+            // Clear lists if the date or filter options have changed
             if (!datesEqual(selectedDate, date) || !options.equals(selectedFilters)) {
-                for ((type, list) in allItems) list.clear()
-                for ((type, list) in currentItems) list.clear()
+                for ((_, list) in allItems) list.clear()
+                for ((_, list) in currentItems) list.clear()
                 hasItems = false
             }
 
             selectedDate = date
             selectedFilters = options.copy()
 
+            // If no items exist, fetch them and add to their respective lists (events, births, deaths)
             if (!hasItems) {
                 val url = buildURL(buildDateURL(date))
                 val result = url.readText()
                 val allHistoryItems = parseContent(result)
                 for ((type) in allItems) {
+                    allItems[type] = filter(allHistoryItems, type)
+
                     if (selectedFilters.types.contains(type)) {
                         allItems[type] = filter(allHistoryItems, type)
                     }
@@ -59,10 +77,12 @@ class ContentProvider {
                 hasItems = true
             }
 
+            // Pull "count" number of items from lists of all elements and add to lists of current elements
             currentItems[type]!!.addAll(getAvailableItems(allItems[type]!!, currentItems[type]!!, count))
             currentItems[type]!!.forEach { it.image = fetchImage(it.links)}
-            val isLastItem = allItems[type]!!.size === currentItems[type]!!.size
+            val isLastItem = allItems[type]!!.size == currentItems[type]!!.size
 
+            // Callback function that updates recycler views in main thread
             uiThread {
                 updateRecyclerView(currentItems, isLastItem)
             }
@@ -139,6 +159,7 @@ class ContentProvider {
 
         // Content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
+
         // Split array into events, births, and deaths
         // Only care about strings starting with an asterisk
         // Assumes events, births, deaths proceed each other

@@ -28,7 +28,7 @@ class FilterOptions(var order: Order, var types: MutableList<Type>, var eras: Mu
         var newEras: MutableList<Era> = mutableListOf()
         var changed = false
 
-        if ((view.findViewById(R.id.switchAncient) as Switch).isChecked) newOrder = Order.DESCENDING
+        if ((view.findViewById(R.id.switchOrder) as Switch).isChecked) newOrder = Order.DESCENDING
 
         if ((view.findViewById(R.id.switchEvents) as Switch).isChecked) newTypes.add(Type.EVENT)
         if ((view.findViewById(R.id.switchBirths) as Switch).isChecked) newTypes.add(Type.BIRTH)

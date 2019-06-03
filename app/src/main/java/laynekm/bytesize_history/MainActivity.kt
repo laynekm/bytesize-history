@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity()  {
 
     private lateinit var historyViews: HistoryViews
     private lateinit var historyAdapters: HistoryAdapters
+    private lateinit var dateLabel: TextView
     private lateinit var dropdownFilter: ImageView
     private lateinit var dropdownView: View
     private lateinit var eventFilter: TextView
@@ -36,11 +37,11 @@ class MainActivity : AppCompatActivity()  {
     private val defaultOrder: Order = Order.ASCENDING
     private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
     private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
+    private var filterOptions: FilterOptions = FilterOptions(defaultOrder, defaultTypes, defaultEras)
 
     private val contentProvider: ContentProvider = ContentProvider()
-    private var filterOptions: FilterOptions = FilterOptions(defaultOrder, defaultTypes, defaultEras)
     private var selectedDate: Date = getToday()
-    private var selectedType: Type = filterOptions.types[0]
+    private var selectedType: Type? = filterOptions.types[0]
     private var updating: Boolean = false
     private var shouldScroll: Boolean = false
     private var endOfList: Boolean = false
@@ -51,6 +52,8 @@ class MainActivity : AppCompatActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+
+        dateLabel = findViewById(R.id.dateLabel)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         dropdownView = findViewById(R.id.dropdownView)
         eventFilter = findViewById(R.id.eventBtn)
@@ -59,23 +62,7 @@ class MainActivity : AppCompatActivity()  {
         progressBar = findViewById(R.id.progressBar)
         secondaryProgressBar = findViewById(R.id.secondaryProgressBar)
 
-        dropdownFilter.setOnClickListener {
-            if (dropdownView.visibility === View.GONE) {
-                dropdownView.visibility = View.VISIBLE
-                filterOptions.setViewContent(dropdownView)
-            }
-            else {
-                dropdownView.visibility = View.GONE
-                val filtersChanged = filterOptions.setFilterOptions(dropdownView)
-                if (filtersChanged) {
-                    progressBar.visibility = View.VISIBLE
-                    if (!filterOptions.types.contains(selectedType)) setSelectedType(filterOptions.types[0])
-                    updateTypeSelectors()
-                    getHistoryItems()
-                }
-            }
-        }
-
+        dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         eventFilter.setOnClickListener { setSelectedType(Type.EVENT) }
         birthFilter.setOnClickListener { setSelectedType(Type.BIRTH) }
         deathFilter.setOnClickListener { setSelectedType(Type.DEATH) }
@@ -84,12 +71,12 @@ class MainActivity : AppCompatActivity()  {
             selectedDate = stringToDate(savedInstanceState.getString(dateString))
         }
 
-        initializeRecyclerViews()
-        var dateLabel: TextView = findViewById(R.id.dateLabel)
         dateLabel.text = buildDateLabel(selectedDate)
         progressBar.visibility = View.VISIBLE
         secondaryProgressBar.visibility = View.GONE
-        getHistoryItems()
+
+        initializeRecyclerViews()
+        fetchHistoryItems()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -104,7 +91,7 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
-    // Populate recycler view with initial empty data
+    // Create RecyclerViews and their adapters, initialized as empty
     private fun initializeRecyclerViews() {
         historyViews = HistoryViews(mutableMapOf(
             Type.EVENT to findViewById(R.id.eventItems),
@@ -119,34 +106,36 @@ class MainActivity : AppCompatActivity()  {
         ))
 
         for ((type, adapter) in historyViews.views) {
-            adapter.adapter = historyAdapters.adapters.get(type)
+            adapter.adapter = historyAdapters.adapters[type]
             adapter.layoutManager = LinearLayoutManager(this)
+
+            // Add more items to RecyclerView when bottom is reached, scroll down slightly so user can see
             adapter.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     if (!recyclerView.canScrollVertically(1) && !updating && !endOfList) {
                         secondaryProgressBar.visibility = View.VISIBLE
                         shouldScroll = true
-                        getHistoryItems()
+                        fetchHistoryItems()
                     }
                 }
             })
         }
     }
 
-    // Functions for adding
-    private fun getHistoryItems() {
+    // Fetches history items from content provider
+    private fun fetchHistoryItems() {
         updating = true
-        contentProvider.fetchHistoryItems(selectedDate, ::updateRecyclerView, filterOptions, selectedType)
+        contentProvider.fetchHistoryItems(selectedDate, filterOptions, selectedType, ::updateRecyclerView)
     }
 
-    // Populate recycler view with fetched data and hide progress bar
+    // Callback function passed into fetchHistoryItems, updates views and other UI elements
     private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>, lastItem: Boolean) {
-        if (progressBar.visibility === View.VISIBLE) progressBar.visibility = View.GONE
-        if (secondaryProgressBar.visibility === View.VISIBLE) secondaryProgressBar.visibility = View.GONE
+        if (progressBar.visibility == View.VISIBLE) progressBar.visibility = View.GONE
+        if (secondaryProgressBar.visibility == View.VISIBLE) secondaryProgressBar.visibility = View.GONE
 
         for ((type, adapter) in historyAdapters.adapters) {
-            if (shouldScroll) historyViews.views.get(type)!!.smoothScrollBy(0, 250)
+            if (shouldScroll) historyViews.views[type]!!.smoothScrollBy(0, 250)
             adapter.setItems(items.get(type)!!)
             adapter.notifyDataSetChanged()
             shouldScroll = false
@@ -157,16 +146,38 @@ class MainActivity : AppCompatActivity()  {
 
     }
 
+    // Updates date using value selected in calendar, refetches history items if date changed
     private fun updateDate(date: Date) {
         if (!datesEqual(date, selectedDate)) {
             selectedDate = date
-            var dateLabel: TextView = findViewById(R.id.dateLabel)
             dateLabel.text = buildDateLabel(selectedDate)
             progressBar.visibility = View.VISIBLE
-            getHistoryItems()
+            fetchHistoryItems()
         }
     }
 
+    // Toggles dropdown filter, refetches history items when menu is closed if filters changed
+    private fun dropdownFilterOnClick() {
+        if (dropdownView.visibility == View.GONE) {
+            dropdownView.visibility = View.VISIBLE
+            filterOptions.setViewContent(dropdownView)
+        }
+        else {
+            dropdownView.visibility = View.GONE
+            val filtersChanged = filterOptions.setFilterOptions(dropdownView)
+            if (filtersChanged) {
+                progressBar.visibility = View.VISIBLE
+                if (!filterOptions.types.contains(selectedType)) {
+                    if (filterOptions.types.size == 0) setSelectedType(null)
+                    else setSelectedType(filterOptions.types[0])
+                }
+                updateTypeSelectors()
+                fetchHistoryItems()
+            }
+        }
+    }
+
+    // Shows and hides type selectors according to filter options
     private fun updateTypeSelectors() {
         if (filterOptions.types.contains(Type.EVENT)) eventFilter.visibility = View.VISIBLE
         else { eventFilter.visibility = View.GONE }
@@ -176,9 +187,13 @@ class MainActivity : AppCompatActivity()  {
         else { deathFilter.visibility = View.GONE }
     }
 
-    private fun setSelectedType(type: Type) {
+    // Sets current history item type and hides other views
+    private fun setSelectedType(type: Type?) {
         selectedType = type
-        getHistoryItems()
+        if(historyAdapters.adapters[selectedType] != null && historyAdapters.adapters[selectedType]!!.itemCount == 0) {
+            fetchHistoryItems()
+        }
+
         when (selectedType) {
             Type.EVENT -> {
                 findViewById<RecyclerView>(R.id.eventItems).visibility = View.VISIBLE
@@ -195,9 +210,15 @@ class MainActivity : AppCompatActivity()  {
                 findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
                 findViewById<RecyclerView>(R.id.deathItems).visibility = View.VISIBLE
             }
+            else -> {
+                findViewById<RecyclerView>(R.id.eventItems).visibility = View.GONE
+                findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
+                findViewById<RecyclerView>(R.id.deathItems).visibility = View.GONE
+            }
         }
     }
 
+    // Displays DatePicker and handles calls updateDate with the new selected date
     fun showDatePickerDialog(view: View) {
         var date: Calendar = Calendar.getInstance()
         var selectedYear = date.get(Calendar.YEAR)
@@ -210,9 +231,10 @@ class MainActivity : AppCompatActivity()  {
         }, selectedYear, selectedMonth, selectedDay).show()
     }
 
+    // If the WebView is open, back button should close the WebView; otherwise, it should function normally
     override fun onBackPressed() {
         val webView: WebView = findViewById(R.id.webView)
-        if (webView.visibility === View.VISIBLE) {
+        if (webView.visibility == View.VISIBLE) {
             webView.visibility = View.GONE
             webView.loadUrl("about:blank")
         } else {
@@ -220,6 +242,8 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
+    // Ensures state is consistent when activity is destroyed/recreated
+    // TODO: Need to save a lot more than just the date
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState);
         outState.putString(dateString, dateToString(selectedDate))

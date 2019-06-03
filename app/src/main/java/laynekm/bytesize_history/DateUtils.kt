@@ -6,7 +6,7 @@ import java.util.*
 data class Date(val month: Int, val day: Int)
 
 fun datesEqual(date1: Date, date2: Date): Boolean {
-    return date1.month === date2.month && date1.day === date2.day
+    return date1.month == date2.month && date1.day == date2.day
 }
 
 fun datesEqual(date1: String, date2: String): Boolean {
@@ -32,6 +32,6 @@ fun dateToString(date: Date): String {
     return "${date.month}-${date.day}"
 }
 
-fun stringToDate(date: String): Date {
-    return Date(date.substringBefore("-").toInt(), date.substringAfter("-").toInt())
+fun stringToDate(date: String?): Date {
+    return Date(date!!.substringBefore("-").toInt(), date.substringAfter("-").toInt())
 }
