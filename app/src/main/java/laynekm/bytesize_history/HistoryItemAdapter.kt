@@ -35,7 +35,6 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.history_item, parent, false)
 
-        // TODO: Fix progress bar not appearing due to linear layout pushing main content down
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)

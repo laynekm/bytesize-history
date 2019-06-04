@@ -202,10 +202,10 @@ class MainActivity : AppCompatActivity()  {
 
     // Displays DatePicker and handles calls updateDate with the new selected date
     fun showDatePickerDialog(view: View) {
-        var date: Calendar = Calendar.getInstance()
-        var selectedYear = date.get(Calendar.YEAR)
-        var selectedMonth = selectedDate.month
-        var selectedDay = selectedDate.day
+        val date: Calendar = Calendar.getInstance()
+        val selectedYear = date.get(Calendar.YEAR)
+        val selectedMonth = selectedDate.month
+        val selectedDay = selectedDate.day
 
         // TODO: Hide year label
         DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, month, day ->
