@@ -16,13 +16,7 @@ class ContentProvider {
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
-    private var allItems = mutableMapOf<Type, MutableList<HistoryItem>>(
-        Type.EVENT to mutableListOf(),
-        Type.BIRTH to mutableListOf(),
-        Type.DEATH to mutableListOf()
-    )
-
-    private var currentItems = mutableMapOf<Type, MutableList<HistoryItem>>(
+    private var historyItems = mutableMapOf<Type, MutableList<HistoryItem>>(
         Type.EVENT to mutableListOf(),
         Type.BIRTH to mutableListOf(),
         Type.DEATH to mutableListOf()
@@ -30,8 +24,6 @@ class ContentProvider {
 
     private var selectedDate: Date = getToday()
     private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
-    private val count = 15
-    private var hasItems = false
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     // TODO: Add in handling for no when there's no internet connectivity (just display an error)
@@ -39,67 +31,67 @@ class ContentProvider {
         date: Date,
         options: FilterOptions,
         type: Type?,
-        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>, Boolean) -> Unit) {
+        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
 
         if (type === null) {
             updateRecyclerView(mutableMapOf(
                 Type.EVENT to mutableListOf(),
                 Type.BIRTH to mutableListOf(),
                 Type.DEATH to mutableListOf()
-            ), true)
+            ))
         }
 
         doAsync {
-
-            // Clear lists if the date or filter options have changed
-            if (!datesEqual(selectedDate, date) || !options.equals(selectedFilters)) {
-                for ((_, list) in allItems) list.clear()
-                for ((_, list) in currentItems) list.clear()
-                hasItems = false
+            if (!datesEqual(selectedDate, date)) {
+                for ((_, list) in historyItems) list.clear()
             }
 
             selectedDate = date
             selectedFilters = options.copy()
 
-            // If no items exist, fetch them and add to their respective lists (events, births, deaths)
-            if (!hasItems) {
-                val url = buildURL(buildDateURL(date))
-                val result = url.readText()
-                val allHistoryItems = parseContent(result)
-                for ((type) in allItems) {
-                    allItems[type] = filter(allHistoryItems, type)
+            // Fetch items and put into their respective lists (events, births, deaths)
+            val url = buildURL(buildDateURL(date))
+            val result = url.readText()
+            val allHistoryItems = parseContent(result)
+            for ((type) in historyItems) {
+                if (selectedFilters.types.contains(type)) {
+                    historyItems[type] = filterErasAndSort(filterType(allHistoryItems, type))
 
-                    if (selectedFilters.types.contains(type)) {
-                        allItems[type] = filter(allHistoryItems, type)
-                    }
                 }
-
-                hasItems = true
             }
-
-            // Pull "count" number of items from lists of all elements and add to lists of current elements
-            currentItems[type]!!.addAll(getAvailableItems(allItems[type]!!, currentItems[type]!!, count))
-            currentItems[type]!!.forEach { it.image = fetchImage(it.links)}
-            val isLastItem = allItems[type]!!.size == currentItems[type]!!.size
 
             // Callback function that updates recycler views in main thread
             uiThread {
-                updateRecyclerView(currentItems, isLastItem)
+                updateRecyclerView(historyItems)
             }
         }
     }
 
-    private fun filter(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
+    fun filterHistoryItems(
+        options: FilterOptions,
+        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
+
+        if (selectedFilters.equals(options)) return
+        selectedFilters = options.copy()
+
+        for ((type) in historyItems) {
+            historyItems[type]  = filterErasAndSort(historyItems[type]!!)
+        }
+
+        updateRecyclerView(historyItems)
+    }
+
+    private fun filterType(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
         var filteredItems: MutableList<HistoryItem> = mutableListOf()
-        items.forEach { if (it.type === type && selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
-        if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
+        items.forEach { if (it.type === type) filteredItems.add(it) }
         return filteredItems
     }
 
-    fun <T> getAvailableItems(allItems: MutableList<T>, currentItems: MutableList<T>, count: Int): MutableList<T> {
-        val index = currentItems.size
-        if (allItems.size >= index + count) return allItems.subList(index, index + count)
-        return allItems.subList(index, allItems.size)
+    private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
+        var filteredItems: MutableList<HistoryItem> = mutableListOf()
+        items.forEach { if (selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
+        if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
+        return filteredItems
     }
 
     private fun buildURL(searchParam: String): URL {
@@ -202,12 +194,14 @@ class ContentProvider {
 
     // Fetches image URL based on provided webpage links
     // Some pages might not have images, so keep fetching until one of them does
-    private fun fetchImage(links: MutableList<Link>): String {
+    fun fetchImage(links: MutableList<Link>): String {
         var image = ""
         links.forEach {
             image = parseImageURL(buildImageURL(it.title).readText())
+            Log.d(TAG, "Fetched image $image")
             if (image !== "") return image
         }
+
         return image
     }
 
