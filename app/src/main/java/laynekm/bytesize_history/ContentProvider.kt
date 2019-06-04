@@ -48,10 +48,8 @@ class ContentProvider {
             }
 
             selectedDate = date
-            val oldOrder = selectedFilters.order
             selectedFilters = options.copy()
-            val newOrder = selectedFilters.order
-            shouldReverse = oldOrder !== newOrder
+            shouldReverse = selectedFilters.order === Order.DESCENDING
 
             // Fetch items and put into their respective lists (events, births, deaths)
             val url = buildURL(buildDateURL(date))
