@@ -81,4 +81,8 @@ class FilterOptions(var order: Order, var types: MutableList<Type>, var eras: Mu
         list2.forEach { if (!list1.contains(it)) listsEqual = false }
         return listsEqual
     }
+
+    override fun toString(): String {
+        return "Order: $order, types: $types, eras: $eras"
+    }
 }

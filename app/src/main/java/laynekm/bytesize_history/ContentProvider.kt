@@ -24,6 +24,7 @@ class ContentProvider {
 
     private var selectedDate: Date = getToday()
     private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
+    private var shouldReverse: Boolean = false
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     // TODO: Add in handling for no when there's no internet connectivity (just display an error)
@@ -47,7 +48,10 @@ class ContentProvider {
             }
 
             selectedDate = date
+            val oldOrder = selectedFilters.order
             selectedFilters = options.copy()
+            val newOrder = selectedFilters.order
+            shouldReverse = oldOrder !== newOrder
 
             // Fetch items and put into their respective lists (events, births, deaths)
             val url = buildURL(buildDateURL(date))
@@ -56,8 +60,8 @@ class ContentProvider {
             for ((type) in historyItems) {
                 if (selectedFilters.types.contains(type)) {
                     historyItems[type] = filterErasAndSort(filterType(allHistoryItems, type))
-
                 }
+                if (shouldReverse) historyItems[type]!!.reverse()
             }
 
             // Callback function that updates recycler views in main thread
@@ -72,10 +76,14 @@ class ContentProvider {
         updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
 
         if (selectedFilters.equals(options)) return
+        val oldOrder = selectedFilters.order
         selectedFilters = options.copy()
+        val newOrder = selectedFilters.order
+        shouldReverse = oldOrder !== newOrder
 
         for ((type) in historyItems) {
             historyItems[type]  = filterErasAndSort(historyItems[type]!!)
+            if (shouldReverse) historyItems[type]!!.reverse()
         }
 
         updateRecyclerView(historyItems)
@@ -90,7 +98,6 @@ class ContentProvider {
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         var filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach { if (selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
-        if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
         return filteredItems
     }
 

@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity()  {
 
     private val dateString = "selectedDate"
 
+    // TODO: Set new date if app is loaded on a new day without being closed the day before
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
