@@ -5,7 +5,7 @@
                                              android:layout_width="match_parent"
                                              android:layout_height="match_parent"
                                              android:background="?attr/colorBackgroundFloating"
-                                             android:paddingBottom="8dp">
+                                             android:paddingBottom="16dp">
 
     <Switch
             android:text="@string/order_descending"
