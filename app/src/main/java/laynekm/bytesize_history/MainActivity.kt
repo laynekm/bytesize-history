@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var birthFilter: TextView
     private lateinit var deathFilter: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var secondaryProgressBar: ProgressBar
 
     private val defaultOrder: Order = Order.ASCENDING
     private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
@@ -42,9 +41,7 @@ class MainActivity : AppCompatActivity()  {
     private val contentProvider: ContentProvider = ContentProvider()
     private var selectedDate: Date = getToday()
     private var selectedType: Type? = filterOptions.types[0]
-    private var updating: Boolean = false
-    private var shouldScroll: Boolean = false
-    private var endOfList: Boolean = false
+    private var fetching: Boolean = false
 
     private val dateString = "selectedDate"
 
@@ -60,7 +57,6 @@ class MainActivity : AppCompatActivity()  {
         birthFilter = findViewById(R.id.birthBtn)
         deathFilter = findViewById(R.id.deathBtn)
         progressBar = findViewById(R.id.progressBar)
-        secondaryProgressBar = findViewById(R.id.secondaryProgressBar)
 
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         eventFilter.setOnClickListener { setSelectedType(Type.EVENT) }
@@ -73,7 +69,6 @@ class MainActivity : AppCompatActivity()  {
 
         dateLabel.text = buildDateLabel(selectedDate)
         progressBar.visibility = View.VISIBLE
-        secondaryProgressBar.visibility = View.GONE
 
         initializeRecyclerViews()
         fetchHistoryItems()
@@ -108,42 +103,30 @@ class MainActivity : AppCompatActivity()  {
         for ((type, adapter) in historyViews.views) {
             adapter.adapter = historyAdapters.adapters[type]
             adapter.layoutManager = LinearLayoutManager(this)
-
-            // Add more items to RecyclerView when bottom is reached, scroll down slightly so user can see
-            adapter.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (!recyclerView.canScrollVertically(1) && !updating && !endOfList) {
-                        secondaryProgressBar.visibility = View.VISIBLE
-                        shouldScroll = true
-                        fetchHistoryItems()
-                    }
-                }
-            })
         }
     }
 
     // Fetches history items from content provider
     private fun fetchHistoryItems() {
-        updating = true
+        fetching = true
         contentProvider.fetchHistoryItems(selectedDate, filterOptions, selectedType, ::updateRecyclerView)
     }
 
+    // Filters history items without having to refetch
+    private fun filterHistoryItems() {
+        contentProvider.filterHistoryItems(filterOptions, ::updateRecyclerView)
+    }
+
     // Callback function passed into fetchHistoryItems, updates views and other UI elements
-    private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>, lastItem: Boolean) {
+    private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>) {
         if (progressBar.visibility == View.VISIBLE) progressBar.visibility = View.GONE
-        if (secondaryProgressBar.visibility == View.VISIBLE) secondaryProgressBar.visibility = View.GONE
 
         for ((type, adapter) in historyAdapters.adapters) {
-            if (shouldScroll) historyViews.views[type]!!.smoothScrollBy(0, 250)
-            adapter.setItems(items.get(type)!!)
+            adapter.setItems(items[type]!!)
             adapter.notifyDataSetChanged()
-            shouldScroll = false
         }
 
-        updating = false
-        endOfList = lastItem
-
+        fetching = false
     }
 
     // Updates date using value selected in calendar, refetches history items if date changed
@@ -166,13 +149,12 @@ class MainActivity : AppCompatActivity()  {
             dropdownView.visibility = View.GONE
             val filtersChanged = filterOptions.setFilterOptions(dropdownView)
             if (filtersChanged) {
-                progressBar.visibility = View.VISIBLE
                 if (!filterOptions.types.contains(selectedType)) {
                     if (filterOptions.types.size == 0) setSelectedType(null)
                     else setSelectedType(filterOptions.types[0])
                 }
                 updateTypeSelectors()
-                fetchHistoryItems()
+                filterHistoryItems()
             }
         }
     }

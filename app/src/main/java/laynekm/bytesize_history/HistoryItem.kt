@@ -25,9 +25,10 @@ class HistoryItem (
     val year: Int,
     val desc: String,
     val links: MutableList<Link>,
-    var image: String?) {
-
-   var era: Era = determineEra(year)
+    var image: String) {
+    
+    var hasFetchedImage: Boolean = false
+    var era: Era = determineEra(year)
 
     private fun determineEra(year: Int): Era {
         return when {

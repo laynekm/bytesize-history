@@ -102,13 +102,4 @@
             tools:visibility="gone" app:layout_constraintHorizontal_bias="0.504"
             app:layout_constraintTop_toTopOf="@+id/recyclerViewContainer"/>
 
-    <ProgressBar
-            style="?android:attr/progressBarStyle"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:id="@+id/secondaryProgressBar" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp" tools:visibility="gone"/>
-
 </android.support.constraint.ConstraintLayout>
