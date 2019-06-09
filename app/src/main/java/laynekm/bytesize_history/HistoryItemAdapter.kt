@@ -50,8 +50,6 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         return ViewHolder(view)
     }
 
-    // TODO: This should probably refactored so the image and content are loaded simultaneously
-    // Currently, the content is already there and it takes a moment for the image to load
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
         if (!items[index].hasFetchedImage) {
             viewHolder.historyItem.visibility = View.GONE

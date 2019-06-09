@@ -22,6 +22,12 @@ class ContentProvider {
         Type.DEATH to mutableListOf()
     )
 
+    private var filteredHistoryItems = mutableMapOf<Type, MutableList<HistoryItem>>(
+        Type.EVENT to mutableListOf(),
+        Type.BIRTH to mutableListOf(),
+        Type.DEATH to mutableListOf()
+    )
+
     private var selectedDate: Date = getToday()
     private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
     private var shouldReverse: Boolean = false
@@ -54,18 +60,17 @@ class ContentProvider {
             // Fetch items and put into their respective lists (events, births, deaths)
             val url = buildURL(buildDateURL(date))
             val result = url.readText()
-            Log.wtf(TAG, result.toString())
             val allHistoryItems = parseContent(result)
             for ((type) in historyItems) {
                 if (selectedFilters.types.contains(type)) {
-                    historyItems[type] = filterErasAndSort(filterType(allHistoryItems, type))
+                    historyItems[type] = filterType(allHistoryItems, type)
+                    filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
                 }
-                if (shouldReverse) historyItems[type]!!.reverse()
             }
 
             // Callback function that updates recycler views in main thread
             uiThread {
-                updateRecyclerView(historyItems)
+                updateRecyclerView(filteredHistoryItems)
             }
         }
     }
@@ -81,11 +86,10 @@ class ContentProvider {
         shouldReverse = oldOrder !== newOrder
 
         for ((type) in historyItems) {
-            historyItems[type]  = filterErasAndSort(historyItems[type]!!)
-            if (shouldReverse) historyItems[type]!!.reverse()
+            filteredHistoryItems[type]  = filterErasAndSort(historyItems[type]!!)
         }
 
-        updateRecyclerView(historyItems)
+        updateRecyclerView(filteredHistoryItems)
     }
 
     private fun filterType(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
@@ -97,6 +101,7 @@ class ContentProvider {
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         var filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach { if (selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
+        if (shouldReverse) filteredItems.reverse()
         return filteredItems
     }
 

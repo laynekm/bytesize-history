@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity()  {
 
     // Callback function passed into fetchHistoryItems, updates views and other UI elements
     private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>) {
+        Log.wtf("updateRecyclerView", "$items")
         if (progressBar.visibility == View.VISIBLE) progressBar.visibility = View.GONE
 
         for ((type, adapter) in historyAdapters.adapters) {
