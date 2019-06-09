@@ -14,7 +14,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import android.graphics.Bitmap
 import android.widget.*
-
+import com.squareup.picasso.Callback
 
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
@@ -102,10 +102,17 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
 
             uiThread {
                 if (image === "") viewHolder.image.setImageResource(R.drawable.default_image)
-                else Picasso.get().load(image).into(viewHolder.image)
-                viewHolder.historyItem.visibility = View.VISIBLE
+                else Picasso.get().load(image).into(viewHolder.image, object: Callback {
+                    override fun onSuccess() { imageCallback(viewHolder, items[index]) }
+                    override fun onError(exception: Exception) { imageCallback(viewHolder, items[index]) }
+                })
             }
         }
+    }
+
+    private fun imageCallback(viewHolder: ViewHolder, item: HistoryItem) {
+        viewHolder.historyItem.visibility = View.VISIBLE
+        item.hasFetchedImage = true
     }
 
     override fun getItemCount(): Int {
