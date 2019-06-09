@@ -16,21 +16,21 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.filter_dropdown.*
 import java.util.*
 
 class HistoryViews(var views: MutableMap<Type, RecyclerView>)
 class HistoryAdapters(var adapters: MutableMap<Type, HistoryItemAdapter>)
+class TextViewFilters(var filters: MutableMap<Type, TextView>)
 
 class MainActivity : AppCompatActivity()  {
 
     private lateinit var historyViews: HistoryViews
     private lateinit var historyAdapters: HistoryAdapters
+    private lateinit var textViewFilters: TextViewFilters
     private lateinit var dateLabel: TextView
     private lateinit var dropdownFilter: ImageView
     private lateinit var dropdownView: View
-    private lateinit var eventFilter: TextView
-    private lateinit var birthFilter: TextView
-    private lateinit var deathFilter: TextView
     private lateinit var progressBar: ProgressBar
 
     private val defaultOrder: Order = Order.ASCENDING
@@ -54,15 +54,8 @@ class MainActivity : AppCompatActivity()  {
         dateLabel = findViewById(R.id.dateLabel)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         dropdownView = findViewById(R.id.dropdownView)
-        eventFilter = findViewById(R.id.eventBtn)
-        birthFilter = findViewById(R.id.birthBtn)
-        deathFilter = findViewById(R.id.deathBtn)
         progressBar = findViewById(R.id.progressBar)
-
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
-        eventFilter.setOnClickListener { setSelectedType(Type.EVENT) }
-        birthFilter.setOnClickListener { setSelectedType(Type.BIRTH) }
-        deathFilter.setOnClickListener { setSelectedType(Type.DEATH) }
 
         if (savedInstanceState !== null) {
             selectedDate = stringToDate(savedInstanceState.getString(dateString))
@@ -101,6 +94,16 @@ class MainActivity : AppCompatActivity()  {
             Type.DEATH to HistoryItemAdapter(this, mutableListOf())
         ))
 
+        textViewFilters = TextViewFilters(mutableMapOf(
+            Type.EVENT to findViewById(R.id.eventBtn) as TextView,
+            Type.BIRTH to findViewById(R.id.birthBtn) as TextView,
+            Type.DEATH to findViewById(R.id.deathBtn) as TextView
+        ))
+
+        for ((type, textView) in textViewFilters.filters) {
+            textView.setOnClickListener { setSelectedType(type) }
+        }
+
         for ((type, adapter) in historyViews.views) {
             adapter.adapter = historyAdapters.adapters[type]
             adapter.layoutManager = LinearLayoutManager(this)
@@ -110,6 +113,7 @@ class MainActivity : AppCompatActivity()  {
     // Fetches history items from content provider
     private fun fetchHistoryItems() {
         fetching = true
+        progressBar.visibility = View.VISIBLE
         contentProvider.fetchHistoryItems(selectedDate, filterOptions, selectedType, ::updateRecyclerView)
     }
 
@@ -135,7 +139,6 @@ class MainActivity : AppCompatActivity()  {
         if (!datesEqual(date, selectedDate)) {
             selectedDate = date
             dateLabel.text = buildDateLabel(selectedDate)
-            progressBar.visibility = View.VISIBLE
             fetchHistoryItems()
         }
     }
@@ -162,42 +165,22 @@ class MainActivity : AppCompatActivity()  {
 
     // Shows and hides type selectors according to filter options
     private fun updateTypeSelectors() {
-        if (filterOptions.types.contains(Type.EVENT)) eventFilter.visibility = View.VISIBLE
-        else { eventFilter.visibility = View.GONE }
-        if (filterOptions.types.contains(Type.BIRTH)) birthFilter.visibility = View.VISIBLE
-        else { birthFilter.visibility = View.GONE }
-        if (filterOptions.types.contains(Type.DEATH)) deathFilter.visibility = View.VISIBLE
-        else { deathFilter.visibility = View.GONE }
+        for ((type, textView) in textViewFilters.filters) {
+            if (filterOptions.types.contains(type)) textView.visibility = View.VISIBLE
+            else textView.visibility = View.GONE
+        }
     }
 
     // Sets current history item type and hides other views
-    private fun setSelectedType(type: Type?) {
-        selectedType = type
+    private fun setSelectedType(newType: Type?) {
+        selectedType = newType
         if(historyAdapters.adapters[selectedType] != null && historyAdapters.adapters[selectedType]!!.itemCount == 0) {
             fetchHistoryItems()
         }
 
-        when (selectedType) {
-            Type.EVENT -> {
-                findViewById<RecyclerView>(R.id.eventItems).visibility = View.VISIBLE
-                findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
-                findViewById<RecyclerView>(R.id.deathItems).visibility = View.GONE
-            }
-            Type.BIRTH -> {
-                findViewById<RecyclerView>(R.id.eventItems).visibility = View.GONE
-                findViewById<RecyclerView>(R.id.birthItems).visibility = View.VISIBLE
-                findViewById<RecyclerView>(R.id.deathItems).visibility = View.GONE
-            }
-            Type.DEATH -> {
-                findViewById<RecyclerView>(R.id.eventItems).visibility = View.GONE
-                findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
-                findViewById<RecyclerView>(R.id.deathItems).visibility = View.VISIBLE
-            }
-            else -> {
-                findViewById<RecyclerView>(R.id.eventItems).visibility = View.GONE
-                findViewById<RecyclerView>(R.id.birthItems).visibility = View.GONE
-                findViewById<RecyclerView>(R.id.deathItems).visibility = View.GONE
-            }
+        for ((type, view) in historyViews.views) {
+            if (type === selectedType) view.visibility = View.VISIBLE
+            else view.visibility = View.GONE
         }
     }
 

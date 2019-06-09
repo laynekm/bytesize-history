@@ -54,6 +54,7 @@ class ContentProvider {
             // Fetch items and put into their respective lists (events, births, deaths)
             val url = buildURL(buildDateURL(date))
             val result = url.readText()
+            Log.wtf(TAG, result.toString())
             val allHistoryItems = parseContent(result)
             for ((type) in historyItems) {
                 if (selectedFilters.types.contains(type)) {
