@@ -1,6 +1,7 @@
 package laynekm.bytesize_history
 
 import android.app.DatePickerDialog
+import android.graphics.Typeface
 import android.media.Image
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -100,6 +101,7 @@ class MainActivity : AppCompatActivity()  {
             Type.DEATH to findViewById(R.id.deathBtn) as TextView
         ))
 
+        textViewFilters.filters[selectedType]!!.setTypeface(null, Typeface.BOLD)
         for ((type, textView) in textViewFilters.filters) {
             textView.setOnClickListener { setSelectedType(type) }
         }
@@ -179,8 +181,14 @@ class MainActivity : AppCompatActivity()  {
         }
 
         for ((type, view) in historyViews.views) {
-            if (type === selectedType) view.visibility = View.VISIBLE
-            else view.visibility = View.GONE
+            if (type === selectedType) {
+                view.visibility = View.VISIBLE
+                textViewFilters.filters[type]!!.setTypeface(null, Typeface.BOLD)
+            }
+            else {
+                textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)
+                view.visibility = View.GONE
+            }
         }
     }
 
