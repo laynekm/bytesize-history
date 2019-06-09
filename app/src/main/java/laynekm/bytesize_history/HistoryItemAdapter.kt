@@ -53,6 +53,10 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     // TODO: This should probably refactored so the image and content are loaded simultaneously
     // Currently, the content is already there and it takes a moment for the image to load
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
+        if (!items[index].hasFetchedImage) {
+            viewHolder.historyItem.visibility = View.GONE
+        }
+
         viewHolder.image.setImageResource(0)
 
         if (items[index].year < 0) viewHolder.year.text = "${items[index].year * -1} BC"
@@ -99,6 +103,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             uiThread {
                 if (image === "") viewHolder.image.setImageResource(R.drawable.default_image)
                 else Picasso.get().load(image).into(viewHolder.image)
+                viewHolder.historyItem.visibility = View.VISIBLE
             }
         }
     }
