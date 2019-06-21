@@ -15,14 +15,15 @@ import org.jetbrains.anko.uiThread
 import android.graphics.Bitmap
 import android.widget.*
 import com.squareup.picasso.Callback
-
+import android.support.v7.widget.Toolbar
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
     private val contentProvider = ContentProvider()
-    private val progressBar = (context as Activity).findViewById(R.id.progressBar) as ProgressBar
+    private val toolbar = (context as Activity).findViewById(R.id.toolbar) as Toolbar
     private val webView = (context as Activity).findViewById(R.id.webView) as WebView
+    private val progressBar = (context as Activity).findViewById(R.id.progressBar) as ProgressBar
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal var historyItem: ConstraintLayout = itemView.findViewById(R.id.historyItem)
@@ -39,6 +40,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBar.visibility = View.VISIBLE
+                toolbar.setNavigationIcon(R.drawable.abc_ic_arrow_drop_right_black_24dp)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -119,5 +121,6 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
 
     fun setItems(items: MutableList<HistoryItem>) {
         this.items = items
+        notifyDataSetChanged()
     }
 }

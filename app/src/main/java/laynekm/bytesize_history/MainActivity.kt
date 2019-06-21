@@ -2,8 +2,8 @@ package laynekm.bytesize_history
 
 import android.app.DatePickerDialog
 import android.graphics.Typeface
-import android.media.Image
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -15,9 +15,7 @@ import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.filter_dropdown.*
+import android.support.v7.widget.Toolbar
 import java.util.*
 
 class HistoryViews(var views: MutableMap<Type, RecyclerView>)
@@ -26,6 +24,7 @@ class TextViewFilters(var filters: MutableMap<Type, TextView>)
 
 class MainActivity : AppCompatActivity()  {
 
+    private lateinit var toolbar: Toolbar
     private lateinit var historyViews: HistoryViews
     private lateinit var historyAdapters: HistoryAdapters
     private lateinit var textViewFilters: TextViewFilters
@@ -33,6 +32,7 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var dropdownFilter: ImageView
     private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
+    private lateinit var webView: WebView
 
     private val defaultOrder: Order = Order.ASCENDING
     private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
@@ -44,28 +44,31 @@ class MainActivity : AppCompatActivity()  {
     private var selectedType: Type? = filterOptions.types[0]
     private var fetching: Boolean = false
 
-    private val dateString = "selectedDate"
+    private val dateKey = "selectedDate"
 
     // TODO: Set new date if app is loaded on a new day without being closed the day before
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        toolbar =  findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
-        dateLabel = findViewById(R.id.dateLabel)
-        dropdownFilter = findViewById(R.id.dropdownFilter)
-        dropdownView = findViewById(R.id.dropdownView)
-        progressBar = findViewById(R.id.progressBar)
-        dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
-
-        if (savedInstanceState !== null) {
-            selectedDate = stringToDate(savedInstanceState.getString(dateString))
-        }
-
-        dateLabel.text = buildDateLabel(selectedDate)
-        progressBar.visibility = View.VISIBLE
+        toolbar.navigationIcon = null
 
         initializeRecyclerViews()
+
+        dateLabel = findViewById(R.id.dateLabel)
+        dropdownView = findViewById(R.id.dropdownView)
+        progressBar = findViewById(R.id.progressBar)
+        dropdownFilter = findViewById(R.id.dropdownFilter)
+        webView = findViewById(R.id.webView)
+        dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+
+        if (savedInstanceState !== null) {
+            selectedDate = stringToDate(savedInstanceState.getString(dateKey))
+        }
+        dateLabel.text = buildDateLabel(selectedDate)
         fetchHistoryItems()
     }
 
@@ -126,12 +129,10 @@ class MainActivity : AppCompatActivity()  {
 
     // Callback function passed into fetchHistoryItems, updates views and other UI elements
     private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>) {
-        Log.wtf("updateRecyclerView", "$items")
         if (progressBar.visibility == View.VISIBLE) progressBar.visibility = View.GONE
 
         for ((type, adapter) in historyAdapters.adapters) {
             adapter.setItems(items[type]!!)
-            adapter.notifyDataSetChanged()
         }
 
         fetching = false
@@ -208,7 +209,6 @@ class MainActivity : AppCompatActivity()  {
 
     // If the WebView is open, back button should close the WebView; otherwise, it should function normally
     override fun onBackPressed() {
-        val webView: WebView = findViewById(R.id.webView)
         if (webView.visibility == View.VISIBLE) {
             webView.visibility = View.GONE
             webView.loadUrl("about:blank")
@@ -217,10 +217,9 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
-    // Ensures state is consistent when activity is destroyed/recreated
-    // TODO: Need to save a lot more than just the date
+    // Ensures date is consistent when activity is destroyed/recreated
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState);
-        outState.putString(dateString, dateToString(selectedDate))
+        outState.putString(dateKey, dateToString(selectedDate))
     }
 }

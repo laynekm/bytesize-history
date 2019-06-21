@@ -49,8 +49,8 @@ class HistoryItem (
 }
 
 class Link (
-    val title: String,
-    val link: String) {
+    var title: String,
+    var link: String) {
 
     override fun toString(): String {
         return "$title ($link)"
