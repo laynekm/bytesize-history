@@ -40,7 +40,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 progressBar.visibility = View.VISIBLE
-                toolbar.setNavigationIcon(R.drawable.abc_ic_arrow_drop_right_black_24dp)
+                toolbar.setNavigationIcon(R.drawable.back_arrow)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {

@@ -212,6 +212,7 @@ class MainActivity : AppCompatActivity()  {
         if (webView.visibility == View.VISIBLE) {
             webView.visibility = View.GONE
             webView.loadUrl("about:blank")
+            toolbar.navigationIcon = null
         } else {
             super.onBackPressed()
         }
