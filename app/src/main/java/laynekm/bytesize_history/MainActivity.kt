@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -16,9 +15,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.support.v7.widget.Toolbar
 import android.view.animation.AnimationUtils.loadAnimation
-import java.util.*
 import android.widget.Button
-
+import java.util.Calendar
 
 class HistoryViews(var views: MutableMap<Type, RecyclerView>)
 class HistoryAdapters(var adapters: MutableMap<Type, HistoryItemAdapter>)
@@ -55,13 +53,7 @@ class MainActivity : AppCompatActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        toolbar =  findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        toolbar.navigationIcon = null
-
-        initializeRecyclerViews()
-        initializeFilters()
-
+        toolbar = findViewById(R.id.toolbar)
         dateLabel = findViewById(R.id.dateLabel)
         errorTextView = findViewById(R.id.errorTextView)
         retryBtn = findViewById(R.id.retryBtn)
@@ -69,6 +61,8 @@ class MainActivity : AppCompatActivity()  {
         progressBar = findViewById(R.id.progressBar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         webView = findViewById(R.id.webView)
+
+        setSupportActionBar(toolbar)
         retryBtn.setOnClickListener { fetchHistoryItems() }
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
@@ -77,10 +71,13 @@ class MainActivity : AppCompatActivity()  {
             selectedDate = stringToDate(savedInstanceState.getString(dateKey))
         }
 
+        initializeRecyclerViews()
+        initializeFilters()
+
         setSelectedType(selectedType)
         dateLabel.text = buildDateLabel(selectedDate)
-        fetchHistoryItems()
 
+        fetchHistoryItems()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -156,6 +153,7 @@ class MainActivity : AppCompatActivity()  {
     // Updates date using value selected in calendar, refetches history items if date changed
     private fun updateDate(date: Date) {
         if (!datesEqual(date, selectedDate)) {
+
             // Clear adapters
             updateRecyclerView(mutableMapOf(
                 Type.EVENT to mutableListOf(),
@@ -172,10 +170,12 @@ class MainActivity : AppCompatActivity()  {
     // Toggles dropdown filter, refetches history items when menu is closed if filters changed
     private fun dropdownFilterOnClick() {
         if (dropdownView.visibility == View.GONE) {
+            dropdownFilter.rotation = 180.toFloat()
             dropdownView.visibility = View.VISIBLE
             filterOptions.setViewContent(dropdownView)
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
         } else {
+            dropdownFilter.rotation = 0.toFloat()
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_up))
             dropdownView.visibility = View.GONE
             val filtersChanged = filterOptions.setFilterOptions(dropdownView)
