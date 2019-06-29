@@ -17,6 +17,9 @@ import android.widget.*
 import com.squareup.picasso.Callback
 import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.widget.LinearLayout
+
+
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
@@ -103,10 +106,14 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
 
             uiThread {
                 if (image === "") viewHolder.image.setImageResource(R.drawable.default_image)
-                else Picasso.get().load(image).into(viewHolder.image, object: Callback {
-                    override fun onSuccess() { imageCallback(viewHolder, items[index]) }
-                    override fun onError(exception: Exception) { imageCallback(viewHolder, items[index]) }
-                })
+                else Picasso.get()
+                    .load(image)
+                    .resize(100, 100)
+                    .centerCrop()
+                    .into(viewHolder.image, object: Callback {
+                        override fun onSuccess() { imageCallback(viewHolder, items[index]) }
+                        override fun onError(exception: Exception) { imageCallback(viewHolder, items[index]) }
+                    })
             }
         }
     }

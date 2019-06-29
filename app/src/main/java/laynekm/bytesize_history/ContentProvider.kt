@@ -147,7 +147,7 @@ class ContentProvider {
         val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
             .appendQueryParameter("prop", "pageimages")
-            .appendQueryParameter("pithumbsize", "100")
+            .appendQueryParameter("pithumbsize", "200")
             .appendQueryParameter("format", "json")
             .appendQueryParameter("formatversion", "2")
             .appendQueryParameter("titles", searchParam)
