@@ -239,7 +239,7 @@ class ContentProvider {
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String): ParseResult {
         var desc = line.substringAfter("&ndash; ")
-        var links = mutableListOf<Link>()
+        val links = mutableListOf<Link>()
 
         // Loop until all square brackets are removed
         // Link text is on the left side, text to display is on the right
