@@ -17,14 +17,7 @@ import android.widget.*
 import com.squareup.picasso.Callback
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
-import android.view.animation.AnimationUtils.loadAnimation
-
-
-
-
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
@@ -90,12 +83,11 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         }
 
         // onClick displays/hides links
+        // TODO: Add animation
         viewHolder.historyItem.setOnClickListener {
             if (viewHolder.linkView.visibility == View.GONE) {
                 viewHolder.linkView.visibility = View.VISIBLE
-//                viewHolder.linkView.startAnimation(loadAnimation(context, R.anim.slide_down))
             } else {
-//                viewHolder.linkView.startAnimation(loadAnimation(context, R.anim.slide_up))
                 viewHolder.linkView.visibility = View.GONE
             }
         }
@@ -140,9 +132,5 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     fun setItems(items: MutableList<HistoryItem>) {
         this.items = items
         notifyDataSetChanged()
-    }
-
-    fun getItems(): MutableList<HistoryItem> {
-        return this.items
     }
 }
