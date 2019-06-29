@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity()  {
             selectedDate = stringToDate(savedInstanceState.getString(dateKey))
         }
 
+        setSelectedType(selectedType)
         dateLabel.text = buildDateLabel(selectedDate)
         fetchHistoryItems()
 
@@ -194,8 +195,10 @@ class MainActivity : AppCompatActivity()  {
             if (type === selectedType) {
                 view.visibility = View.VISIBLE
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.BOLD)
+                textViewFilters.filters[type]!!.setBackgroundResource(R.drawable.borderbottom)
             } else {
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)
+                textViewFilters.filters[type]!!.setBackgroundResource(0)
                 view.visibility = View.GONE
             }
         }
