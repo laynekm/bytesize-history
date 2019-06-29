@@ -210,7 +210,7 @@ class ContentProvider {
     // BC values will be negative
     private fun parseYear(line: String): Int {
         var yearSection = "";
-        if (line.contains(" &ndash; ")) yearSection = line.substringBefore(" &ndash; ")
+        if (line.contains("&ndash;")) yearSection = line.substringBefore("&ndash;")
         else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
         if (yearSection === "") return 0
 
@@ -238,7 +238,7 @@ class ContentProvider {
 
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String): ParseResult {
-        var desc = line.substringAfter(" &ndash; ")
+        var desc = line.substringAfter("&ndash; ")
         var links = mutableListOf<Link>()
 
         // Loop until all square brackets are removed
