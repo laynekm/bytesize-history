@@ -56,8 +56,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/historyItemTypes" android:layout_marginTop="8dp"
-            android:visibility="gone"/>
+            app:layout_constraintTop_toBottomOf="@+id/historyItemTypes" android:layout_marginTop="16dp"
+            android:visibility="gone" android:layout_marginRight="8dp"/>
 
     <Button
             android:text="@string/retry_btn"
@@ -68,6 +68,16 @@
             android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp" android:visibility="gone"/>
+
+    <include android:id="@+id/dropdownView" layout="@layout/filter_dropdown" android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/topbar"
+             android:visibility="gone"/>
+
+    <include android:id="@+id/topbar" layout="@layout/topbar" android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             app:layout_constraintTop_toTopOf="parent"
+             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
 
     <WebView
             android:id="@+id/webView"
@@ -89,16 +99,5 @@
             android:visibility="gone"
             tools:visibility="gone" app:layout_constraintHorizontal_bias="0.504"
             android:layout_marginTop="16dp"/>
-
-    <include android:id="@+id/dropdownView" layout="@layout/filter_dropdown" android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/topbar"
-             android:visibility="gone"/>
-
-    <include android:id="@+id/topbar" layout="@layout/topbar" android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             app:layout_constraintTop_toTopOf="parent"
-             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
-    />
 
 </android.support.constraint.ConstraintLayout>
