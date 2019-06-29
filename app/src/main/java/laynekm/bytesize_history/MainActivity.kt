@@ -1,10 +1,8 @@
 package laynekm.bytesize_history
 
 import android.app.DatePickerDialog
-import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
-import android.os.Parcelable
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -18,10 +16,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.support.v7.widget.Toolbar
 import java.util.*
-import android.net.NetworkInfo
-import android.content.Context.CONNECTIVITY_SERVICE
-import android.support.v4.content.ContextCompat.getSystemService
-import android.net.ConnectivityManager
 import android.widget.Button
 
 
@@ -152,7 +146,7 @@ class MainActivity : AppCompatActivity()  {
         }
 
         fetching = false
-        checkFilterResults(selectedType!!)
+        checkFilterResults(selectedType)
     }
 
     // Updates date using value selected in calendar, refetches history items if date changed
@@ -206,7 +200,7 @@ class MainActivity : AppCompatActivity()  {
             }
         }
 
-        checkFilterResults(selectedType!!)
+        checkFilterResults(selectedType)
     }
 
     // Displays DatePicker and handles calls updateDate with the new selected date
@@ -239,8 +233,11 @@ class MainActivity : AppCompatActivity()  {
         errorTextView.setText(R.string.fetch_error)
     }
 
-    private fun checkFilterResults(type: Type) {
-        if (historyAdapters.adapters[type]!!.itemCount == 0) {
+    private fun checkFilterResults(type: Type?) {
+        if (type === null) {
+            errorTextView.visibility = View.VISIBLE
+            errorTextView.text = resources.getString(R.string.type_error)
+        } else if (historyAdapters.adapters[type]!!.itemCount == 0) {
             errorTextView.visibility = View.VISIBLE
             errorTextView.text = resources.getString(R.string.filter_error, formatType(type))
         } else {
