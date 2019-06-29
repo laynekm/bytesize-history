@@ -6,6 +6,10 @@ import com.google.gson.JsonParser
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.net.URL
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+
 
 // Used to return desc and links from parseDescriptionAndLinks
 data class ParseResult(val desc: String, val links: MutableList<Link>)
@@ -32,12 +36,12 @@ class ContentProvider {
     private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
-    // TODO: Add in handling for no when there's no internet connectivity (just display an error)
     fun fetchHistoryItems(
         date: Date,
         options: FilterOptions,
         type: Type?,
-        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
+        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit,
+        onFetchError: () -> Unit) {
 
         if (type === null) {
             updateRecyclerView(mutableMapOf(
@@ -55,10 +59,31 @@ class ContentProvider {
             selectedDate = date
             selectedFilters = options.copy()
 
-
             // Fetch items and put into their respective lists (events, births, deaths)
             val url = buildURL(buildDateURL(date))
-            val result = url.readText()
+            var result = ""
+
+            try {
+                val connection = url.openConnection() as HttpURLConnection
+                connection.connectTimeout = 1000
+                val reader = BufferedReader(InputStreamReader(connection.inputStream))
+
+                var str = reader.readLine()
+                while (str != null) {
+                    result += str
+                    str = reader.readLine()
+                }
+
+                reader.close()
+            } catch (e: Exception) {
+                Log.e("ContentProvider", "$e")
+
+                // Callback function that updates error messaging in main thread
+                uiThread {
+                    onFetchError()
+                }
+            }
+
             val allHistoryItems = parseContent(result)
             for ((type) in historyItems) {
                 if (selectedFilters.types.contains(type)) {
@@ -143,7 +168,6 @@ class ContentProvider {
     }
 
     // Builds HistoryItem objects from json string input
-    // TODO: Add error handling in case content does not exist or API call fails
     private fun parseContent(json: String): MutableList<HistoryItem> {
 
         // Extract content property from json

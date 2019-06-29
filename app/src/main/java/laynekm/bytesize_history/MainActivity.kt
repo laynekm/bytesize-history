@@ -1,6 +1,7 @@
 package laynekm.bytesize_history
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Parcelable
@@ -17,6 +18,12 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.support.v7.widget.Toolbar
 import java.util.*
+import android.net.NetworkInfo
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.support.v4.content.ContextCompat.getSystemService
+import android.net.ConnectivityManager
+import android.widget.Button
+
 
 class HistoryViews(var views: MutableMap<Type, RecyclerView>)
 class HistoryAdapters(var adapters: MutableMap<Type, HistoryItemAdapter>)
@@ -29,6 +36,8 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var historyAdapters: HistoryAdapters
     private lateinit var textViewFilters: TextViewFilters
     private lateinit var dateLabel: TextView
+    private lateinit var errorTextView: TextView
+    private lateinit var retryBtn: Button
     private lateinit var dropdownFilter: ImageView
     private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
@@ -58,18 +67,23 @@ class MainActivity : AppCompatActivity()  {
         initializeRecyclerViews()
 
         dateLabel = findViewById(R.id.dateLabel)
+        errorTextView = findViewById(R.id.errorTextView)
+        retryBtn = findViewById(R.id.retryBtn)
         dropdownView = findViewById(R.id.dropdownView)
         progressBar = findViewById(R.id.progressBar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         webView = findViewById(R.id.webView)
+        retryBtn.setOnClickListener { fetchHistoryItems() }
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
         if (savedInstanceState !== null) {
             selectedDate = stringToDate(savedInstanceState.getString(dateKey))
         }
+
         dateLabel.text = buildDateLabel(selectedDate)
         fetchHistoryItems()
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -118,8 +132,10 @@ class MainActivity : AppCompatActivity()  {
     // Fetches history items from content provider
     private fun fetchHistoryItems() {
         fetching = true
+        retryBtn.visibility = View.GONE
+        errorTextView.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
-        contentProvider.fetchHistoryItems(selectedDate, filterOptions, selectedType, ::updateRecyclerView)
+        contentProvider.fetchHistoryItems(selectedDate, filterOptions, selectedType, ::updateRecyclerView, ::onFetchError)
     }
 
     // Filters history items without having to refetch
@@ -136,6 +152,7 @@ class MainActivity : AppCompatActivity()  {
         }
 
         fetching = false
+        checkFilterResults(selectedType!!)
     }
 
     // Updates date using value selected in calendar, refetches history items if date changed
@@ -178,20 +195,18 @@ class MainActivity : AppCompatActivity()  {
     // Sets current history item type and hides other views
     private fun setSelectedType(newType: Type?) {
         selectedType = newType
-        if(historyAdapters.adapters[selectedType] != null && historyAdapters.adapters[selectedType]!!.itemCount == 0) {
-            fetchHistoryItems()
-        }
 
         for ((type, view) in historyViews.views) {
             if (type === selectedType) {
                 view.visibility = View.VISIBLE
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.BOLD)
-            }
-            else {
+            } else {
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)
                 view.visibility = View.GONE
             }
         }
+
+        checkFilterResults(selectedType!!)
     }
 
     // Displays DatePicker and handles calls updateDate with the new selected date
@@ -201,7 +216,6 @@ class MainActivity : AppCompatActivity()  {
         val selectedMonth = selectedDate.month
         val selectedDay = selectedDate.day
 
-        // TODO: Hide year label
         DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, month, day ->
             updateDate(Date(month, day))
         }, selectedYear, selectedMonth, selectedDay).show()
@@ -216,6 +230,26 @@ class MainActivity : AppCompatActivity()  {
         } else {
             super.onBackPressed()
         }
+    }
+
+    private fun onFetchError() {
+        progressBar.visibility = View.GONE
+        retryBtn.visibility = View.VISIBLE
+        errorTextView.visibility = View.VISIBLE
+        errorTextView.setText(R.string.fetch_error)
+    }
+
+    private fun checkFilterResults(type: Type) {
+        if (historyAdapters.adapters[type]!!.itemCount == 0) {
+            errorTextView.visibility = View.VISIBLE
+            errorTextView.text = resources.getString(R.string.filter_error, formatType(type))
+        } else {
+            errorTextView.visibility = View.GONE
+        }
+    }
+
+    private fun formatType(type: Type): String {
+        return type.toString().toLowerCase() + "s"
     }
 
     // Ensures date is consistent when activity is destroyed/recreated

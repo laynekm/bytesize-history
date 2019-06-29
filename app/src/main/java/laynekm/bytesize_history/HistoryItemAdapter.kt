@@ -16,6 +16,7 @@ import android.graphics.Bitmap
 import android.widget.*
 import com.squareup.picasso.Callback
 import android.support.v7.widget.Toolbar
+import android.util.Log
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
@@ -122,5 +123,9 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     fun setItems(items: MutableList<HistoryItem>) {
         this.items = items
         notifyDataSetChanged()
+    }
+
+    fun getItems(): MutableList<HistoryItem> {
+        return this.items
     }
 }
