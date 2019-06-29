@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBackground">
+
+    <TextView
+            android:id="@+id/dateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/default_date"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+    />
+
+    <ImageView
+            android:layout_width="36dp"
+            android:layout_height="32dp" app:srcCompat="@drawable/filter"
+            android:id="@+id/dropdownFilter"
+            android:contentDescription="@string/filter_view"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/calendarView" android:layout_marginRight="8dp"
+    />
+
+    <ImageView
+            android:layout_width="42dp"
+            android:layout_height="38dp"
+            app:srcCompat="@drawable/calendar"
+            android:id="@+id/calendarView"
+            android:contentDescription="@string/calendar_view"
+            android:onClick="showDatePickerDialog"
+            android:layout_marginTop="6dp"
+            app:layout_constraintTop_toTopOf="parent" android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginRight="16dp"
+    />
+
+</android.support.constraint.ConstraintLayout>

@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.support.v7.widget.Toolbar
+import android.view.animation.AnimationUtils.loadAnimation
 import java.util.*
 import android.widget.Button
 
@@ -166,8 +167,9 @@ class MainActivity : AppCompatActivity()  {
         if (dropdownView.visibility == View.GONE) {
             dropdownView.visibility = View.VISIBLE
             filterOptions.setViewContent(dropdownView)
-        }
-        else {
+            dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
+        } else {
+            dropdownView.startAnimation(loadAnimation(this, R.anim.slide_up))
             dropdownView.visibility = View.GONE
             val filtersChanged = filterOptions.setFilterOptions(dropdownView)
             if (filtersChanged) {
