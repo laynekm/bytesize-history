@@ -156,6 +156,13 @@ class MainActivity : AppCompatActivity()  {
     // Updates date using value selected in calendar, refetches history items if date changed
     private fun updateDate(date: Date) {
         if (!datesEqual(date, selectedDate)) {
+            // Clear adapters
+            updateRecyclerView(mutableMapOf(
+                Type.EVENT to mutableListOf(),
+                Type.BIRTH to mutableListOf(),
+                Type.DEATH to mutableListOf()
+            ))
+
             selectedDate = date
             dateLabel.text = buildDateLabel(selectedDate)
             fetchHistoryItems()
