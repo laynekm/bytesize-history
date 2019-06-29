@@ -30,7 +30,7 @@
     <string name="era_2000s">🏨 2000s</string>
 
     <!-- User dialog messages -->
-    <string name="fetch_error">Unable to fetch items.</string>
+    <string name="fetch_error">Unable to fetch data.\n\n¯\\_(ツ)_/¯</string>
     <string name="retry_btn">Retry</string>
     <string name="filter_error">No %1$s found matching those filters.</string>
     <string name="type_error">There\'s absolutely nothing here.</string>
