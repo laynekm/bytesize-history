@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity()  {
         toolbar.navigationIcon = null
 
         initializeRecyclerViews()
+        initializeFilters()
 
         dateLabel = findViewById(R.id.dateLabel)
         errorTextView = findViewById(R.id.errorTextView)
@@ -107,20 +108,21 @@ class MainActivity : AppCompatActivity()  {
             Type.DEATH to HistoryItemAdapter(this, mutableListOf())
         ))
 
+        for ((type, adapter) in historyViews.views) {
+            adapter.adapter = historyAdapters.adapters[type]
+            adapter.layoutManager = LinearLayoutManager(this)
+        }
+    }
+
+    private fun initializeFilters() {
         textViewFilters = TextViewFilters(mutableMapOf(
             Type.EVENT to findViewById(R.id.eventBtn) as TextView,
             Type.BIRTH to findViewById(R.id.birthBtn) as TextView,
             Type.DEATH to findViewById(R.id.deathBtn) as TextView
         ))
 
-        textViewFilters.filters[selectedType]!!.setTypeface(null, Typeface.BOLD)
         for ((type, textView) in textViewFilters.filters) {
             textView.setOnClickListener { setSelectedType(type) }
-        }
-
-        for ((type, adapter) in historyViews.views) {
-            adapter.adapter = historyAdapters.adapters[type]
-            adapter.layoutManager = LinearLayoutManager(this)
         }
     }
 
@@ -199,7 +201,7 @@ class MainActivity : AppCompatActivity()  {
             } else {
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)
                 textViewFilters.filters[type]!!.setBackgroundResource(0)
-                view.visibility = View.GONE
+                view.visibility = View.INVISIBLE
             }
         }
 
