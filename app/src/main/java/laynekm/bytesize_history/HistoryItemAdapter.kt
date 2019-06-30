@@ -1,7 +1,9 @@
 package laynekm.bytesize_history
 
+import android.app.ActionBar
 import android.app.Activity
 import android.content.Context
+import android.content.res.Resources
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -18,6 +20,13 @@ import com.squareup.picasso.Callback
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.widget.LinearLayout
+import kotlinx.android.synthetic.main.history_item.view.*
+import android.view.ViewGroup.MarginLayoutParams
+import android.util.TypedValue
+
+
+
+
 
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
@@ -49,12 +58,32 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
-        if (!items[index].hasFetchedImage) {
-            viewHolder.historyItem.visibility = View.GONE
+
+        // Clear existing resources
+        viewHolder.image.setImageResource(0)
+        viewHolder.historyItem.setBackgroundResource(0)
+        viewHolder.linkView.setBackgroundResource(0)
+        if (!items[index].hasFetchedImage) { viewHolder.historyItem.visibility = View.GONE }
+
+        // Add margins based on history item depth, include left border if depth > 0
+        val margin = items[index].depth * 25
+        val dpMargin = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            margin.toFloat(),
+            context.resources.displayMetrics
+        ).toInt()
+
+        if (items[index].depth > 0) {
+            viewHolder.historyItem.setBackgroundResource(R.drawable.borderleft)
+            viewHolder.linkView.setBackgroundResource(R.drawable.borderleft)
         }
 
-        viewHolder.image.setImageResource(0)
+        (viewHolder.historyItem.layoutParams as MarginLayoutParams).leftMargin = dpMargin
+        (viewHolder.linkView.layoutParams as MarginLayoutParams).leftMargin = dpMargin
+
+        // Set year
         if (items[index].year < 0) viewHolder.year.text = context.resources.getString(R.string.BC_text, items[index].year * -1)
+        else if (items[index].year == 0) viewHolder.year.text = ""
         else viewHolder.year.text = "${items[index].year}"
         viewHolder.desc.text = items[index].desc
 

@@ -23,10 +23,11 @@ enum class Era constructor(private val type: String) {
 class HistoryItem (
     val type: Type,
     val year: Int,
-    val desc: String,
+    var desc: String,
     val links: MutableList<Link>,
-    var image: String) {
-    
+    val depth: Int) {
+
+    var image: String = ""
     var hasFetchedImage: Boolean = false
     var era: Era = determineEra(year)
 

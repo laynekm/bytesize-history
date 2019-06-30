@@ -16,7 +16,7 @@ data class ParseResult(val desc: String, val links: MutableList<Link>)
 
 class ContentProvider {
 
-    private val TAG = "ContentProvider"
+    private val TAG = "BHContentProvider"
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
@@ -48,8 +48,7 @@ class ContentProvider {
         onFetchError: () -> Unit) {
 
         this.selectedFilters = filters.copy()
-//        val url = buildURL(buildDateForURL(date))
-        val url = buildURL("September_11")
+        val url = buildURL(buildDateForURL(date))
         var result = ""
 
         // Fetch items and put into their respective lists (events, births, deaths)
@@ -59,6 +58,7 @@ class ContentProvider {
             } catch (e: Exception) {
                 Log.e("ContentProvider", "$e")
                 uiThread { onFetchError() }
+                return@doAsync
             }
 
             val allHistoryItems = parseContent(result)
@@ -179,8 +179,13 @@ class ContentProvider {
         // Content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
 
+        lines.forEach {
+            Log.wtf(TAG, it)
+        }
+
         // Split array into events, births, and deaths; assumes this order is respected
-        // Only care about strings starting with an asterisk
+        // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
+        // TODO: Add support for Holidays and observances
         var historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
         for (line in lines) {
@@ -188,17 +193,19 @@ class ContentProvider {
             if (line.contains("==Births==")) type = Type.BIRTH
             if (line.contains("==Deaths==")) type = Type.DEATH
             if (line.contains("==Holidays and observances==")) break
-            if (type != null && line.contains("*")) historyItems.add(buildHistoryItem(line, type))
+            if (type != null && line.contains("*")) {
+                historyItems.add(buildHistoryItem(line, type))
+            }
         }
 
         return historyItems
     }
 
-    // TODO: Add support for sublists (see June 1)
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
         val year = parseYear(line)
+        val depth = parseDepth(line)
         val (desc, links) = parseDescriptionAndLinks(line)
-        return HistoryItem(type, year, desc, links, "")
+        return HistoryItem(type, year, desc, links, depth)
     }
 
     // Parse out unneeded chars and return integer representation of year (BC will be negative)
@@ -206,6 +213,7 @@ class ContentProvider {
         var yearSection = ""
         if (line.contains("&ndash;")) yearSection = line.substringBefore("&ndash;")
         else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
+        if (yearSection == "") return 0
 
         if (yearSection.contains("(")) {
             val secondaryYear = yearSection.substringBetween("(", ")")
@@ -215,6 +223,14 @@ class ContentProvider {
         var yearInt = Regex("[^0-9]").replace(yearSection, "").toInt()
         if (yearSection.contains("BC")) yearInt *= -1
         return yearInt
+    }
+
+    // Depth of the item is determined by the number of asterisks (ie. one item might have its own list)
+    // Subtract 1 because root depth should be 0
+    private fun parseDepth(line: String): Int {
+        var depth = 0
+        line.forEach { if (it == '*') depth++ }
+        return --depth
     }
 
     // Fetches image URL based on provided webpage links
@@ -273,6 +289,10 @@ class ContentProvider {
         // Remove remaining characters
         desc = desc.replace("|", "")
         desc = desc.replace("\\", "")
+
+        if (desc.contains("*")) {
+            desc = desc.replace("*", "").replaceFirst(" ", "")
+        }
 
         return ParseResult(desc, links)
     }
