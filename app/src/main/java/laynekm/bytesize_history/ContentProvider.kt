@@ -1,5 +1,6 @@
 package laynekm.bytesize_history
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.gson.JsonParser
@@ -23,6 +24,22 @@ class ContentProvider {
     private var filteredHistoryItems = getEmptyTypeMap()
     private var selectedFilters = FilterOptions()
 
+    private fun connectToURL(url: URL): String {
+        var result = ""
+        val connection = url.openConnection() as HttpURLConnection
+        connection.connectTimeout = 10000
+        val reader = BufferedReader(InputStreamReader(connection.inputStream))
+
+        var str = reader.readLine()
+        while (str != null) {
+            result += str
+            str = reader.readLine()
+        }
+
+        reader.close()
+        return result
+    }
+
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     fun fetchHistoryItems(
         date: Date,
@@ -31,23 +48,13 @@ class ContentProvider {
         onFetchError: () -> Unit) {
 
         this.selectedFilters = filters.copy()
-        val url = buildURL(buildDateURL(date))
+        val url = buildURL(buildDateForURL(date))
         var result = ""
 
         // Fetch items and put into their respective lists (events, births, deaths)
         doAsync {
             try {
-                val connection = url.openConnection() as HttpURLConnection
-                connection.connectTimeout = 1000
-                val reader = BufferedReader(InputStreamReader(connection.inputStream))
-
-                var str = reader.readLine()
-                while (str != null) {
-                    result += str
-                    str = reader.readLine()
-                }
-
-                reader.close()
+                result = connectToURL(url)
             } catch (e: Exception) {
                 Log.e("ContentProvider", "$e")
                 uiThread { onFetchError() }
@@ -64,6 +71,26 @@ class ContentProvider {
             // Callback function that updates recycler views in main thread
             uiThread { updateRecyclerView(filteredHistoryItems) }
         }
+    }
+
+    // Returns a single history event for the user's daily notification
+    fun fetchDailyHistoryFact(context: Context, pushNotification: (Context, HistoryItem, Date) -> Unit) {
+        val date = getToday()
+        val url = buildURL(buildDateForURL(date))
+        var result = ""
+        doAsync {
+            result = connectToURL(url)
+            val allHistoryItems = parseContent(result)
+            val randomHistoryItem = getRandomHistoryItem(allHistoryItems, Type.EVENT)
+            uiThread { pushNotification(context, randomHistoryItem, date) }
+        }
+    }
+
+    // Returns random history item of the specified type
+    private fun getRandomHistoryItem(items: MutableList<HistoryItem>, type: Type): HistoryItem {
+        val filteredItems = filterType(items, type)
+        val randomIndex = (0 until filteredItems.size - 1).random()
+        return filteredItems[randomIndex]
     }
 
     fun filterHistoryItems(

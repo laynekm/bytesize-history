@@ -10,13 +10,15 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.support.v7.widget.Toolbar
 import android.view.animation.AnimationUtils.loadAnimation
-import android.widget.Button
 import java.util.Calendar
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.widget.*
+
 
 class HistoryViews(var views: MutableMap<Type, RecyclerView>)
 class HistoryAdapters(var adapters: MutableMap<Type, HistoryItemAdapter>)
@@ -71,9 +73,12 @@ class MainActivity : AppCompatActivity()  {
         initializeFilters()
 
         setSelectedType(selectedType)
-        dateLabel.text = buildDateLabel(selectedDate)
+        dateLabel.text = buildDateForLabel(selectedDate)
 
         fetchHistoryItems()
+
+        val rightNow = Calendar.getInstance()
+        this.setAlarm(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE), rightNow.get(Calendar.SECOND) + 10)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -151,7 +156,7 @@ class MainActivity : AppCompatActivity()  {
     private fun updateDate(date: Date) {
         if (!datesEqual(date, selectedDate)) {
             selectedDate = date
-            dateLabel.text = buildDateLabel(selectedDate)
+            dateLabel.text = buildDateForLabel(selectedDate)
             updateRecyclerView(getEmptyTypeMap())
             fetchHistoryItems()
         }
@@ -261,5 +266,20 @@ class MainActivity : AppCompatActivity()  {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState);
         outState.putString(dateKey, dateToString(selectedDate))
+    }
+
+    private fun setAlarm(hour: Int, minute: Int, second: Int) {
+        val calendar: Calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, second)
+        }
+
+        val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = Intent(this, NotificationReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0)
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_HOUR, pendingIntent)
+//        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
     }
 }

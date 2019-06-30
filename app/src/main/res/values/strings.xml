@@ -35,4 +35,8 @@
     <string name="retry_btn">Retry</string>
     <string name="filter_error">No %1$s found matching those filters.</string>
     <string name="type_error">There\'s absolutely nothing here.</string>
+
+    <!-- Notifications -->
+    <string name="channel_name">Bytesize History</string>
+    <string name="channel_description">Daily history fact notification</string>
 </resources>
