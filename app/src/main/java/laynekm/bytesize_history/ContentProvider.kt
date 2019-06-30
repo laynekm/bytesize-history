@@ -178,12 +178,12 @@ class ContentProvider {
         var yearSection = ""
         if (line.contains("&ndash;")) yearSection = line.substringBefore("&ndash;")
         else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
-        if (yearSection === "") return 0
 
         if (yearSection.contains("(")) {
-            val secondaryYear = yearSection.substringAfter("(").substringBefore(")")
+            val secondaryYear = yearSection.substringBetween("(", ")")
             yearSection = yearSection.replace(secondaryYear, "")
         }
+
         var yearInt = Regex("[^0-9]").replace(yearSection, "").toInt()
         if (yearSection.contains("BC")) yearInt *= -1
         return yearInt
@@ -195,7 +195,6 @@ class ContentProvider {
         var image = ""
         links.forEach {
             image = parseImageURL(buildImageURL(it.title).readText())
-            Log.d(TAG, "Fetched image $image")
             if (image !== "") return image
         }
 
@@ -210,9 +209,9 @@ class ContentProvider {
         // Loop until all square brackets are removed
         // Link text is on the left side, text to display is on the right
         while (desc.contains("[[")) {
-            val innerText = desc.substringAfter("[[").substringBefore("]]")
+            val innerText = desc.substringBetween("[[", "]]")
             if (innerText.contains("|")) {
-                val leftText = innerText.substringAfter("[[").substringBefore("|")
+                val leftText = innerText.substringBetween("[[", "|")
                 val linkTitle = formatText(leftText)
                 val linkURL = buildWebURL(leftText)
                 links.add(Link(linkTitle, linkURL))
@@ -226,9 +225,9 @@ class ContentProvider {
         }
 
         // Loop until all <ref> tags are removed
-        // These links don't really  matter, only care about wikipedia links
+        // These links don't really  matter, only care about Wikipedia links so don't bother preserving them
         while (desc.contains("<ref")) {
-            val innerText = desc.substringAfter("<ref").substringBefore("</ref>")
+            val innerText = desc.substringBetween("<ref", "</ref>")
             desc = desc.replaceFirst(innerText, "")
             desc = desc.replaceFirst("<ref", "")
             desc = desc.replaceFirst("</ref>", "")
@@ -236,7 +235,7 @@ class ContentProvider {
 
         // TODO: Add italics ({{ should be <i> or something, not sure yet)
         while (desc.contains("{{")) {
-            val innerText = desc.substringAfter("{{").substringBefore("}}")
+            val innerText = desc.substringBetween("{{", "}}")
             val parsedInnerText = innerText.replace("|", " ")
             desc = desc.replaceFirst(innerText, parsedInnerText)
             desc = desc.replaceFirst("{{", "")
@@ -275,5 +274,6 @@ class ContentProvider {
         return text.capitalize()
     }
 
-    private fun String.substringBetween(str1: String, str2: String): String = this.substringBefore(str1).substringAfter(str2)
+    private fun String.substringBetween(str1: String, str2: String): String
+            = this.substringAfter(str1).substringBefore(str2)
 }

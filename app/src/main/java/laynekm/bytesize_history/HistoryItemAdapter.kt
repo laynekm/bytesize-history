@@ -38,14 +38,9 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.history_item, parent, false)
 
-        webView.webViewClient = object : WebViewClient() {
+        webView.webViewClient = object: WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
-                progressBar.visibility = View.VISIBLE
-            }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
                 progressBar.visibility = View.GONE
             }
         }
@@ -59,8 +54,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         }
 
         viewHolder.image.setImageResource(0)
-
-        if (items[index].year < 0) viewHolder.year.text = "${items[index].year * -1} BC"
+        if (items[index].year < 0) viewHolder.year.text = context.resources.getString(R.string.BC_text, items[index].year * -1)
         else viewHolder.year.text = "${items[index].year}"
         viewHolder.desc.text = items[index].desc
 
@@ -69,13 +63,14 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         viewHolder.linkView.removeAllViews()
         items[index].links.forEach {
             val link = LayoutInflater.from(context).inflate(R.layout.link_item, null)
-            viewHolder.linkView.addView(link)
             val linkText = link.findViewById<TextView>(R.id.linkText)
-            linkText.text = it.title
             val url = it.link
+            viewHolder.linkView.addView(link)
+            linkText.text = it.title
 
             // Attach onClick handler to open link
             link.setOnClickListener {
+                progressBar.visibility = View.VISIBLE
                 webView.visibility = View.VISIBLE
                 webView.loadUrl(url)
                 toolbar.setNavigationIcon(R.drawable.back_arrow)
@@ -85,24 +80,19 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         // onClick displays/hides links
         // TODO: Add animation
         viewHolder.historyItem.setOnClickListener {
-            if (viewHolder.linkView.visibility == View.GONE) {
-                viewHolder.linkView.visibility = View.VISIBLE
-            } else {
-                viewHolder.linkView.visibility = View.GONE
-            }
+            if (viewHolder.linkView.visibility == View.GONE) viewHolder.linkView.visibility = View.VISIBLE
+            else viewHolder.linkView.visibility = View.GONE
         }
 
         // If item already has an image then display it, otherwise fetch the image
+        // Set hasFetchedImage boolean rather than check image since some items don't have images and will refetch
         doAsync {
-            var image: String
+            val image: String
             if (!items[index].hasFetchedImage) {
                 image = contentProvider.fetchImage(items[index].links)
                 items[index].image = image
-
-                // Set boolean rather than check image because some items don't have images and will always refetch
                 items[index].hasFetchedImage = true
-            }
-            else {
+            } else {
                 image = items[index].image
             }
 
@@ -113,16 +103,11 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
                     .resize(100, 100)
                     .centerCrop()
                     .into(viewHolder.image, object: Callback {
-                        override fun onSuccess() { imageCallback(viewHolder, items[index]) }
-                        override fun onError(exception: Exception) { imageCallback(viewHolder, items[index]) }
+                        override fun onSuccess() { viewHolder.historyItem.visibility = View.VISIBLE }
+                        override fun onError(exception: Exception) { viewHolder.historyItem.visibility = View.VISIBLE }
                     })
             }
         }
-    }
-
-    private fun imageCallback(viewHolder: ViewHolder, item: HistoryItem) {
-        viewHolder.historyItem.visibility = View.VISIBLE
-        item.hasFetchedImage = true
     }
 
     override fun getItemCount(): Int {

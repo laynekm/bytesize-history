@@ -31,8 +31,8 @@ class FilterOptions(
     // Applies amended view content to filter options
     fun setFilterOptions(view: View): Boolean {
         var newOrder = Order.ASCENDING
-        var newTypes: MutableList<Type> = mutableListOf()
-        var newEras: MutableList<Era> = mutableListOf()
+        val newTypes: MutableList<Type> = mutableListOf()
+        val newEras: MutableList<Era> = mutableListOf()
         var changed = false
 
         if ((view.findViewById(R.id.switchOrder) as Switch).isChecked) newOrder = Order.DESCENDING

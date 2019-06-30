@@ -12,6 +12,7 @@
     <string name="events_text">⚔ Events</string>
     <string name="births_text">👶 Births</string>
     <string name="deaths_text">🌹 Deaths</string>
+    <string name="BC_text">%1$d BC</string>
 
     <!-- Filter dropdown -->
     <string name="order_header">Order</string>

@@ -49,6 +49,10 @@ class MainActivity : AppCompatActivity()  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (savedInstanceState !== null) {
+            selectedDate = stringToDate(savedInstanceState.getString(dateKey))
+        }
+
         toolbar = findViewById(R.id.toolbar)
         dateLabel = findViewById(R.id.dateLabel)
         errorTextView = findViewById(R.id.errorTextView)
@@ -62,10 +66,6 @@ class MainActivity : AppCompatActivity()  {
         retryBtn.setOnClickListener { fetchHistoryItems() }
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
-
-        if (savedInstanceState !== null) {
-            selectedDate = stringToDate(savedInstanceState.getString(dateKey))
-        }
 
         initializeRecyclerViews()
         initializeFilters()
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
-    // Create RecyclerViews and their adapters, initialized as empty
+    // Get RecyclerViews and create their adapters, initialized as empty
     private fun initializeRecyclerViews() {
         historyViews = HistoryViews(mutableMapOf(
             Type.EVENT to findViewById(R.id.eventItems),
@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
+    // Get filter TextViews and assign onClick handlers
     private fun initializeFilters() {
         textViewFilters = TextViewFilters(mutableMapOf(
             Type.EVENT to findViewById(R.id.eventBtn) as TextView,
@@ -120,7 +121,7 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
-    // Fetches history items from content provider
+    // Fetch history items from content provider
     private fun fetchHistoryItems() {
         fetching = true
         retryBtn.visibility = View.GONE
@@ -129,53 +130,54 @@ class MainActivity : AppCompatActivity()  {
         contentProvider.fetchHistoryItems(selectedDate, filterOptions, ::updateRecyclerView, ::onFetchError)
     }
 
-    // Filters history items without having to refetch
+    // Filter history items without having to refetch
     private fun filterHistoryItems() {
         contentProvider.filterHistoryItems(filterOptions, ::updateRecyclerView)
     }
 
-    // Callback function passed into fetchHistoryItems, updates views and other UI elements
+    // Callback function to update RecyclerViews and other UI elements
     private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>) {
-        if (progressBar.visibility == View.VISIBLE) progressBar.visibility = View.GONE
+        fetching = false
+        progressBar.visibility = View.GONE
 
         for ((type, adapter) in historyAdapters.adapters) {
             adapter.setItems(items[type]!!)
         }
 
-        fetching = false
         checkFilterResults(selectedType)
     }
 
-    // Updates date using value selected in calendar, refetches history items if date changed
+    // Update date using value selected from calendar, clear and refetch history items if it changed
     private fun updateDate(date: Date) {
         if (!datesEqual(date, selectedDate)) {
-
-            // Clear adapters
-            updateRecyclerView(getEmptyTypeMap())
-
             selectedDate = date
             dateLabel.text = buildDateLabel(selectedDate)
+            updateRecyclerView(getEmptyTypeMap())
             fetchHistoryItems()
         }
     }
 
-    // Toggles dropdown filter, refetches history items when menu is closed if filters changed
+    // Toggle dropdown filter visibility and handle updating filters
     private fun dropdownFilterOnClick() {
         if (dropdownView.visibility == View.GONE) {
+            filterOptions.setViewContent(dropdownView)
             dropdownFilter.rotation = 180.toFloat()
             dropdownView.visibility = View.VISIBLE
-            filterOptions.setViewContent(dropdownView)
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
         } else {
             dropdownFilter.rotation = 0.toFloat()
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_up))
             dropdownView.visibility = View.GONE
+
             val filtersChanged = filterOptions.setFilterOptions(dropdownView)
             if (filtersChanged) {
+
+                // Case where selectedType is no longer in filterOptions, or no types are in filterOptions
                 if (!filterOptions.types.contains(selectedType)) {
                     if (filterOptions.types.size == 0) setSelectedType(null)
                     else setSelectedType(filterOptions.types[0])
                 }
+
                 updateTypeSelectors()
                 filterHistoryItems()
             }
@@ -200,9 +202,9 @@ class MainActivity : AppCompatActivity()  {
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.BOLD)
                 textViewFilters.filters[type]!!.setBackgroundResource(R.drawable.borderbottom)
             } else {
+                view.visibility = View.INVISIBLE
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)
                 textViewFilters.filters[type]!!.setBackgroundResource(0)
-                view.visibility = View.INVISIBLE
             }
         }
 
@@ -221,7 +223,7 @@ class MainActivity : AppCompatActivity()  {
         }, selectedYear, selectedMonth, selectedDay).show()
     }
 
-    // If the WebView is open, back button should close the WebView; otherwise, it should function normally
+    // If  WebView is open, back button should close the WebView; otherwise, it should function normally
     override fun onBackPressed() {
         if (webView.visibility == View.VISIBLE) {
             webView.visibility = View.GONE
