@@ -56,3 +56,11 @@ class Link (
         return "$title ($link)"
     }
 }
+
+fun getEmptyTypeMap(): MutableMap<Type, MutableList<HistoryItem>> {
+    return mutableMapOf(
+        Type.EVENT to mutableListOf(),
+        Type.BIRTH to mutableListOf(),
+        Type.DEATH to mutableListOf()
+    )
+}

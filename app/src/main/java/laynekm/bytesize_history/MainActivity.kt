@@ -36,11 +36,7 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
 
-    private val defaultOrder: Order = Order.ASCENDING
-    private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
-    private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
-    private var filterOptions: FilterOptions = FilterOptions(defaultOrder, defaultTypes, defaultEras)
-
+    private var filterOptions: FilterOptions = FilterOptions()
     private val contentProvider: ContentProvider = ContentProvider()
     private var selectedDate: Date = getToday()
     private var selectedType: Type? = filterOptions.types[0]
@@ -130,7 +126,7 @@ class MainActivity : AppCompatActivity()  {
         retryBtn.visibility = View.GONE
         errorTextView.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
-        contentProvider.fetchHistoryItems(selectedDate, filterOptions, selectedType, ::updateRecyclerView, ::onFetchError)
+        contentProvider.fetchHistoryItems(selectedDate, filterOptions, ::updateRecyclerView, ::onFetchError)
     }
 
     // Filters history items without having to refetch
@@ -155,11 +151,7 @@ class MainActivity : AppCompatActivity()  {
         if (!datesEqual(date, selectedDate)) {
 
             // Clear adapters
-            updateRecyclerView(mutableMapOf(
-                Type.EVENT to mutableListOf(),
-                Type.BIRTH to mutableListOf(),
-                Type.DEATH to mutableListOf()
-            ))
+            updateRecyclerView(getEmptyTypeMap())
 
             selectedDate = date
             dateLabel.text = buildDateLabel(selectedDate)

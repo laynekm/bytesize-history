@@ -10,7 +10,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 
-
 // Used to return desc and links from parseDescriptionAndLinks
 data class ParseResult(val desc: String, val links: MutableList<Link>)
 
@@ -20,49 +19,23 @@ class ContentProvider {
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
-    var historyItems = mutableMapOf<Type, MutableList<HistoryItem>>(
-        Type.EVENT to mutableListOf(),
-        Type.BIRTH to mutableListOf(),
-        Type.DEATH to mutableListOf()
-    )
-
-    var filteredHistoryItems = mutableMapOf<Type, MutableList<HistoryItem>>(
-        Type.EVENT to mutableListOf(),
-        Type.BIRTH to mutableListOf(),
-        Type.DEATH to mutableListOf()
-    )
-
-    private var selectedDate: Date = getToday()
-    private var selectedFilters = FilterOptions(Order.ASCENDING, mutableListOf(), mutableListOf())
+    private var historyItems = getEmptyTypeMap()
+    private var filteredHistoryItems = getEmptyTypeMap()
+    private var selectedFilters = FilterOptions()
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     fun fetchHistoryItems(
         date: Date,
-        options: FilterOptions,
-        type: Type?,
+        filters: FilterOptions,
         updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit,
         onFetchError: () -> Unit) {
 
-        if (type === null) {
-            updateRecyclerView(mutableMapOf(
-                Type.EVENT to mutableListOf(),
-                Type.BIRTH to mutableListOf(),
-                Type.DEATH to mutableListOf()
-            ))
-        }
+        this.selectedFilters = filters.copy()
+        val url = buildURL(buildDateURL(date))
+        var result = ""
 
+        // Fetch items and put into their respective lists (events, births, deaths)
         doAsync {
-            if (!datesEqual(selectedDate, date)) {
-                for ((_, list) in historyItems) list.clear()
-            }
-
-            selectedDate = date
-            selectedFilters = options.copy()
-
-            // Fetch items and put into their respective lists (events, births, deaths)
-            val url = buildURL(buildDateURL(date))
-            var result = ""
-
             try {
                 val connection = url.openConnection() as HttpURLConnection
                 connection.connectTimeout = 1000
@@ -77,11 +50,7 @@ class ContentProvider {
                 reader.close()
             } catch (e: Exception) {
                 Log.e("ContentProvider", "$e")
-
-                // Callback function that updates error messaging in main thread
-                uiThread {
-                    onFetchError()
-                }
+                uiThread { onFetchError() }
             }
 
             val allHistoryItems = parseContent(result)
@@ -93,39 +62,38 @@ class ContentProvider {
             }
 
             // Callback function that updates recycler views in main thread
-            uiThread {
-                updateRecyclerView(filteredHistoryItems)
-            }
+            uiThread { updateRecyclerView(filteredHistoryItems) }
         }
     }
 
     fun filterHistoryItems(
-        options: FilterOptions,
+        filters: FilterOptions,
         updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
 
-        if (selectedFilters.equals(options)) return
-        selectedFilters = options.copy()
+        if (selectedFilters.equals(filters)) return
+        selectedFilters = filters.copy()
 
         for ((type) in historyItems) {
-            filteredHistoryItems[type]  = filterErasAndSort(historyItems[type]!!)
+            filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
         }
 
         updateRecyclerView(filteredHistoryItems)
     }
 
     private fun filterType(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
-        var filteredItems: MutableList<HistoryItem> = mutableListOf()
+        val filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach { if (it.type === type) filteredItems.add(it) }
         return filteredItems
     }
 
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
-        var filteredItems: MutableList<HistoryItem> = mutableListOf()
+        val filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach { if (selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
         if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
         return filteredItems
     }
 
+    // Builds URL for the initial API call to Wikipedia
     private fun buildURL(searchParam: String): URL {
         val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
@@ -142,7 +110,7 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
-    // Image URL needs to be an actual URL since readText() is called on it
+    // Builds URL to get images for each history item
     private fun buildImageURL(searchParam: String): URL {
         val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
@@ -157,7 +125,7 @@ class ContentProvider {
         return URL(uri.toString())
     }
 
-    // Web URL needs to be a string since it's being passed into webView.loadUrl
+    // Build URL for each Wikipedia link item, needs to be string since it's passed into WebView.loadUrl
     private fun buildWebURL(searchParam: String): String {
         val uri: Uri = Uri.parse(WEB_BASE_URL).buildUpon()
             .appendPath(searchParam)
@@ -183,9 +151,8 @@ class ContentProvider {
         // Content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
 
-        // Split array into events, births, and deaths
+        // Split array into events, births, and deaths; assumes this order is respected
         // Only care about strings starting with an asterisk
-        // Assumes events, births, deaths proceed each other
         var historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
         for (line in lines) {
@@ -206,16 +173,15 @@ class ContentProvider {
         return HistoryItem(type, year, desc, links, "")
     }
 
-    // Parse out unneeded chars and return integer representation of year
-    // BC values will be negative
+    // Parse out unneeded chars and return integer representation of year (BC will be negative)
     private fun parseYear(line: String): Int {
-        var yearSection = "";
+        var yearSection = ""
         if (line.contains("&ndash;")) yearSection = line.substringBefore("&ndash;")
         else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
         if (yearSection === "") return 0
 
         if (yearSection.contains("(")) {
-            var secondaryYear = yearSection.substringAfter("(").substringBefore(")")
+            val secondaryYear = yearSection.substringAfter("(").substringBefore(")")
             yearSection = yearSection.replace(secondaryYear, "")
         }
         var yearInt = Regex("[^0-9]").replace(yearSection, "").toInt()
@@ -308,4 +274,6 @@ class ContentProvider {
     private fun formatText(text: String): String {
         return text.capitalize()
     }
+
+    private fun String.substringBetween(str1: String, str2: String): String = this.substringBefore(str1).substringAfter(str2)
 }

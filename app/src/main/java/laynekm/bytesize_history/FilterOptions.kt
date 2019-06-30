@@ -3,7 +3,14 @@ package laynekm.bytesize_history
 import android.view.View
 import android.widget.Switch
 
-class FilterOptions(var order: Order, var types: MutableList<Type>, var eras: MutableList<Era>) {
+private val defaultOrder: Order = Order.ASCENDING
+private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
+private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
+
+class FilterOptions(
+    var order: Order = defaultOrder,
+    var types: MutableList<Type> = defaultTypes,
+    var eras: MutableList<Era> = defaultEras) {
 
     // Sets view content based on filter options
     fun setViewContent(view: View) {
