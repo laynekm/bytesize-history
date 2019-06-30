@@ -48,7 +48,8 @@ class ContentProvider {
         onFetchError: () -> Unit) {
 
         this.selectedFilters = filters.copy()
-        val url = buildURL(buildDateForURL(date))
+//        val url = buildURL(buildDateForURL(date))
+        val url = buildURL("September_11")
         var result = ""
 
         // Fetch items and put into their respective lists (events, births, deaths)

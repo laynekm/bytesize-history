@@ -7,10 +7,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.os.Build
-import android.provider.Settings.Global.getString
 import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat.getSystemService
-import android.widget.Toast
 
 import laynekm.bytesize_history.R.mipmap.ic_launcher
 
@@ -31,6 +28,7 @@ class NotificationReceiver : BroadcastReceiver() {
             .setContentTitle("${buildDateForNotification(date)}, ${historyItem.year}")
             .setContentText(historyItem.desc)
             .setStyle(NotificationCompat.BigTextStyle())
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
 
         val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -40,8 +38,8 @@ class NotificationReceiver : BroadcastReceiver() {
     // Create the NotificationChannel, but only on API 26+ because
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "name"
-            val descriptionText = "desc"
+            val name = "Bytesize History Notifications"
+            val descriptionText = "Pushes a daily notification at a time of your choosing"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText

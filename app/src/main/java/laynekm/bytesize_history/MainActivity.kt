@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity()  {
         fetchHistoryItems()
 
         val rightNow = Calendar.getInstance()
-        this.setAlarm(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE), rightNow.get(Calendar.SECOND) + 10)
+        this.setAlarm(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE), rightNow.get(Calendar.SECOND) + 3)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity()  {
         val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val alarmIntent = Intent(this, NotificationReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0)
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_HOUR, pendingIntent)
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 60000, pendingIntent)
 //        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
     }
 }
