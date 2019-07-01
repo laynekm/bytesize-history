@@ -98,13 +98,15 @@ class MainActivity : AppCompatActivity()  {
         historyViews = HistoryViews(mutableMapOf(
             Type.EVENT to findViewById(R.id.eventItems),
             Type.BIRTH to findViewById(R.id.birthItems),
-            Type.DEATH to findViewById(R.id.deathItems)
+            Type.DEATH to findViewById(R.id.deathItems),
+            Type.OBSERVANCE to findViewById((R.id.observanceItems))
         ))
 
         historyAdapters = HistoryAdapters(mutableMapOf(
             Type.EVENT to HistoryItemAdapter(this, mutableListOf()),
             Type.BIRTH to HistoryItemAdapter(this, mutableListOf()),
-            Type.DEATH to HistoryItemAdapter(this, mutableListOf())
+            Type.DEATH to HistoryItemAdapter(this, mutableListOf()),
+            Type.OBSERVANCE to HistoryItemAdapter(this, mutableListOf())
         ))
 
         for ((type, adapter) in historyViews.views) {
@@ -118,7 +120,8 @@ class MainActivity : AppCompatActivity()  {
         textViewFilters = TextViewFilters(mutableMapOf(
             Type.EVENT to findViewById(R.id.eventBtn) as TextView,
             Type.BIRTH to findViewById(R.id.birthBtn) as TextView,
-            Type.DEATH to findViewById(R.id.deathBtn) as TextView
+            Type.DEATH to findViewById(R.id.deathBtn) as TextView,
+            Type.OBSERVANCE to findViewById(R.id.observanceBtn) as TextView
         ))
 
         for ((type, textView) in textViewFilters.filters) {

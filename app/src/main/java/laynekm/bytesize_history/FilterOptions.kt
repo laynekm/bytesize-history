@@ -4,8 +4,8 @@ import android.view.View
 import android.widget.Switch
 
 private val defaultOrder: Order = Order.ASCENDING
-private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH)
-private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS)
+private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH, Type.OBSERVANCE)
+private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS, Era.NONE)
 
 class FilterOptions(
     var order: Order = defaultOrder,
@@ -19,6 +19,7 @@ class FilterOptions(
         if (types.contains(Type.EVENT)) (view.findViewById(R.id.switchEvents) as Switch).setChecked(true)
         if (types.contains(Type.BIRTH)) (view.findViewById(R.id.switchBirths) as Switch).setChecked(true)
         if (types.contains(Type.DEATH)) (view.findViewById(R.id.switchDeaths) as Switch).setChecked(true)
+        if (types.contains(Type.OBSERVANCE)) (view.findViewById(R.id.switchObservances) as Switch).setChecked(true)
 
         if (eras.contains(Era.ANCIENT)) (view.findViewById(R.id.switchAncient) as Switch).setChecked(true)
         if (eras.contains(Era.MEDIEVAL)) (view.findViewById(R.id.switchMedieval) as Switch).setChecked(true)
@@ -40,6 +41,7 @@ class FilterOptions(
         if ((view.findViewById(R.id.switchEvents) as Switch).isChecked) newTypes.add(Type.EVENT)
         if ((view.findViewById(R.id.switchBirths) as Switch).isChecked) newTypes.add(Type.BIRTH)
         if ((view.findViewById(R.id.switchDeaths) as Switch).isChecked) newTypes.add(Type.DEATH)
+        if ((view.findViewById(R.id.switchObservances) as Switch).isChecked) newTypes.add(Type.OBSERVANCE)
 
         if ((view.findViewById(R.id.switchAncient) as Switch).isChecked) newEras.add(Era.ANCIENT)
         if ((view.findViewById(R.id.switchMedieval) as Switch).isChecked) newEras.add(Era.MEDIEVAL)

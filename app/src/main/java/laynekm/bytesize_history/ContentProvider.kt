@@ -41,6 +41,7 @@ class ContentProvider {
     }
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
+    // TODO: Fetch images for each type when tab is selected so initial load time isn't as long
     fun fetchHistoryItems(
         date: Date,
         filters: FilterOptions,
@@ -186,13 +187,15 @@ class ContentProvider {
         // Split array into events, births, and deaths; assumes this order is respected
         // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
         // TODO: Add support for Holidays and observances
-        var historyItems = mutableListOf<HistoryItem>()
+        // TODO: Change to when statement
+        val historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
         for (line in lines) {
             if (line.contains("==Events==")) type = Type.EVENT
             if (line.contains("==Births==")) type = Type.BIRTH
             if (line.contains("==Deaths==")) type = Type.DEATH
-            if (line.contains("==Holidays and observances==")) break
+            if (line.contains("==Holidays and observances==")) type = Type.OBSERVANCE
+            if (line.contains("==References==")) break
             if (type != null && line.contains("*")) {
                 historyItems.add(buildHistoryItem(line, type))
             }
@@ -202,18 +205,24 @@ class ContentProvider {
     }
 
     private fun buildHistoryItem(line: String, type: Type): HistoryItem {
-        val year = parseYear(line)
+        val year = parseYear(line, type)
         val depth = parseDepth(line)
-        val (desc, links) = parseDescriptionAndLinks(line)
-        return HistoryItem(type, year, desc, links, depth)
+        val (desc, links) = parseDescriptionAndLinks(line, type)
+//        Log.wtf(TAG, "$desc")
+        val historyItem = HistoryItem(type, year, desc, links, depth)
+        Log.wtf(TAG, "$historyItem")
+        return historyItem
     }
 
     // Parse out unneeded chars and return integer representation of year (BC will be negative)
-    private fun parseYear(line: String): Int {
+    // TODO: Properly assign year to sublists
+    private fun parseYear(line: String, type: Type): Int? {
+        if (type === Type.OBSERVANCE) return null
+
         var yearSection = ""
         if (line.contains("&ndash;")) yearSection = line.substringBefore("&ndash;")
         else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
-        if (yearSection == "") return 0
+        if (yearSection == "") return null
 
         if (yearSection.contains("(")) {
             val secondaryYear = yearSection.substringBetween("(", ")")
@@ -246,8 +255,9 @@ class ContentProvider {
     }
 
     // Parse line and return description and links
-    private fun parseDescriptionAndLinks(line: String): ParseResult {
-        var desc = line.substringAfter("&ndash; ")
+    private fun parseDescriptionAndLinks(line: String, type: Type): ParseResult {
+        var desc = line
+        if (type !== Type.OBSERVANCE) desc = line.substringAfter("&ndash; ")
         val links = mutableListOf<Link>()
 
         // Loop until all square brackets are removed
@@ -291,7 +301,8 @@ class ContentProvider {
         desc = desc.replace("\\", "")
 
         if (desc.contains("*")) {
-            desc = desc.replace("*", "").replaceFirst(" ", "")
+            desc = desc.replace("*", "")
+            if (type !== Type.OBSERVANCE) desc = desc.replaceFirst(" ", "")
         }
 
         return ParseResult(desc, links)

@@ -6,7 +6,7 @@ enum class Order constructor(private val type: String) {
 }
 
 enum class Type constructor(private val type: String) {
-    EVENT("Event"), BIRTH("Birth"), DEATH("Death");
+    EVENT("Event"), BIRTH("Birth"), DEATH("Death"), OBSERVANCE("Observance");
     override fun toString(): String = this.type
 }
 
@@ -16,13 +16,14 @@ enum class Era constructor(private val type: String) {
     EARLYMODERN("Early Modern"),
     EIGHTEENS("1800s"),
     NINETEENS("1900s"),
-    TWOTHOUSANDS("2000s");
+    TWOTHOUSANDS("2000s"),
+    NONE("None");
     override fun toString(): String = this.type
 }
 
 class HistoryItem (
     val type: Type,
-    val year: Int,
+    val year: Int?,
     var desc: String,
     val links: MutableList<Link>,
     val depth: Int) {
@@ -31,7 +32,9 @@ class HistoryItem (
     var hasFetchedImage: Boolean = false
     var era: Era = determineEra(year)
 
-    private fun determineEra(year: Int): Era {
+    private fun determineEra(year: Int?): Era {
+        if (year === null) return Era.NONE
+
         return when {
             year < 500 -> Era.ANCIENT
             year in 500..1499 -> Era.MEDIEVAL
@@ -62,6 +65,7 @@ fun getEmptyTypeMap(): MutableMap<Type, MutableList<HistoryItem>> {
     return mutableMapOf(
         Type.EVENT to mutableListOf(),
         Type.BIRTH to mutableListOf(),
-        Type.DEATH to mutableListOf()
+        Type.DEATH to mutableListOf(),
+        Type.OBSERVANCE to mutableListOf()
     )
 }

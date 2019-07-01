@@ -82,8 +82,10 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         (viewHolder.linkView.layoutParams as MarginLayoutParams).leftMargin = dpMargin
 
         // Set year
-        if (items[index].year < 0) viewHolder.year.text = context.resources.getString(R.string.BC_text, items[index].year * -1)
-        else if (items[index].year == 0) viewHolder.year.text = ""
+        if (items[index].year === null || items[index].year == 0) viewHolder.year.text = ""
+        else if (items[index].year!! < 0) {
+            viewHolder.year.text = context.resources.getString(R.string.BC_text, items[index].year!! * -1)
+        }
         else viewHolder.year.text = "${items[index].year}"
         viewHolder.desc.text = items[index].desc
 

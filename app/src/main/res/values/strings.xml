@@ -12,6 +12,7 @@
     <string name="events_text">⚔ Events</string>
     <string name="births_text">👶 Births</string>
     <string name="deaths_text">🌹 Deaths</string>
+    <string name="observances_text">👀 Holidays</string>
     <string name="BC_text">%1$d BC</string>
 
     <!-- Filter dropdown -->
@@ -22,6 +23,7 @@
     <string name="type_events">⚔ Events</string>
     <string name="type_births">👶 Births</string>
     <string name="type_deaths">🌹 Deaths</string>
+    <string name="type_observances">👀 Holidays</string>
     <string name="era_header">Time Periods</string>
     <string name="era_ancient">🏛️ Ancient (before 500 AD)</string>
     <string name="era_medieval">🏰 Medieval (500-1500 AD)</string>

@@ -24,4 +24,11 @@
             android:layout_width="fill_parent"
             android:layout_height="40dip" android:text="@string/deaths_text"/>
 
+    <TextView
+            android:id="@+id/observanceBtn"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_width="fill_parent"
+            android:layout_height="40dip" android:text="@string/observances_text"/>
+
 </LinearLayout>
