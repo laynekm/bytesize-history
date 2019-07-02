@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity()  {
             if (type === selectedType) {
                 view.visibility = View.VISIBLE
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.BOLD)
-                textViewFilters.filters[type]!!.setBackgroundResource(R.drawable.borderbottom)
+                textViewFilters.filters[type]!!.setBackgroundResource(R.drawable.border_bottom)
             } else {
                 view.visibility = View.INVISIBLE
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)

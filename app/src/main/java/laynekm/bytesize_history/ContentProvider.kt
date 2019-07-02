@@ -186,7 +186,6 @@ class ContentProvider {
 
         // Split array into events, births, and deaths; assumes this order is respected
         // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
-        // TODO: Add support for Holidays and observances
         // TODO: Change to when statement
         val historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
@@ -210,7 +209,7 @@ class ContentProvider {
         val (desc, links) = parseDescriptionAndLinks(line, type)
 //        Log.wtf(TAG, "$desc")
         val historyItem = HistoryItem(type, year, desc, links, depth)
-        Log.wtf(TAG, "$historyItem")
+        Log.wtf(TAG, "$year - $desc")
         return historyItem
     }
 

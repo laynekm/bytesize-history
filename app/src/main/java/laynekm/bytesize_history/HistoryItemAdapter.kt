@@ -1,9 +1,7 @@
 package laynekm.bytesize_history
 
-import android.app.ActionBar
 import android.app.Activity
 import android.content.Context
-import android.content.res.Resources
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -18,9 +16,7 @@ import android.graphics.Bitmap
 import android.widget.*
 import com.squareup.picasso.Callback
 import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.history_item.view.*
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
@@ -37,6 +33,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     private val progressBar = (context as Activity).findViewById(R.id.progressBar) as ProgressBar
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        internal var historyItemContainer: LinearLayout = itemView.findViewById(R.id.historyItemContainer)
         internal var historyItem: ConstraintLayout = itemView.findViewById(R.id.historyItem)
         internal var image: ImageView = itemView.findViewById(R.id.historyImage)
         internal var year: TextView = itemView.findViewById(R.id.yearLabel)
@@ -58,41 +55,36 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
+        val item = items[index]
 
         // Clear existing resources
         viewHolder.image.setImageResource(0)
-        viewHolder.historyItem.setBackgroundResource(0)
-        viewHolder.linkView.setBackgroundResource(0)
-        if (!items[index].hasFetchedImage) { viewHolder.historyItem.visibility = View.GONE }
+        viewHolder.historyItemContainer.setBackgroundResource(0)
+        if (!item.hasFetchedImage) { viewHolder.historyItem.visibility = View.GONE }
 
         // Add margins based on history item depth, include left border if depth > 0
-        val margin = items[index].depth * 25
+        val margin = item.depth * 25
         val dpMargin = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             margin.toFloat(),
             context.resources.displayMetrics
         ).toInt()
 
-        if (items[index].depth > 0) {
-            viewHolder.historyItem.setBackgroundResource(R.drawable.borderleft)
-            viewHolder.linkView.setBackgroundResource(R.drawable.borderleft)
-        }
-
-        (viewHolder.historyItem.layoutParams as MarginLayoutParams).leftMargin = dpMargin
-        (viewHolder.linkView.layoutParams as MarginLayoutParams).leftMargin = dpMargin
+        (viewHolder.historyItemContainer.layoutParams as MarginLayoutParams).leftMargin = dpMargin
+        if (item.depth > 0) viewHolder.historyItemContainer.setBackgroundResource(R.drawable.border_left)
 
         // Set year
-        if (items[index].year === null || items[index].year == 0) viewHolder.year.text = ""
-        else if (items[index].year!! < 0) {
-            viewHolder.year.text = context.resources.getString(R.string.BC_text, items[index].year!! * -1)
+        if (item.year === null || item.year == 0) viewHolder.year.text = ""
+        else if (item.year < 0) {
+            viewHolder.year.text = context.resources.getString(R.string.BC_text, item.year * -1)
         }
-        else viewHolder.year.text = "${items[index].year}"
-        viewHolder.desc.text = items[index].desc
+        else viewHolder.year.text = "${item.year}"
+        viewHolder.desc.text = item.desc
 
         // Dynamically inflate link items
         viewHolder.linkView.visibility = View.GONE
         viewHolder.linkView.removeAllViews()
-        items[index].links.forEach {
+        item.links.forEach {
             val link = LayoutInflater.from(context).inflate(R.layout.link_item, null)
             val linkText = link.findViewById<TextView>(R.id.linkText)
             val url = it.link
@@ -119,12 +111,12 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         // Set hasFetchedImage boolean rather than check image since some items don't have images and will refetch
         doAsync {
             val image: String
-            if (!items[index].hasFetchedImage) {
-                image = contentProvider.fetchImage(items[index].links)
-                items[index].image = image
-                items[index].hasFetchedImage = true
+            if (!item.hasFetchedImage) {
+                image = contentProvider.fetchImage(item.links)
+                item.image = image
+                item.hasFetchedImage = true
             } else {
-                image = items[index].image
+                image = item.image
             }
 
             uiThread {
