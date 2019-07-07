@@ -23,10 +23,10 @@ class NotificationSettingsActivity : AppCompatActivity() {
     private var notificationEnabled: Boolean = false
     private var notificationTime: String = notificationTimeDefault
 
-    lateinit var sharedPref: SharedPreferences
-    lateinit var notificationSwitch: Switch
-    lateinit var notificationTimeView: TextView
-    lateinit var notificationTimeButton: Button
+    private lateinit var sharedPref: SharedPreferences
+    private lateinit var notificationSummaryTextView: TextView
+    private lateinit var notificationToggleButton: Button
+    private lateinit var notificationTimeButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,25 +42,25 @@ class NotificationSettingsActivity : AppCompatActivity() {
         notificationTimeKey = getString(R.string.notification_time_pref_key)
         notificationTimeDefault = getString(R.string.notification_time_default)
 
-        notificationSwitch = findViewById(R.id.notification_switch) as Switch
-        notificationTimeView = findViewById(R.id.notification_time)
-        notificationTimeButton = findViewById(R.id.notification_time_button)
+        notificationSummaryTextView = findViewById(R.id.notification_summary_text)
+        notificationToggleButton = findViewById(R.id.notification_toggle_btn)
+        notificationTimeButton = findViewById(R.id.notification_time_btn)
 
         sharedPref = this.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
         notificationEnabled = sharedPref.getBoolean(notificationEnabledKey,  true)
         notificationTime = sharedPref.getString(notificationTimeKey, notificationTimeDefault)!!
 
-        notificationSwitch.setChecked(notificationEnabled)
-        notificationSwitch.setOnCheckedChangeListener { _, isChecked ->  toggleNotification(isChecked) }
-        notificationTimeButton.setOnClickListener { showTimePickerDialog() }
-
-        // Disable notification time elements views if notification is disabled
-        if (!notificationEnabled) {
-            notificationTimeView.text = getString(R.string.notification_disabled)
+        if (notificationEnabled) {
+            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, notificationTime)
+            notificationToggleButton.text = getString(R.string.notification_disable)
+        } else {
+            notificationSummaryTextView.text = getString(R.string.notification_summary_disabled)
+            notificationToggleButton.text = getString(R.string.notification_enable)
             notificationTimeButton.isEnabled = false
         }
 
-        notificationTimeView.text = notificationTime
+        notificationToggleButton.setOnClickListener { toggleNotification() }
+        notificationTimeButton.setOnClickListener { showTimePickerDialog() }
     }
 
     private fun showTimePickerDialog() {
@@ -74,19 +74,25 @@ class NotificationSettingsActivity : AppCompatActivity() {
     }
 
     private fun updateTime(time: Time) {
+        if (timesEqual(stringToTime(notificationTime), time)) return
+
         notificationManager.updateNotification(time)
         notificationTime = timeToString(time)
-        notificationTimeView.text = timeToString(time)
+        notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, notificationTime)
     }
 
-    private fun toggleNotification(checked: Boolean) {
-        if (checked) {
+    private fun toggleNotification() {
+        notificationEnabled = !notificationEnabled
+
+        if (notificationEnabled) {
             notificationManager.updateNotification(stringToTime(notificationTime))
-            notificationTimeView.text = notificationTime
+            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, notificationTime)
+            notificationToggleButton.text = getString(R.string.notification_disable)
             notificationTimeButton.isEnabled = true
         } else {
             notificationManager.disableNotification()
-            notificationTimeView.text = getString(R.string.notification_disabled)
+            notificationSummaryTextView.text = getString(R.string.notification_summary_disabled)
+            notificationToggleButton.text = getString(R.string.notification_enable)
             notificationTimeButton.isEnabled = false
         }
     }

@@ -12,7 +12,7 @@
     <string name="events_text">⚔ Events</string>
     <string name="births_text">👶 Births</string>
     <string name="deaths_text">🌹 Deaths</string>
-    <string name="observances_text">👀 Holidays</string>
+    <string name="observances_text">👀 Observances</string>
     <string name="BC_text">%1$d BC</string>
     <string name="preferences_key">PREFERENCES</string>
 
@@ -24,7 +24,7 @@
     <string name="type_events">⚔ Events</string>
     <string name="type_births">👶 Births</string>
     <string name="type_deaths">🌹 Deaths</string>
-    <string name="type_observances">👀 Holidays</string>
+    <string name="type_observances">👀 Observances</string>
     <string name="era_header">Time Periods</string>
     <string name="era_ancient">🏛️ Ancient (before 500 AD)</string>
     <string name="era_medieval">🏰 Medieval (500-1500 AD)</string>
@@ -41,12 +41,14 @@
 
     <!-- Notification settings -->
     <string name="notification_settings_title">Notification Settings</string>
-    <string name="notification_toggle">Send daily history facts</string>
-    <string name="notification_time">Notification time:</string>
+    <string name="notification_time_default">10:00</string>
+    <string name="notification_summary_enabled">A history fact will be sent to you daily at %1$s.</string>
+    <string name="notification_summary_disabled">Daily history notification is disabled.</string>
+    <string name="notification_change_time">Change time</string>
+    <string name="notification_disable">Disable</string>
+    <string name="notification_enable">Enable</string>
     <string name="notification_enabled_pref_key">send_notifications</string>
     <string name="notification_time_pref_key">notification_time</string>
-    <string name="notification_time_default">10:00</string>
-    <string name="notification_disabled">Disabled</string>
 
     <!-- Notifications -->
     <string name="notification_title">%1$s: On this day in %2$d...</string>
