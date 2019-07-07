@@ -11,7 +11,7 @@
             android:textColor="@color/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
-            android:id="@+id/switchOrder"
+            android:id="@+id/notification_switch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp" android:layout_marginRight="8dp" android:textOff="@string/order_descending"
@@ -111,7 +111,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/textView"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp" app:layout_constraintTop_toBottomOf="@+id/switchOrder"
+            android:layout_marginStart="8dp" app:layout_constraintTop_toBottomOf="@+id/notification_switch"
             android:layout_marginTop="16dp" android:textStyle="bold"/>
     <Switch
             android:text="@string/type_events"

@@ -14,7 +14,7 @@ class FilterOptions(
 
     // Sets view content based on filter options
     fun setViewContent(view: View) {
-        if (order === Order.DESCENDING) (view.findViewById(R.id.switchOrder) as Switch).setChecked(true)
+        if (order === Order.DESCENDING) (view.findViewById(R.id.notification_switch) as Switch).setChecked(true)
 
         if (types.contains(Type.EVENT)) (view.findViewById(R.id.switchEvents) as Switch).setChecked(true)
         if (types.contains(Type.BIRTH)) (view.findViewById(R.id.switchBirths) as Switch).setChecked(true)
@@ -36,7 +36,7 @@ class FilterOptions(
         val newEras: MutableList<Era> = mutableListOf()
         var changed = false
 
-        if ((view.findViewById(R.id.switchOrder) as Switch).isChecked) newOrder = Order.DESCENDING
+        if ((view.findViewById(R.id.notification_switch) as Switch).isChecked) newOrder = Order.DESCENDING
 
         if ((view.findViewById(R.id.switchEvents) as Switch).isChecked) newTypes.add(Type.EVENT)
         if ((view.findViewById(R.id.switchBirths) as Switch).isChecked) newTypes.add(Type.BIRTH)

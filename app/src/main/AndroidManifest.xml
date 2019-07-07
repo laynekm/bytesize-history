@@ -15,29 +15,36 @@
         <activity
                 android:name=".MainActivity"
                 android:label="@string/app_name"
-                android:theme="@style/AppTheme.NoActionBar"
-                android:screenOrientation="portrait">
+                android:screenOrientation="portrait"
+                android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <receiver android:name=".NotificationReceiver" android:enabled="true" android:exported="false"/>
-        <!--<receiver android:name=".BootReceiver"-->
-                  <!--android:enabled="true"-->
-                  <!--android:exported="true">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.BOOT_COMPLETED" />-->
-                <!--<category android:name="android.intent.category.HOME" />-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
-        <!--<service-->
-                <!--android:name=".MyService"-->
-                <!--android:enabled="true"-->
-                <!--android:exported="true">-->
-        <!--</service>-->
+        <receiver
+                android:name=".NotificationReceiver"
+                android:enabled="true"
+                android:exported="false"/>
+        <!-- <receiver android:name=".BootReceiver" -->
+        <!-- android:enabled="true" -->
+        <!-- android:exported="true"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
+        <!-- <category android:name="android.intent.category.HOME" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
+        <!-- <service -->
+        <!-- android:name=".MyService" -->
+        <!-- android:enabled="true" -->
+        <!-- android:exported="true"> -->
+        <!-- </service> -->
+        <activity
+                android:name=".NotificationSettingsActivity"
+                android:label="@string/notification_settings_title"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@ import java.text.DateFormatSymbols
 import java.util.*
 
 data class Date(val month: Int, val day: Int)
+data class Time(val hour: Int, val minute: Int)
 
 fun datesEqual(date1: Date, date2: Date): Boolean {
     return date1.month == date2.month && date1.day == date2.day
@@ -34,4 +35,16 @@ fun dateToString(date: Date): String {
 
 fun stringToDate(date: String?): Date {
     return Date(date!!.substringBefore("-").toInt(), date.substringAfter("-").toInt())
+}
+
+fun timesEqual(time1: Time, time2: Time): Boolean {
+    return time1.hour == time2.hour && time1.minute == time2.minute
+}
+
+fun timeToString(time: Time): String {
+    return "${time.hour}:${time.minute.toString().padStart(2, '0')}"
+}
+
+fun stringToTime(time: String): Time {
+    return Time(time.substringBefore(":").toInt(), time.substringAfter(":").toInt())
 }

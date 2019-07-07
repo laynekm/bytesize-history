@@ -17,6 +17,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
     private val contentProvider: ContentProvider = ContentProvider()
 
+    // TODO: Fix notifications not working over data connection
     override fun onReceive(context: Context, intent: Intent) {
         this.createNotificationChannel(context)
         this.contentProvider.fetchDailyHistoryFact(context, ::pushNotification)
@@ -25,7 +26,7 @@ class NotificationReceiver : BroadcastReceiver() {
     private fun pushNotification(context: Context, historyItem: HistoryItem, date: Date) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)
-            .setContentTitle("${buildDateForNotification(date)}, ${historyItem.year}")
+            .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), historyItem.year))
             .setContentText(historyItem.desc)
             .setStyle(NotificationCompat.BigTextStyle())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

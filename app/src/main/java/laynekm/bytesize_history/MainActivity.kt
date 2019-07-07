@@ -17,6 +17,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.util.Log
 import android.widget.*
 
 
@@ -37,9 +39,11 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
+    private lateinit var sharedPref: SharedPreferences
 
     private var filterOptions: FilterOptions = FilterOptions()
     private val contentProvider: ContentProvider = ContentProvider()
+    private lateinit var notificationManager: NotificationManager
     private var selectedDate: Date = getToday()
     private var selectedType: Type? = filterOptions.types[0]
     private var fetching: Boolean = false
@@ -63,6 +67,7 @@ class MainActivity : AppCompatActivity()  {
         progressBar = findViewById(R.id.progressBar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         webView = findViewById(R.id.webView)
+        sharedPref = this.getSharedPreferences(getString(R.string.preferences_key), Context.MODE_PRIVATE)
 
         setSupportActionBar(toolbar)
         retryBtn.setOnClickListener { fetchHistoryItems() }
@@ -75,10 +80,10 @@ class MainActivity : AppCompatActivity()  {
         setSelectedType(selectedType)
         dateLabel.text = buildDateForLabel(selectedDate)
 
-        fetchHistoryItems()
+        notificationManager = NotificationManager(this)
+        notificationManager.initializePreferences()
 
-        val rightNow = Calendar.getInstance()
-        this.setAlarm(rightNow.get(Calendar.HOUR_OF_DAY), rightNow.get(Calendar.MINUTE), rightNow.get(Calendar.SECOND) + 3)
+        fetchHistoryItems()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -88,7 +93,14 @@ class MainActivity : AppCompatActivity()  {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.changeNotification -> true
+            R.id.changeNotification -> {
+                val notificationSettingsIntent = Intent(this@MainActivity, NotificationSettingsActivity::class.java)
+                startActivity(notificationSettingsIntent)
+                return true
+            }
+            R.id.changeTheme -> {
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -220,6 +232,7 @@ class MainActivity : AppCompatActivity()  {
     }
 
     // Displays DatePicker and handles calls updateDate with the new selected date
+    // TODO: Remove onClick from XML
     fun showDatePickerDialog(view: View) {
         val date: Calendar = Calendar.getInstance()
         val selectedYear = date.get(Calendar.YEAR)
@@ -252,10 +265,10 @@ class MainActivity : AppCompatActivity()  {
     private fun checkFilterResults(type: Type?) {
         if (type === null) {
             errorTextView.visibility = View.VISIBLE
-            errorTextView.text = resources.getString(R.string.type_error)
+            errorTextView.text = getString(R.string.type_error)
         } else if (historyAdapters.adapters[type]!!.itemCount == 0) {
             errorTextView.visibility = View.VISIBLE
-            errorTextView.text = resources.getString(R.string.filter_error, formatType(type))
+            errorTextView.text = getString(R.string.filter_error, formatType(type))
         } else {
             errorTextView.visibility = View.GONE
         }
@@ -269,20 +282,5 @@ class MainActivity : AppCompatActivity()  {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState);
         outState.putString(dateKey, dateToString(selectedDate))
-    }
-
-    private fun setAlarm(hour: Int, minute: Int, second: Int) {
-        val calendar: Calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, second)
-        }
-
-        val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = Intent(this, NotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0)
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 60000, pendingIntent)
-//        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
     }
 }
