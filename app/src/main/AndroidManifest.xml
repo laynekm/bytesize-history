@@ -3,6 +3,7 @@
           package="laynekm.bytesize_history">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
             android:allowBackup="true"
@@ -27,19 +28,14 @@
                 android:name=".NotificationReceiver"
                 android:enabled="true"
                 android:exported="false"/>
-        <!-- <receiver android:name=".BootReceiver" -->
-        <!-- android:enabled="true" -->
-        <!-- android:exported="true"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
-        <!-- <category android:name="android.intent.category.HOME" /> -->
-        <!-- </intent-filter> -->
-        <!-- </receiver> -->
-        <!-- <service -->
-        <!-- android:name=".MyService" -->
-        <!-- android:enabled="true" -->
-        <!-- android:exported="true"> -->
-        <!-- </service> -->
+
+        <receiver android:name=".BootReceiver"
+                  android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
+
         <activity
                 android:name=".NotificationSettingsActivity"
                 android:label="@string/notification_settings_title"

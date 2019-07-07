@@ -25,6 +25,7 @@ class NotificationManager(val context: Context) {
             setNotificationPreferences(true, notificationTimeDefault)
             setNotification(notificationTimeDefault)
         } else {
+            // TODO: Remove this, just here for testing purposes
             Toast.makeText(context, "Daily notification already set for ${timeToString(notificationTime)}", Toast.LENGTH_LONG).show()
         }
     }
@@ -46,6 +47,11 @@ class NotificationManager(val context: Context) {
         // manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
 
         Toast.makeText(context, "Daily notification set for ${timeToString(time)}", Toast.LENGTH_LONG).show()
+    }
+
+    // Same as setNotification but uses the existing notificationTime instead of a new value
+    fun setNotification() {
+        setNotification(notificationTime)
     }
 
     // Cancels notification

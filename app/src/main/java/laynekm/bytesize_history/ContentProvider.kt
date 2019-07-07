@@ -42,6 +42,7 @@ class ContentProvider {
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     // TODO: Fetch images for each type when tab is selected so initial load time isn't as long
+    // TODO: Fix some items not appearing in recycler views? June 30, 1688 and 1864
     fun fetchHistoryItems(
         date: Date,
         filters: FilterOptions,

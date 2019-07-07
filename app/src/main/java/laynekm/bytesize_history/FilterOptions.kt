@@ -7,6 +7,7 @@ private val defaultOrder: Order = Order.ASCENDING
 private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH, Type.OBSERVANCE)
 private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS, Era.NONE)
 
+// TODO: Save filter options in shared preferences so they're preserved on app restart
 class FilterOptions(
     var order: Order = defaultOrder,
     var types: MutableList<Type> = defaultTypes,
