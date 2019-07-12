@@ -9,10 +9,10 @@
     <string name="default_image">History image</string>
     <string name="default_year">1918</string>
     <string name="default_desc">The end of WW1. The end of WW1.</string>
-    <string name="events_text">⚔ Events</string>
-    <string name="births_text">👶 Births</string>
-    <string name="deaths_text">🌹 Deaths</string>
-    <string name="observances_text">👀 Observances</string>
+    <string name="events_text">Events</string>
+    <string name="births_text">Births</string>
+    <string name="deaths_text">Deaths</string>
+    <string name="observances_text">Holidays</string>
     <string name="BC_text">%1$d BC</string>
     <string name="preferences_key">PREFERENCES</string>
 
