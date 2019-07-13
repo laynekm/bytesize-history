@@ -43,10 +43,7 @@ class ContentProvider {
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     // TODO: Fetch images for each type when tab is selected so initial load time isn't as long
     // TODO: Figure out why notifications often send 1-10 minutes late
-    // TODO: Fix some items not appearing in recycler views? June 30, 1688 and 1864
-    // TODO: July 11: Date appears as 911911
     // TODO: Fix July 9, 1730 abbr
-    // TODO: Fix observances not appearing sometimes
     fun fetchHistoryItems(
         date: Date,
         filters: FilterOptions,
@@ -226,6 +223,11 @@ class ContentProvider {
 
         if (yearSection.contains("(")) {
             val secondaryYear = yearSection.substringBetween("(", ")")
+            yearSection = yearSection.replace(secondaryYear, "")
+        }
+
+        if (yearSection.contains("|")) {
+            val secondaryYear = yearSection.substringAfter("|")
             yearSection = yearSection.replace(secondaryYear, "")
         }
 
