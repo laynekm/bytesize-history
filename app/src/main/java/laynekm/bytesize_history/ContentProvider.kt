@@ -46,6 +46,7 @@ class ContentProvider {
     // TODO: Fix some items not appearing in recycler views? June 30, 1688 and 1864
     // TODO: July 11: Date appears as 911911
     // TODO: Fix July 9, 1730 abbr
+    // TODO: Fix observances not appearing sometimes
     fun fetchHistoryItems(
         date: Date,
         filters: FilterOptions,

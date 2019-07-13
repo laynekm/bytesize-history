@@ -23,7 +23,7 @@
     <string name="type_events">⚔ Events</string>
     <string name="type_births">👶 Births</string>
     <string name="type_deaths">🌹 Deaths</string>
-    <string name="type_observances">👀 Observances</string>
+    <string name="type_observances">👀 Holidays/observances</string>
     <string name="era_header">Time Periods</string>
     <string name="era_ancient">🏛️ Ancient (before 500 AD)</string>
     <string name="era_medieval">🏰 Medieval (500-1500 AD)</string>

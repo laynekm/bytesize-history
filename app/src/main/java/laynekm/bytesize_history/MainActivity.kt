@@ -276,14 +276,10 @@ class MainActivity : AppCompatActivity()  {
             errorTextView.text = getString(R.string.type_error)
         } else if (historyAdapters.adapters[type]!!.itemCount == 0) {
             errorTextView.visibility = View.VISIBLE
-            errorTextView.text = getString(R.string.filter_error, formatType(type))
+            errorTextView.text = getString(R.string.filter_error, mapTypeToLabel(type))
         } else {
             errorTextView.visibility = View.GONE
         }
-    }
-
-    private fun formatType(type: Type): String {
-        return type.toString().toLowerCase() + "s"
     }
 
     // Ensures date is consistent when activity is destroyed/recreated

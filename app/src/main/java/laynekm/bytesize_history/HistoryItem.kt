@@ -69,3 +69,12 @@ fun getEmptyTypeMap(): MutableMap<Type, MutableList<HistoryItem>> {
         Type.OBSERVANCE to mutableListOf()
     )
 }
+
+fun mapTypeToLabel(type: Type): String {
+    return when (type) {
+        Type.EVENT -> "events"
+        Type.BIRTH -> "births"
+        Type.DEATH -> "deaths"
+        Type.OBSERVANCE -> "holidays/observances"
+    }
+}
