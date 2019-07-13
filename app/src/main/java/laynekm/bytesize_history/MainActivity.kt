@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var errorTextView: TextView
     private lateinit var retryBtn: Button
     private lateinit var dropdownFilter: ImageView
+    private lateinit var datePickerButton: ImageView
     private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
@@ -53,6 +54,8 @@ class MainActivity : AppCompatActivity()  {
     private val dateKey = "selectedDate"
 
     // TODO: Set new date if app is loaded on a new day without being closed the day before
+    // TODO: Unify view/variable names (ie. turn some views into buttons with fitting ids/variable names)
+    // TODO: Figure out why filter/calendar are slightly different shades of grey
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -68,12 +71,14 @@ class MainActivity : AppCompatActivity()  {
         dropdownView = findViewById(R.id.dropdownView)
         progressBar = findViewById(R.id.progressBar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
+        datePickerButton = findViewById(R.id.calendarView)
         webView = findViewById(R.id.webView)
         sharedPref = this.getSharedPreferences(getString(R.string.notification_pref_key), Context.MODE_PRIVATE)
 
         setSupportActionBar(toolbar)
         retryBtn.setOnClickListener { fetchHistoryItems() }
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
+        datePickerButton.setOnClickListener { showDatePickerDialog() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
         notificationManager = NotificationManager(this)
@@ -238,8 +243,7 @@ class MainActivity : AppCompatActivity()  {
     }
 
     // Displays DatePicker and handles calls updateDate with the new selected date
-    // TODO: Remove onClick from XML
-    fun showDatePickerDialog(view: View) {
+    private fun showDatePickerDialog() {
         val date: Calendar = Calendar.getInstance()
         val selectedYear = date.get(Calendar.YEAR)
         val selectedMonth = selectedDate.month

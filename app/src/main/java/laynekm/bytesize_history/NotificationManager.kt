@@ -25,6 +25,7 @@ class NotificationManager(val context: Context) {
             setNotificationPreferences(true, notificationTimeDefault)
             setNotification(notificationTimeDefault)
         }
+
         // TODO: Remove these toasts, just here for testing purposes
         else if (!preferencesEnabled) {
             Toast.makeText(context, "Notifications are disabled.", Toast.LENGTH_LONG).show()
