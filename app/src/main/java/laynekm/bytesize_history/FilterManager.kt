@@ -27,7 +27,7 @@ class FilterManager(var context: Context) {
         if (options.eras.contains(Era.TWOTHOUSANDS)) (view.findViewById(R.id.switch2000s) as Switch).setChecked(true)
     }
 
-    // Applies amended view content to filter options
+    // Applies amended view content to filter options and updates preferences
     fun setFilterOptions(view: View): FilterOptions {
         var order = Order.ASCENDING
         val types: MutableList<Type> = mutableListOf()
@@ -45,12 +45,13 @@ class FilterManager(var context: Context) {
         if ((view.findViewById(R.id.switch1900s) as Switch).isChecked) eras.add(Era.NINETEENS)
         if ((view.findViewById(R.id.switch2000s) as Switch).isChecked) eras.add(Era.TWOTHOUSANDS)
 
-        return FilterOptions(order, types, eras)
+        val filterOptions = FilterOptions(order, types, eras)
+        this.setPreferences(filterOptions)
+        return filterOptions
     }
 
     fun hasPreferences(): Boolean {
-        if (sharedPref.contains(hasPreferencesKey)) return true
-        return false
+        return sharedPref.contains(hasPreferencesKey)
     }
 
     // Gets preferences if they exist
@@ -72,7 +73,14 @@ class FilterManager(var context: Context) {
         return FilterOptions(order, types, eras)
     }
 
+    // Set preferences; in most cases, the enum string value itself is used as the key
     fun setPreferences(options: FilterOptions) {
-
+        with (sharedPref.edit()) {
+            putBoolean("${Order.DESCENDING}", options.order === Order.DESCENDING)
+            Type.values().forEach { putBoolean("$it", options.types.contains(it)) }
+            Era.values().forEach { putBoolean("$it", options.eras.contains(it)) }
+            putBoolean(hasPreferencesKey, true)
+            apply()
+        }
     }
 }

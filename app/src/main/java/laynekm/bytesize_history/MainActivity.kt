@@ -76,21 +76,18 @@ class MainActivity : AppCompatActivity()  {
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
+        filterManager = FilterManager(this)
+        if (filterManager.hasPreferences()) filterOptions = filterManager.getPreferences()
+        else filterManager.setPreferences(filterOptions)
+
+        notificationManager = NotificationManager(this)
+        notificationManager.initializePreferences()
+
         initializeRecyclerViews()
         initializeFilters()
 
         setSelectedType(selectedType)
         dateLabel.text = buildDateForLabel(selectedDate)
-
-        filterManager = FilterManager(this)
-        if (filterManager.hasPreferences()) {
-            filterOptions = filterManager.getPreferences()
-        } else {
-            filterManager.setPreferences(filterOptions)
-        }
-
-        notificationManager = NotificationManager(this)
-        notificationManager.initializePreferences()
 
         fetchHistoryItems()
     }
@@ -148,6 +145,8 @@ class MainActivity : AppCompatActivity()  {
         for ((type, textView) in textViewFilters.filters) {
             textView.setOnClickListener { setSelectedType(type) }
         }
+
+        updateTypeSelectors()
     }
 
     // Fetch history items from content provider
@@ -201,13 +200,6 @@ class MainActivity : AppCompatActivity()  {
             val newFilters = filterManager.setFilterOptions(dropdownView)
             if (!newFilters.equals(filterOptions)) {
                 filterOptions = newFilters
-
-                // Case where selectedType is no longer in filterOptions, or no types are in filterOptions
-                if (!filterOptions.types.contains(selectedType)) {
-                    if (filterOptions.types.size == 0) setSelectedType(null)
-                    else setSelectedType(filterOptions.types[0])
-                }
-
                 updateTypeSelectors()
                 filterHistoryItems()
             }
@@ -236,6 +228,12 @@ class MainActivity : AppCompatActivity()  {
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.NORMAL)
                 textViewFilters.filters[type]!!.setBackgroundResource(0)
             }
+        }
+
+        // Case where selectedType is no longer in filterOptions, or no types are in filterOptions
+        if (!filterOptions.types.contains(selectedType)) {
+            if (filterOptions.types.size == 0) setSelectedType(null)
+            else setSelectedType(filterOptions.types[0])
         }
 
         checkFilterResults(selectedType)
