@@ -44,9 +44,7 @@ class FilterManager(var context: Context) {
         if ((view.findViewById(R.id.switch1900s) as Switch).isChecked) eras.add(Era.NINETEENS)
         if ((view.findViewById(R.id.switch2000s) as Switch).isChecked) eras.add(Era.TWOTHOUSANDS)
 
-        val filterOptions = FilterOptions(order, types, eras)
-        this.setPreferences(filterOptions)
-        return filterOptions
+        return FilterOptions(order, types, eras)
     }
 
     fun hasPreferences(): Boolean {

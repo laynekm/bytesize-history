@@ -65,10 +65,8 @@ class ContentProvider {
 
             val allHistoryItems = parseContent(result)
             for ((type) in historyItems) {
-                if (selectedFilters.types.contains(type)) {
-                    historyItems[type] = filterType(allHistoryItems, type)
-                    filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
-                }
+                historyItems[type] = filterType(allHistoryItems, type)
+                filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
             }
 
             // Callback function that updates recycler views in main thread
