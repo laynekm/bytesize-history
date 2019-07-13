@@ -43,7 +43,6 @@ class ContentProvider {
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
     // TODO: Fetch images for each type when tab is selected so initial load time isn't as long
     // TODO: Figure out why notifications often send 1-10 minutes late
-    // TODO: Fix July 9, 1730 abbr
     fun fetchHistoryItems(
         date: Date,
         filters: FilterOptions,
@@ -289,9 +288,16 @@ class ContentProvider {
             desc = desc.replaceFirst("</ref>", "")
         }
 
-        // TODO: Add italics ({{ should be <i> or something, not sure yet)
         while (desc.contains("{{")) {
             val innerText = desc.substringBetween("{{", "}}")
+
+            // Don't bother converting values, just show the value and the first given unit (ie. km)
+            // TODO: Maybe add support for converting values
+            if (innerText.contains("convert")) {
+                val splitText = innerText.split("|").toTypedArray()
+                desc = desc.replaceFirst(innerText, splitText[1] + " " + splitText[2])
+            }
+
             val parsedInnerText = innerText.replace("|", " ")
             desc = desc.replaceFirst(innerText, parsedInnerText)
             desc = desc.replaceFirst("{{", "")
