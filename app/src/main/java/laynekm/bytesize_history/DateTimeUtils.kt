@@ -41,10 +41,27 @@ fun timesEqual(time1: Time, time2: Time): Boolean {
     return time1.hour == time2.hour && time1.minute == time2.minute
 }
 
+// TODO: Format as am/pm instead of 24hr time
 fun timeToString(time: Time): String {
     return "${time.hour}:${time.minute.toString().padStart(2, '0')}"
 }
 
 fun stringToTime(time: String): Time {
     return Time(time.substringBefore(":").toInt(), time.substringAfter(":").toInt())
+}
+
+fun stringTo12HourString(time: String): String {
+    val hour = stringToTime(time).hour
+    val minute = stringToTime(time).minute.toString().padStart(2, '0')
+
+    return when (hour) {
+        0 -> "12:$minute AM"
+        12 -> "12:$minute PM"
+        in 1..11 -> "$hour:$minute AM"
+        else -> "${hour - 12}:$minute PM"
+    }
+}
+
+fun timeTo12HourString(time: Time): String {
+    return stringTo12HourString(timeToString(time))
 }

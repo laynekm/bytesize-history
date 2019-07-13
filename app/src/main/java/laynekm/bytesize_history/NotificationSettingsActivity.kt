@@ -51,7 +51,7 @@ class NotificationSettingsActivity : AppCompatActivity() {
         notificationTime = sharedPref.getString(notificationTimeKey, notificationTimeDefault)!!
 
         if (notificationEnabled) {
-            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, notificationTime)
+            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, stringTo12HourString(notificationTime))
             notificationToggleButton.text = getString(R.string.notification_disable)
         } else {
             notificationSummaryTextView.text = getString(R.string.notification_summary_disabled)
@@ -78,7 +78,7 @@ class NotificationSettingsActivity : AppCompatActivity() {
 
         notificationManager.updateNotification(time)
         notificationTime = timeToString(time)
-        notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, notificationTime)
+        notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, stringTo12HourString(notificationTime))
     }
 
     private fun toggleNotification() {

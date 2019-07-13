@@ -55,8 +55,10 @@ class MainActivity : AppCompatActivity()  {
 
     // TODO: Set new date if app is loaded on a new day without being closed the day before
     // TODO: Unify view/variable names (ie. turn some views into buttons with fitting ids/variable names)
-    // TODO: Figure out why filter/calendar are slightly different shades of grey
     // TODO: History types sometimes don't have data when their toggle is switched on
+    // TODO: Allow user to go back in WebView without closing it
+    // TODO: Replace pngs with svgs to colours can be changed easily, set more accurately (currently a bit off)
+    // TODO: Add dark theme
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

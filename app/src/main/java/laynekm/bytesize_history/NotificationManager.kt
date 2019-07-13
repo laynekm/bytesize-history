@@ -30,7 +30,7 @@ class NotificationManager(val context: Context) {
         else if (!preferencesEnabled) {
             Toast.makeText(context, "Notifications are disabled.", Toast.LENGTH_LONG).show()
         } else if (!missingPreferences) {
-            Toast.makeText(context, "Notification already set for ${timeToString(notificationTime)}.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Notification already set for ${timeTo12HourString(notificationTime)}.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -50,7 +50,7 @@ class NotificationManager(val context: Context) {
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_HOUR, pendingIntent)
         // manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
 
-        Toast.makeText(context, "Daily notification set for ${timeToString(time)}", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Daily notification set for ${timeTo12HourString(time)}", Toast.LENGTH_LONG).show()
     }
 
     // Same as setNotification but uses the existing notificationTime instead of a new value
