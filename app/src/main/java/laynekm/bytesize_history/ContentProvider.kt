@@ -298,9 +298,10 @@ class ContentProvider {
             desc = desc.replaceFirst("}}", "")
         }
 
-        // Remove remaining characters
+        // Remove remaining unwanted characters
         desc = desc.replace("|", "")
         desc = desc.replace("\\", "")
+        desc = desc.replace("&nbsp;", " ")
 
         if (desc.contains("*")) {
             desc = desc.replace("*", "")
