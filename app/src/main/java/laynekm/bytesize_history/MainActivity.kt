@@ -41,9 +41,11 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var webView: WebView
     private lateinit var sharedPref: SharedPreferences
 
+    private lateinit var filterManager: FilterManager
+    private lateinit var notificationManager: NotificationManager
     private var filterOptions: FilterOptions = FilterOptions()
     private val contentProvider: ContentProvider = ContentProvider()
-    private lateinit var notificationManager: NotificationManager
+
     private var selectedDate: Date = getToday()
     private var selectedType: Type? = filterOptions.types[0]
     private var fetching: Boolean = false
@@ -67,7 +69,7 @@ class MainActivity : AppCompatActivity()  {
         progressBar = findViewById(R.id.progressBar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         webView = findViewById(R.id.webView)
-        sharedPref = this.getSharedPreferences(getString(R.string.preferences_key), Context.MODE_PRIVATE)
+        sharedPref = this.getSharedPreferences(getString(R.string.notification_pref_key), Context.MODE_PRIVATE)
 
         setSupportActionBar(toolbar)
         retryBtn.setOnClickListener { fetchHistoryItems() }
@@ -79,6 +81,13 @@ class MainActivity : AppCompatActivity()  {
 
         setSelectedType(selectedType)
         dateLabel.text = buildDateForLabel(selectedDate)
+
+        filterManager = FilterManager(this)
+        if (filterManager.hasPreferences()) {
+            filterOptions = filterManager.getPreferences()
+        } else {
+            filterManager.setPreferences(filterOptions)
+        }
 
         notificationManager = NotificationManager(this)
         notificationManager.initializePreferences()
@@ -180,7 +189,7 @@ class MainActivity : AppCompatActivity()  {
     // Toggle dropdown filter visibility and handle updating filters
     private fun dropdownFilterOnClick() {
         if (dropdownView.visibility == View.GONE) {
-            filterOptions.setViewContent(dropdownView)
+            filterManager.setViewContent(dropdownView, filterOptions)
             dropdownFilter.rotation = 180.toFloat()
             dropdownView.visibility = View.VISIBLE
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
@@ -189,8 +198,9 @@ class MainActivity : AppCompatActivity()  {
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_up))
             dropdownView.visibility = View.GONE
 
-            val filtersChanged = filterOptions.setFilterOptions(dropdownView)
-            if (filtersChanged) {
+            val newFilters = filterManager.setFilterOptions(dropdownView)
+            if (!newFilters.equals(filterOptions)) {
+                filterOptions = newFilters
 
                 // Case where selectedType is no longer in filterOptions, or no types are in filterOptions
                 if (!filterOptions.types.contains(selectedType)) {

@@ -14,7 +14,6 @@
     <string name="deaths_text">Deaths</string>
     <string name="observances_text">Holidays</string>
     <string name="BC_text">%1$d BC</string>
-    <string name="preferences_key">PREFERENCES</string>
 
     <!-- Filter dropdown -->
     <string name="order_header">Order</string>
@@ -33,6 +32,13 @@
     <string name="era_1900s">🏘️ 1900s</string>
     <string name="era_2000s">🏨 2000s</string>
 
+    <!-- Preferences -->
+    <string name="notification_pref_key">notification_preferences</string>
+    <string name="notification_enabled_pref_key">send_notifications</string>
+    <string name="notification_time_pref_key">notification_time</string>
+    <string name="filter_pref_key">filter_preferences</string>
+    <string name="has_filter_prefs_key">has_filter_preferences</string>
+
     <!-- User dialog messages -->
     <string name="fetch_error">Unable to fetch data.\n\n¯\\_(ツ)_/¯</string>
     <string name="retry_btn">Retry</string>
@@ -47,8 +53,6 @@
     <string name="notification_change_time">Change time</string>
     <string name="notification_disable">Disable</string>
     <string name="notification_enable">Enable</string>
-    <string name="notification_enabled_pref_key">send_notifications</string>
-    <string name="notification_time_pref_key">notification_time</string>
 
     <!-- Notifications -->
     <string name="notification_title">%1$s: On this day in %2$d...</string>

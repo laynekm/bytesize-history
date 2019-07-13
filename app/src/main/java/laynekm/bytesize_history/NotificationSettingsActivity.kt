@@ -37,7 +37,7 @@ class NotificationSettingsActivity : AppCompatActivity() {
 
         notificationManager = NotificationManager(this)
 
-        preferencesKey = getString(R.string.preferences_key)
+        preferencesKey = getString(R.string.notification_pref_key)
         notificationEnabledKey = getString(R.string.notification_enabled_pref_key)
         notificationTimeKey = getString(R.string.notification_time_pref_key)
         notificationTimeDefault = getString(R.string.notification_time_default)
