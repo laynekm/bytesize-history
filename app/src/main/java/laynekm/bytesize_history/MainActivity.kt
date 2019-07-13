@@ -76,12 +76,10 @@ class MainActivity : AppCompatActivity()  {
         dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
+        notificationManager = NotificationManager(this)
         filterManager = FilterManager(this)
         if (filterManager.hasPreferences()) filterOptions = filterManager.getPreferences()
         else filterManager.setPreferences(filterOptions)
-
-        notificationManager = NotificationManager(this)
-        notificationManager.initializePreferences()
 
         initializeRecyclerViews()
         initializeFilters()

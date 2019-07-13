@@ -187,7 +187,6 @@ class ContentProvider {
 
         // Split array into events, births, and deaths; assumes this order is respected
         // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
-        // TODO: Change to when statement
         val historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
         for (line in lines) {

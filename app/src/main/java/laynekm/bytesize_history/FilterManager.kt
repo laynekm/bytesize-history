@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.Filter
 import android.widget.Switch
 
-// TODO: Save filter options in shared preferences so they're preserved on app restart
 class FilterManager(var context: Context) {
 
     private val preferencesKey = context.getString(R.string.filter_pref_key)

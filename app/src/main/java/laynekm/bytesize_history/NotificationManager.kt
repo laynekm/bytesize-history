@@ -17,17 +17,19 @@ class NotificationManager(val context: Context) {
     private val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
     private var notificationTime = stringToTime(sharedPref.getString(notificationTimeKey, timeToString(notificationTimeDefault))!!)
 
-    // Initializes notification preferences to default values if they do not yet exist
-    // TODO: Move to init
-    fun initializePreferences() {
-        // If notifications are not enabled, no need to do anything
-        if (!sharedPref.getBoolean(notificationEnabledKey, true)) return
-        if (!sharedPref.contains(notificationEnabledKey) || !sharedPref.contains(notificationTimeKey)) {
+    // Initializes notification preferences to default values if they do not yet exist and notifications are enabled
+    init {
+        val preferencesEnabled = sharedPref.getBoolean(notificationEnabledKey, true)
+        val missingPreferences = !sharedPref.contains(notificationEnabledKey) || !sharedPref.contains(notificationTimeKey)
+        if (preferencesEnabled && missingPreferences) {
             setNotificationPreferences(true, notificationTimeDefault)
             setNotification(notificationTimeDefault)
-        } else {
-            // TODO: Remove this, just here for testing purposes
-            Toast.makeText(context, "Daily notification already set for ${timeToString(notificationTime)}", Toast.LENGTH_LONG).show()
+        }
+        // TODO: Remove these toasts, just here for testing purposes
+        else if (!preferencesEnabled) {
+            Toast.makeText(context, "Notifications are disabled.", Toast.LENGTH_LONG).show()
+        } else if (!missingPreferences) {
+            Toast.makeText(context, "Notification already set for ${timeToString(notificationTime)}.", Toast.LENGTH_LONG).show()
         }
     }
 
