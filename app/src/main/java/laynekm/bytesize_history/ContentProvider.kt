@@ -122,7 +122,7 @@ class ContentProvider {
 
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         val filteredItems: MutableList<HistoryItem> = mutableListOf()
-        items.forEach { if (selectedFilters.eras.contains(it.era)) filteredItems.add(it) }
+        items.forEach { if (selectedFilters.eras.contains(it.era) || it.era === Era.NONE) filteredItems.add(it) }
         if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
         return filteredItems
     }
@@ -212,14 +212,10 @@ class ContentProvider {
         val year = parseYear(line, type)
         val depth = parseDepth(line)
         val (desc, links) = parseDescriptionAndLinks(line, type)
-//        Log.wtf(TAG, "$desc")
-        val historyItem = HistoryItem(type, year, desc, links, depth)
-        Log.wtf(TAG, "$year - $desc")
-        return historyItem
+        return HistoryItem(type, year, desc, links, depth)
     }
 
     // Parse out unneeded chars and return integer representation of year (BC will be negative)
-    // TODO: Properly assign year to sublists
     private fun parseYear(line: String, type: Type): Int? {
         if (type === Type.OBSERVANCE) return null
 
