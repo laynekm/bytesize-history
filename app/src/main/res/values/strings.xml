@@ -2,6 +2,8 @@
     <string name="app_name">Bytesize History</string>
     <string name="date_settings">Change date</string>
     <string name="theme_settings">Change theme</string>
+    <string name="theme_settings_light">Change to dark theme</string>
+    <string name="theme_settings_dark">Change to light theme</string>
     <string name="notification_settings">Notification settings</string>
     <string name="calendar_view">Calendar</string>
     <string name="filter_view">Filter</string>

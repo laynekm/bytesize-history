@@ -1,21 +1,16 @@
 package laynekm.bytesize_history
 
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
-import android.view.View
 import android.widget.Button
-import android.widget.Switch
 import android.widget.TextView
-import android.widget.Toast
 
 class NotificationSettingsActivity : AppCompatActivity() {
 
-    private lateinit var notificationManager: NotificationManager
     private var preferencesKey = ""
     private var notificationEnabledKey = ""
     private var notificationTimeKey = ""
@@ -28,7 +23,14 @@ class NotificationSettingsActivity : AppCompatActivity() {
     private lateinit var notificationToggleButton: Button
     private lateinit var notificationTimeButton: Button
 
+    private lateinit var notificationManager: NotificationManager
+    private lateinit var themeManager: ThemeManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Set theme before content is displayed
+        themeManager = ThemeManager(this, ::recreate)
+        themeManager.applyTheme()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_settings)
 

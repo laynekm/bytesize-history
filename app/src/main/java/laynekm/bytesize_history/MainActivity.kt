@@ -103,6 +103,11 @@ class MainActivity : AppCompatActivity()  {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
+        val themeMenuItem = menu.findItem(R.id.changeTheme)
+        when (theme) {
+            "light" -> themeMenuItem.title = getString(R.string.theme_settings_light)
+            "dark" -> themeMenuItem.title = getString(R.string.theme_settings_dark)
+        }
         return true
     }
 

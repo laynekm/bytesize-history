@@ -1,11 +1,14 @@
 <resources>
     <!-- Light theme -->
     <style name="AppTheme.Light" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowDisablePreview">true</item>
+
         <item name="colorPrimary">@color/lightPrimary</item>
         <item name="colorPrimaryLight">@color/lightPrimaryLight</item>
         <item name="colorPrimaryDark">@color/lightPrimaryDark</item>
         <item name="colorAccent">@color/lightColorAccent</item>
 
+        <item name="android:windowBackground">@color/lightBackground</item>
         <item name="android:colorBackground">@color/lightBackground</item>
         <item name="colorBackground">@color/lightBackground</item>
         <item name="colorBackgroundDark">@color/lightBackgroundDark</item>
@@ -14,6 +17,10 @@
         <item name="colorText">@color/lightText</item>
         <item name="colorTextLight">@color/lightTextLight</item>
         <item name="colorTextDark">@color/lightTextDark</item>
+
+        <item name="colorButton">@color/lightPrimary</item>
+        <item name="colorBorderBottom">@color/lightPrimary</item>
+        <item name="colorBorderLeft">@color/lightBackgroundDark</item>
 
         <item name="android:datePickerDialogTheme">@style/dialogThemeLight</item>
         <item name="android:timePickerDialogTheme">@style/dialogThemeLight</item>
@@ -24,11 +31,14 @@
 
     <!-- Dark theme -->
     <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowDisablePreview">true</item>
+        
         <item name="colorPrimary">@color/darkPrimary</item>
         <item name="colorPrimaryLight">@color/darkPrimaryLight</item>
         <item name="colorPrimaryDark">@color/darkPrimaryDark</item>
         <item name="colorAccent">@color/darkColorAccent</item>
 
+        <item name="android:windowBackground">@color/darkBackground</item>
         <item name="android:colorBackground">@color/darkBackground</item>
         <item name="colorBackground">@color/darkBackground</item>
         <item name="colorBackgroundDark">@color/darkBackgroundDark</item>
@@ -38,11 +48,15 @@
         <item name="colorTextLight">@color/darkTextLight</item>
         <item name="colorTextDark">@color/darkTextDark</item>
 
+        <item name="colorButton">@color/darkPrimaryLight</item>
+        <item name="colorBorderBottom">@color/darkColorAccent</item>
+        <item name="colorBorderLeft">@color/darkText</item>
+
         <item name="android:datePickerDialogTheme">@style/dialogThemeDark</item>
         <item name="android:timePickerDialogTheme">@style/dialogThemeDark</item>
     </style>
     <!-- TODO: Style dialog for dark theme -->
     <style name="dialogThemeDark" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorAccent">@color/darkColorAccent</item>
+        <item name="colorAccent">@color/darkPrimaryLight</item>
     </style>
 </resources>
