@@ -3,12 +3,12 @@
                                              xmlns:app="http://schemas.android.com/apk/res-auto"
                                              android:layout_width="match_parent"
                                              android:layout_height="match_parent"
-                                             android:background="@color/colorBackground"
+                                             android:background="?attr/colorBackground"
                                              android:paddingBottom="16dp">
 
     <Switch
             android:text="@string/order_descending"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/notification_switch"
@@ -26,7 +26,7 @@
             android:layout_marginStart="8dp" android:textStyle="bold"/>
     <Switch
             android:text="@string/era_2000s"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:id="@+id/switch2000s" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -35,7 +35,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switch1900s" app:layout_constraintHorizontal_bias="1.0"/>
     <Switch
             android:text="@string/era_1900s"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:id="@+id/switch1900s" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -44,7 +44,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switch1800s" app:layout_constraintHorizontal_bias="0.0"/>
     <Switch
             android:text="@string/era_modern"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:id="@+id/switchEarlyModern" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -53,7 +53,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switchMedieval" app:layout_constraintHorizontal_bias="1.0"/>
     <Switch
             android:text="@string/era_1800s"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:id="@+id/switch1800s" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -62,7 +62,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switchEarlyModern" app:layout_constraintHorizontal_bias="0.0"/>
     <Switch
             android:text="@string/era_medieval"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/switchMedieval" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -71,7 +71,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switchAncient" app:layout_constraintHorizontal_bias="0.0"/>
     <Switch
             android:text="@string/type_deaths"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/switchDeaths" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -80,7 +80,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switchBirths" app:layout_constraintHorizontal_bias="1.0"/>
     <Switch
             android:text="@string/type_observances"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/switchObservances" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -89,7 +89,7 @@
             app:layout_constraintTop_toBottomOf="@+id/switchDeaths" app:layout_constraintHorizontal_bias="1.0"/>
     <Switch
             android:text="@string/era_ancient"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/switchAncient" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -98,7 +98,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView3" app:layout_constraintHorizontal_bias="1.0"/>
     <Switch
             android:text="@string/type_births"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/switchBirths" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
@@ -115,7 +115,7 @@
             android:layout_marginTop="16dp" android:textStyle="bold"/>
     <Switch
             android:text="@string/type_events"
-            android:textColor="@color/colorText"
+            android:textColor="?attr/colorText"
             android:layout_width="match_parent"
             android:layout_height="24dp"
             android:id="@+id/switchEvents" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"

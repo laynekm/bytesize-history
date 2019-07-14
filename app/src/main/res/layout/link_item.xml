@@ -9,7 +9,7 @@
         android:orientation="vertical"
         android:minHeight="40dp"
         android:id="@+id/linkItem"
-        android:background="@color/colorBackgroundDark">
+        android:background="?attr/colorBackgroundDark">
 
     <TextView
             android:text="Winston Churchill"
