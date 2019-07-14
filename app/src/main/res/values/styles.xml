@@ -8,7 +8,6 @@
         <item name="colorPrimaryDark">@color/lightPrimaryDark</item>
         <item name="colorAccent">@color/lightColorAccent</item>
 
-        <item name="android:windowBackground">@color/lightBackground</item>
         <item name="android:colorBackground">@color/lightBackground</item>
         <item name="colorBackground">@color/lightBackground</item>
         <item name="colorBackgroundDark">@color/lightBackgroundDark</item>
@@ -38,7 +37,6 @@
         <item name="colorPrimaryDark">@color/darkPrimaryDark</item>
         <item name="colorAccent">@color/darkColorAccent</item>
 
-        <item name="android:windowBackground">@color/darkBackground</item>
         <item name="android:colorBackground">@color/darkBackground</item>
         <item name="colorBackground">@color/darkBackground</item>
         <item name="colorBackgroundDark">@color/darkBackgroundDark</item>
