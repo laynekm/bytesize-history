@@ -33,10 +33,10 @@
     <string name="era_2000s">🏨 2000s</string>
 
     <!-- Preferences -->
-    <string name="notification_pref_key">notification_preferences</string>
+    <string name="preferences_key">preferences</string>
+    <string name="theme_pref_key">theme</string>
     <string name="notification_enabled_pref_key">send_notifications</string>
     <string name="notification_time_pref_key">notification_time</string>
-    <string name="filter_pref_key">filter_preferences</string>
     <string name="has_filter_prefs_key">has_filter_preferences</string>
 
     <!-- User dialog messages -->

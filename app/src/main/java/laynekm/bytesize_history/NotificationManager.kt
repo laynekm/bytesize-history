@@ -11,7 +11,7 @@ import java.util.*
 // TODO: Should notifications abide by the user's preferences? What if they have all eras turned off?
 class NotificationManager(val context: Context) {
 
-    private val preferencesKey = context.getString(R.string.notification_pref_key)
+    private val preferencesKey = context.getString(R.string.preferences_key)
     private val notificationEnabledKey = context.getString(R.string.notification_enabled_pref_key)
     private val notificationTimeKey = context.getString(R.string.notification_time_pref_key)
     private val notificationTimeDefault = stringToTime(context.getString(R.string.notification_time_default))

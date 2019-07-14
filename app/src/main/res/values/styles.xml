@@ -41,7 +41,8 @@
         <item name="android:datePickerDialogTheme">@style/dialogThemeDark</item>
         <item name="android:timePickerDialogTheme">@style/dialogThemeDark</item>
     </style>
+    <!-- TODO: Style dialog for dark theme -->
     <style name="dialogThemeDark" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorAccent">@color/lightPrimary</item>
+        <item name="colorAccent">@color/darkColorAccent</item>
     </style>
 </resources>

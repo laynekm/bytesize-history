@@ -40,13 +40,14 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
-    private lateinit var sharedPref: SharedPreferences
 
+    private lateinit var themeManager: ThemeManager
     private lateinit var filterManager: FilterManager
     private lateinit var notificationManager: NotificationManager
     private var filterOptions: FilterOptions = FilterOptions()
     private val contentProvider: ContentProvider = ContentProvider()
 
+    private var theme: String = "light"
     private var selectedDate: Date = getToday()
     private var selectedType: Type? = filterOptions.types[0]
     private var fetching: Boolean = false
@@ -56,8 +57,13 @@ class MainActivity : AppCompatActivity()  {
     // TODO: Set new date if app is loaded on a new day without being closed the day before
     // TODO: Unify view/variable names (ie. turn some views into buttons with fitting ids/variable names)
     // TODO: Allow user to go back in WebView without closing it
-    // TODO: Add dark theme
+    // TODO: Preserve recycler view content on destroy
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Set theme before content is displayed
+        themeManager = ThemeManager(this, ::recreate)
+        themeManager.applyTheme()
+        theme = themeManager.getTheme()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -74,7 +80,6 @@ class MainActivity : AppCompatActivity()  {
         dropdownFilter = findViewById(R.id.dropdownFilter)
         datePickerButton = findViewById(R.id.calendarView)
         webView = findViewById(R.id.webView)
-        sharedPref = this.getSharedPreferences(getString(R.string.notification_pref_key), Context.MODE_PRIVATE)
 
         setSupportActionBar(toolbar)
         retryBtn.setOnClickListener { fetchHistoryItems() }
@@ -109,7 +114,11 @@ class MainActivity : AppCompatActivity()  {
                 return true
             }
             R.id.changeTheme -> {
-                true
+                when (theme) {
+                    "light" -> { themeManager.setTheme("dark") }
+                    "dark" -> { themeManager.setTheme("light") }
+                }
+                return true
             }
             else -> super.onOptionsItemSelected(item)
         }
