@@ -7,19 +7,21 @@
     <color name="lightPrimary">#9C27B0</color>
     <color name="lightPrimaryDark">#7B1FA2</color>
     <color name="lightPrimaryLight">#E1BEE7</color>
-    <color name="lightColorAccent">#e040fb</color>
+    <color name="lightColorAccent">#9C27B0</color>
     <color name="lightBackground">#ffffff</color>
     <color name="lightBackgroundDark">#ebebeb</color>
     <color name="lightText">#808080</color>
+    <color name="lightTextLight">#ffffff</color>
     <color name="lightTextDark">#606060</color>
 
     <!-- Dark theme colours -->
-    <color name="darkPrimary">#9C27B0</color>
-    <color name="darkPrimaryDark">#7B1FA2</color>
-    <color name="darkPrimaryLight">#E1BEE7</color>
+    <color name="darkPrimary">#121212</color>
+    <color name="darkPrimaryDark">#000000</color>
+    <color name="darkPrimaryLight">#212121</color>
     <color name="darkColorAccent">#e040fb</color>
-    <color name="darkBackground">#ffffff</color>
-    <color name="darkBackgroundDark">#ebebeb</color>
-    <color name="darkText">#808080</color>
-    <color name="darkTextDark">#606060</color>
+    <color name="darkBackground">#303030</color>
+    <color name="darkBackgroundDark">#212121</color>
+    <color name="darkText">#ebebeb</color>
+    <color name="darkTextLight">#ebebeb</color>
+    <color name="darkTextDark">#ebebeb</color>
 </resources>
