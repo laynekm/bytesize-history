@@ -46,7 +46,7 @@ class ContentProvider {
     fun fetchHistoryItems(
         date: Date,
         filters: FilterOptions,
-        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit,
+        updateRecyclerView: (HashMap<Type, MutableList<HistoryItem>>) -> Unit,
         onFetchError: () -> Unit) {
 
         this.selectedFilters = filters.copy()
@@ -96,7 +96,7 @@ class ContentProvider {
 
     fun filterHistoryItems(
         filters: FilterOptions,
-        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
+        updateRecyclerView: (HashMap<Type, MutableList<HistoryItem>>) -> Unit) {
 
         if (selectedFilters.equals(filters)) return
         selectedFilters = filters.copy()

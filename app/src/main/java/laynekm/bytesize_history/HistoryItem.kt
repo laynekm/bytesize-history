@@ -61,8 +61,8 @@ class Link (
     }
 }
 
-fun getEmptyTypeMap(): MutableMap<Type, MutableList<HistoryItem>> {
-    return mutableMapOf(
+fun getEmptyTypeMap(): HashMap<Type, MutableList<HistoryItem>> {
+    return hashMapOf(
         Type.EVENT to mutableListOf(),
         Type.BIRTH to mutableListOf(),
         Type.DEATH to mutableListOf(),

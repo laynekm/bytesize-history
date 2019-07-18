@@ -22,9 +22,9 @@ import android.util.Log
 import android.widget.*
 
 
-class HistoryViews(var views: MutableMap<Type, RecyclerView>)
-class HistoryAdapters(var adapters: MutableMap<Type, HistoryItemAdapter>)
-class TextViewFilters(var filters: MutableMap<Type, TextView>)
+class HistoryViews(var views: HashMap<Type, RecyclerView>)
+class HistoryAdapters(var adapters: HashMap<Type, HistoryItemAdapter>)
+class TextViewFilters(var filters: HashMap<Type, TextView>)
 
 class MainActivity : AppCompatActivity()  {
 
@@ -131,14 +131,14 @@ class MainActivity : AppCompatActivity()  {
 
     // Get RecyclerViews and create their adapters, initialized as empty
     private fun initializeRecyclerViews() {
-        historyViews = HistoryViews(mutableMapOf(
+        historyViews = HistoryViews(hashMapOf(
             Type.EVENT to findViewById(R.id.eventItems),
             Type.BIRTH to findViewById(R.id.birthItems),
             Type.DEATH to findViewById(R.id.deathItems),
             Type.OBSERVANCE to findViewById((R.id.observanceItems))
         ))
 
-        historyAdapters = HistoryAdapters(mutableMapOf(
+        historyAdapters = HistoryAdapters(hashMapOf(
             Type.EVENT to HistoryItemAdapter(this, mutableListOf()),
             Type.BIRTH to HistoryItemAdapter(this, mutableListOf()),
             Type.DEATH to HistoryItemAdapter(this, mutableListOf()),
@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity()  {
 
     // Get filter TextViews and assign onClick handlers
     private fun initializeFilters() {
-        textViewFilters = TextViewFilters(mutableMapOf(
+        textViewFilters = TextViewFilters(hashMapOf(
             Type.EVENT to findViewById(R.id.eventBtn) as TextView,
             Type.BIRTH to findViewById(R.id.birthBtn) as TextView,
             Type.DEATH to findViewById(R.id.deathBtn) as TextView,
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity()  {
     }
 
     // Callback function to update RecyclerViews and other UI elements
-    private fun updateRecyclerView(items: MutableMap<Type, MutableList<HistoryItem>>) {
+    private fun updateRecyclerView(items: HashMap<Type, MutableList<HistoryItem>>) {
         fetching = false
         progressBar.visibility = View.GONE
 
