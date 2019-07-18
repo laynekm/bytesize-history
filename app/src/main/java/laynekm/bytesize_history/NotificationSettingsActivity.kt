@@ -26,6 +26,7 @@ class NotificationSettingsActivity : AppCompatActivity() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var themeManager: ThemeManager
 
+    // TODO: Fix time not being formatted when enabled
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set theme before content is displayed
         themeManager = ThemeManager(this, ::recreate)

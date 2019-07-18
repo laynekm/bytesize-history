@@ -17,7 +17,8 @@ class NotificationReceiver : BroadcastReceiver() {
 
     private val contentProvider: ContentProvider = ContentProvider()
 
-    // TODO: Fix notifications not working over data connection
+    // TODO: Fix notifications not working over data connection sometimes
+    // TODO: Account for negatives (should show BC instead)
     override fun onReceive(context: Context, intent: Intent) {
         this.createNotificationChannel(context)
         this.contentProvider.fetchDailyHistoryFact(context, ::pushNotification)
