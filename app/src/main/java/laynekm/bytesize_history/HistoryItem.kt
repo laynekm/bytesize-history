@@ -10,6 +10,7 @@ class HistoryItem (
     var image: String = ""
     var hasFetchedImage: Boolean = false
     var era: Era = determineEra(year)
+    var linksVisible = false
 
     private fun determineEra(year: Int?): Era {
         if (year === null) return Era.NONE
