@@ -41,21 +41,20 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
 
+    private val contentManager: ContentManager = ContentManager()
     private lateinit var themeManager: ThemeManager
     private lateinit var filterManager: FilterManager
     private lateinit var notificationManager: NotificationManager
-    private var filterOptions: FilterOptions = FilterOptions()
-    private val contentProvider: ContentProvider = ContentProvider()
 
     private var theme: String = "light"
     private var selectedDate: Date = getToday()
-    private var selectedType: Type? = filterOptions.types[0]
+    private var selectedType: Type? = HistoryItems.filterOptions.types[0]
     private var fetching: Boolean = false
 
     private val dateKey = "selectedDate"
+    private val typeKey = "selectedType"
 
     // TODO: Set new date if app is loaded on a new day without being closed the day before
-    // TODO: Unify view/variable names (ie. turn some views into buttons with fitting ids/variable names)
     // TODO: Allow user to go back in WebView without closing it
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set theme before content is displayed
@@ -68,6 +67,7 @@ class MainActivity : AppCompatActivity()  {
 
         if (savedInstanceState !== null) {
             selectedDate = stringToDate(savedInstanceState.getString(dateKey))
+            selectedType = stringToType(savedInstanceState.getString(typeKey))
         }
 
         toolbar = findViewById(R.id.toolbar)
@@ -88,8 +88,8 @@ class MainActivity : AppCompatActivity()  {
 
         notificationManager = NotificationManager(this)
         filterManager = FilterManager(this)
-        if (filterManager.hasPreferences()) filterOptions = filterManager.getPreferences()
-        else filterManager.setPreferences(filterOptions)
+        if (filterManager.hasPreferences()) HistoryItems.filterOptions = filterManager.getPreferences()
+        else filterManager.setPreferences(HistoryItems.filterOptions)
 
         initializeRecyclerViews()
         initializeFilters()
@@ -97,11 +97,10 @@ class MainActivity : AppCompatActivity()  {
         setSelectedType(selectedType)
         dateLabel.text = buildDateForLabel(selectedDate)
 
-        Log.wtf("MainActivity", HistoryItems.allHistoryItems.toString())
         if (mapIsEmpty(HistoryItems.allHistoryItems) || mapIsEmpty(HistoryItems.filteredHistoryItems)) {
             fetchHistoryItems()
         } else {
-            updateRecyclerView(HistoryItems.filteredHistoryItems)
+            updateViews(true)
         }
     }
 
@@ -177,24 +176,25 @@ class MainActivity : AppCompatActivity()  {
         retryBtn.visibility = View.GONE
         errorTextView.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
-        contentProvider.fetchHistoryItems(selectedDate, filterOptions, ::updateRecyclerView, ::onFetchError)
-    }
-
-    // Filter history items without having to refetch
-    private fun filterHistoryItems() {
-        contentProvider.filterHistoryItems(filterOptions, ::updateRecyclerView)
+        contentManager.fetchHistoryItems(selectedDate, ::updateViews)
     }
 
     // Callback function to update RecyclerViews and other UI elements
-    private fun updateRecyclerView(items: HashMap<Type, MutableList<HistoryItem>>) {
+    private fun updateViews(success: Boolean) {
         fetching = false
         progressBar.visibility = View.GONE
 
-        for ((type, adapter) in historyAdapters.adapters) {
-            adapter.setItems(items[type]!!)
-        }
+        if (success) {
+            for ((type, adapter) in historyAdapters.adapters) {
+                adapter.setItems(HistoryItems.filteredHistoryItems[type]!!)
+            }
 
-        checkFilterResults(selectedType)
+            checkFilterResults(selectedType)
+        } else {
+            retryBtn.visibility = View.VISIBLE
+            errorTextView.visibility = View.VISIBLE
+            errorTextView.setText(R.string.fetch_error)
+        }
     }
 
     // Update date using value selected from calendar, clear and refetch history items if it changed
@@ -202,7 +202,8 @@ class MainActivity : AppCompatActivity()  {
         if (!datesEqual(date, selectedDate)) {
             selectedDate = date
             dateLabel.text = buildDateForLabel(selectedDate)
-            updateRecyclerView(getEmptyTypeMap())
+            HistoryItems.filteredHistoryItems = getEmptyTypeMap()
+            updateViews(true)
             fetchHistoryItems()
         }
     }
@@ -210,7 +211,7 @@ class MainActivity : AppCompatActivity()  {
     // Toggle dropdown filter visibility and handle updating filters
     private fun dropdownFilterOnClick() {
         if (dropdownView.visibility == View.GONE) {
-            filterManager.setViewContent(dropdownView, filterOptions)
+            filterManager.setViewContent(dropdownView, HistoryItems.filterOptions)
             dropdownFilter.rotation = 180.toFloat()
             dropdownView.visibility = View.VISIBLE
             dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
@@ -220,11 +221,12 @@ class MainActivity : AppCompatActivity()  {
             dropdownView.visibility = View.GONE
 
             val newFilters = filterManager.setFilterOptions(dropdownView)
-            if (!newFilters.equals(filterOptions)) {
-                filterOptions = newFilters.copy()
-                filterManager.setPreferences(filterOptions)
+            if (!newFilters.equals(HistoryItems.filterOptions)) {
+                HistoryItems.filterOptions = newFilters.copy()
+                filterManager.setPreferences(HistoryItems.filterOptions)
                 updateTypeSelectors()
-                filterHistoryItems()
+                contentManager.filterHistoryItems()
+                updateViews(true)
             }
         }
     }
@@ -232,14 +234,14 @@ class MainActivity : AppCompatActivity()  {
     // Shows and hides type selectors according to filter options
     private fun updateTypeSelectors() {
         for ((type, textView) in textViewFilters.filters) {
-            if (filterOptions.types.contains(type)) textView.visibility = View.VISIBLE
+            if (HistoryItems.filterOptions.types.contains(type)) textView.visibility = View.VISIBLE
             else textView.visibility = View.GONE
         }
 
         // Case where selectedType is no longer in filterOptions, or no types are in filterOptions
-        if (!filterOptions.types.contains(selectedType)) {
-            if (filterOptions.types.size == 0) setSelectedType(null)
-            else setSelectedType(filterOptions.types[0])
+        if (!HistoryItems.filterOptions.types.contains(selectedType)) {
+            if (HistoryItems.filterOptions.types.size == 0) setSelectedType(null)
+            else setSelectedType(HistoryItems.filterOptions.types[0])
         }
     }
 
@@ -285,13 +287,6 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
-    private fun onFetchError() {
-        progressBar.visibility = View.GONE
-        retryBtn.visibility = View.VISIBLE
-        errorTextView.visibility = View.VISIBLE
-        errorTextView.setText(R.string.fetch_error)
-    }
-
     private fun checkFilterResults(type: Type?) {
         if (type === null) {
             errorTextView.visibility = View.VISIBLE
@@ -308,5 +303,6 @@ class MainActivity : AppCompatActivity()  {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState);
         outState.putString(dateKey, dateToString(selectedDate))
+        outState.putString(typeKey, "$selectedType")
     }
 }

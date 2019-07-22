@@ -1,26 +1,5 @@
 package laynekm.bytesize_history
 
-enum class Order constructor(private val type: String) {
-    ASCENDING("Ascending"), DESCENDING("Descending");
-    override fun toString(): String = this.type
-}
-
-enum class Type constructor(private val type: String) {
-    EVENT("Event"), BIRTH("Birth"), DEATH("Death"), OBSERVANCE("Observance");
-    override fun toString(): String = this.type
-}
-
-enum class Era constructor(private val type: String) {
-    ANCIENT("Ancient"),
-    MEDIEVAL("Medieval"),
-    EARLYMODERN("Early Modern"),
-    EIGHTEENS("1800s"),
-    NINETEENS("1900s"),
-    TWOTHOUSANDS("2000s"),
-    NONE("None");
-    override fun toString(): String = this.type
-}
-
 class HistoryItem (
     val type: Type,
     val year: Int?,
@@ -58,27 +37,5 @@ class Link (
 
     override fun toString(): String {
         return "$title ($link)"
-    }
-}
-
-fun getEmptyTypeMap(): HashMap<Type, MutableList<HistoryItem>> {
-    return hashMapOf(
-        Type.EVENT to mutableListOf(),
-        Type.BIRTH to mutableListOf(),
-        Type.DEATH to mutableListOf(),
-        Type.OBSERVANCE to mutableListOf()
-    )
-}
-
-fun mapIsEmpty(map: HashMap<Type, MutableList<HistoryItem>>): Boolean {
-    return map.values.all { it.isEmpty() }
-}
-
-fun mapTypeToLabel(type: Type): String {
-    return when (type) {
-        Type.EVENT -> "events"
-        Type.BIRTH -> "births"
-        Type.DEATH -> "deaths"
-        Type.OBSERVANCE -> "holidays/observances"
     }
 }

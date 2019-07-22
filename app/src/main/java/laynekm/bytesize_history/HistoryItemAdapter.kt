@@ -20,14 +20,11 @@ import android.widget.LinearLayout
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
-
-
-
-
+// TODO: Preserve opened linkViews onPause/onDestroy
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
-    private val contentProvider = ContentProvider()
+    private val contentManager = ContentManager()
     private val toolbar = (context as Activity).findViewById(R.id.toolbar) as Toolbar
     private val webView = (context as Activity).findViewById(R.id.webView) as WebView
     private val progressBar = (context as Activity).findViewById(R.id.progressBar) as ProgressBar
@@ -112,7 +109,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         doAsync {
             val image: String
             if (!item.hasFetchedImage) {
-                image = contentProvider.fetchImage(item.links)
+                image = contentManager.fetchImage(item.links)
                 item.image = image
                 item.hasFetchedImage = true
             } else {

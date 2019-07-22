@@ -15,13 +15,12 @@ class NotificationReceiver : BroadcastReceiver() {
 
     private val CHANNEL_ID = "NotificationReceiver"
 
-    private val contentProvider: ContentProvider = ContentProvider()
+    private val contentManager: ContentManager = ContentManager()
 
-    // TODO: Fix notifications not working over data connection sometimes
     // TODO: Account for negatives (should show BC instead)
     override fun onReceive(context: Context, intent: Intent) {
         this.createNotificationChannel(context)
-        this.contentProvider.fetchDailyHistoryFact(context, ::pushNotification)
+        this.contentManager.fetchDailyHistoryFact(context, ::pushNotification)
     }
 
     private fun pushNotification(context: Context, historyItem: HistoryItem, date: Date) {
@@ -37,7 +36,7 @@ class NotificationReceiver : BroadcastReceiver() {
         notificationManager.notify(1, builder.build())
     }
 
-    // Create the NotificationChannel, but only on API 26+ because
+    // Create the NotificationChannel (only necessary for API 26+)
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Bytesize History Notifications"
