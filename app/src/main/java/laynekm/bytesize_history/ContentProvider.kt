@@ -19,9 +19,6 @@ class ContentProvider {
     private val TAG = "BHContentProvider"
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
-
-    private var historyItems = getEmptyTypeMap()
-    private var filteredHistoryItems = getEmptyTypeMap()
     private var selectedFilters = FilterOptions()
 
     private fun connectToURL(url: URL): String {
@@ -64,13 +61,13 @@ class ContentProvider {
             }
 
             val allHistoryItems = parseContent(result)
-            for ((type) in historyItems) {
-                historyItems[type] = filterType(allHistoryItems, type)
-                filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
+            for ((type) in HistoryItems.allHistoryItems) {
+                HistoryItems.allHistoryItems[type] = filterType(allHistoryItems, type)
+                HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
             }
 
             // Callback function that updates recycler views in main thread
-            uiThread { updateRecyclerView(filteredHistoryItems) }
+            uiThread { updateRecyclerView(HistoryItems.filteredHistoryItems) }
         }
     }
 
@@ -101,11 +98,11 @@ class ContentProvider {
         if (selectedFilters.equals(filters)) return
         selectedFilters = filters.copy()
 
-        for ((type) in historyItems) {
-            filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
+        for ((type) in HistoryItems.allHistoryItems) {
+            HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
         }
 
-        updateRecyclerView(filteredHistoryItems)
+        updateRecyclerView(HistoryItems.filteredHistoryItems)
     }
 
     private fun filterType(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {

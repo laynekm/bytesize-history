@@ -70,6 +70,10 @@ fun getEmptyTypeMap(): HashMap<Type, MutableList<HistoryItem>> {
     )
 }
 
+fun mapIsEmpty(map: HashMap<Type, MutableList<HistoryItem>>): Boolean {
+    return map.values.all { it.isEmpty() }
+}
+
 fun mapTypeToLabel(type: Type): String {
     return when (type) {
         Type.EVENT -> "events"

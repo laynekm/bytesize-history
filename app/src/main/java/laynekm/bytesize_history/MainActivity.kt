@@ -57,7 +57,6 @@ class MainActivity : AppCompatActivity()  {
     // TODO: Set new date if app is loaded on a new day without being closed the day before
     // TODO: Unify view/variable names (ie. turn some views into buttons with fitting ids/variable names)
     // TODO: Allow user to go back in WebView without closing it
-    // TODO: Preserve recycler view content on destroy
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set theme before content is displayed
         themeManager = ThemeManager(this, ::recreate)
@@ -98,7 +97,12 @@ class MainActivity : AppCompatActivity()  {
         setSelectedType(selectedType)
         dateLabel.text = buildDateForLabel(selectedDate)
 
-        fetchHistoryItems()
+        Log.wtf("MainActivity", HistoryItems.allHistoryItems.toString())
+        if (mapIsEmpty(HistoryItems.allHistoryItems) || mapIsEmpty(HistoryItems.filteredHistoryItems)) {
+            fetchHistoryItems()
+        } else {
+            updateRecyclerView(HistoryItems.filteredHistoryItems)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
