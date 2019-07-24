@@ -12,22 +12,17 @@ import android.view.View
 import android.webkit.WebView
 import android.support.v7.widget.Toolbar
 import android.view.animation.AnimationUtils.loadAnimation
-import java.util.Calendar
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.util.Log
 import android.widget.*
-
 
 class HistoryViews(var views: HashMap<Type, RecyclerView>)
 class HistoryAdapters(var adapters: HashMap<Type, HistoryItemAdapter>)
 class TextViewFilters(var filters: HashMap<Type, TextView>)
 
-class MainActivity : AppCompatActivity()  {
+class MainActivity : AppCompatActivity(), MainPresenter.View  {
 
+    private lateinit var presenter: MainPresenter
     private lateinit var toolbar: Toolbar
     private lateinit var historyViews: HistoryViews
     private lateinit var historyAdapters: HistoryAdapters
@@ -41,34 +36,12 @@ class MainActivity : AppCompatActivity()  {
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
 
-    private val contentManager: ContentManager = ContentManager()
-    private lateinit var themeManager: ThemeManager
-    private lateinit var filterManager: FilterManager
-    private lateinit var notificationManager: NotificationManager
-
-    private var theme: String = "light"
-    private var selectedDate: Date = getToday()
-    private var selectedType: Type? = HistoryItems.filterOptions.types[0]
-    private var fetching: Boolean = false
-
-    private val dateKey = "selectedDate"
-    private val typeKey = "selectedType"
-
-    // TODO: Set new date if app is loaded on a new day without being closed the day before
-    // TODO: Allow user to go back in WebView without closing it
+    // TODO: Allow user to go back in WebView without closing it (move logic to MainPresenter?)
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Set theme before content is displayed
-        themeManager = ThemeManager(this, ::recreate)
-        themeManager.applyTheme()
-        theme = themeManager.getTheme()
+        presenter = MainPresenter(this, this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        if (savedInstanceState !== null) {
-            selectedDate = stringToDate(savedInstanceState.getString(dateKey))
-            selectedType = stringToType(savedInstanceState.getString(typeKey))
-        }
 
         toolbar = findViewById(R.id.toolbar)
         dateLabel = findViewById(R.id.dateLabel)
@@ -81,33 +54,21 @@ class MainActivity : AppCompatActivity()  {
         webView = findViewById(R.id.webView)
 
         setSupportActionBar(toolbar)
-        retryBtn.setOnClickListener { fetchHistoryItems() }
-        dropdownFilter.setOnClickListener { dropdownFilterOnClick() }
-        datePickerButton.setOnClickListener { showDatePickerDialog() }
+        retryBtn.setOnClickListener { presenter.fetchHistoryItems() }
+        dropdownFilter.setOnClickListener { presenter.toggleFilterDropdown(dropdownView) }
+        datePickerButton.setOnClickListener { presenter.showDatePickerDialog() }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
-        notificationManager = NotificationManager(this)
-        filterManager = FilterManager(this)
-        if (filterManager.hasPreferences()) HistoryItems.filterOptions = filterManager.getPreferences()
-        else filterManager.setPreferences(HistoryItems.filterOptions)
-
         initializeRecyclerViews()
-        initializeFilters()
+        initializeFilterViews()
 
-        setSelectedType(selectedType)
-        dateLabel.text = buildDateForLabel(selectedDate)
-
-        if (mapIsEmpty(HistoryItems.allHistoryItems) || mapIsEmpty(HistoryItems.filteredHistoryItems)) {
-            fetchHistoryItems()
-        } else {
-            updateViews(true)
-        }
+        presenter.onViewCreated(savedInstanceState)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         val themeMenuItem = menu.findItem(R.id.changeTheme)
-        when (theme) {
+        when (presenter.getTheme()) {
             "light" -> themeMenuItem.title = getString(R.string.theme_settings_light)
             "dark" -> themeMenuItem.title = getString(R.string.theme_settings_dark)
         }
@@ -120,15 +81,10 @@ class MainActivity : AppCompatActivity()  {
                 val notificationSettingsIntent = Intent(this@MainActivity, NotificationSettingsActivity::class.java)
                 startActivity(notificationSettingsIntent)
                 return true
-            }
-            R.id.changeTheme -> {
-                when (theme) {
-                    "light" -> { themeManager.setTheme("dark") }
-                    "dark" -> { themeManager.setTheme("light") }
-                }
+            } R.id.changeTheme -> {
+                presenter.toggleTheme()
                 return true
-            }
-            else -> super.onOptionsItemSelected(item)
+            } else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -155,7 +111,7 @@ class MainActivity : AppCompatActivity()  {
     }
 
     // Get filter TextViews and assign onClick handlers
-    private fun initializeFilters() {
+    private fun initializeFilterViews() {
         textViewFilters = TextViewFilters(hashMapOf(
             Type.EVENT to findViewById(R.id.eventBtn) as TextView,
             Type.BIRTH to findViewById(R.id.birthBtn) as TextView,
@@ -164,93 +120,69 @@ class MainActivity : AppCompatActivity()  {
         ))
 
         for ((type, textView) in textViewFilters.filters) {
-            textView.setOnClickListener { setSelectedType(type) }
+            textView.setOnClickListener { presenter.setCurrentType(type) }
         }
-
-        updateTypeSelectors()
     }
 
-    // Fetch history items from content provider
-    private fun fetchHistoryItems() {
-        fetching = true
+    override fun onFetchStarted() {
+        progressBar.visibility = View.VISIBLE
         retryBtn.visibility = View.GONE
         errorTextView.visibility = View.GONE
-        progressBar.visibility = View.VISIBLE
-        contentManager.fetchHistoryItems(selectedDate, ::updateViews)
     }
 
-    // Callback function to update RecyclerViews and other UI elements
-    private fun updateViews(success: Boolean) {
-        fetching = false
+    override fun onFetchFinished() {
         progressBar.visibility = View.GONE
+    }
 
-        if (success) {
-            for ((type, adapter) in historyAdapters.adapters) {
-                adapter.setItems(HistoryItems.filteredHistoryItems[type]!!)
-            }
-
-            checkFilterResults(selectedType)
-        } else {
-            retryBtn.visibility = View.VISIBLE
-            errorTextView.visibility = View.VISIBLE
-            errorTextView.setText(R.string.fetch_error)
+    override fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>) {
+        for ((type, adapter) in historyAdapters.adapters) {
+            adapter.setItems(items[type]!!)
         }
     }
 
-    // Update date using value selected from calendar, clear and refetch history items if it changed
-    private fun updateDate(date: Date) {
-        if (!datesEqual(date, selectedDate)) {
-            selectedDate = date
-            dateLabel.text = buildDateForLabel(selectedDate)
-            HistoryItems.filteredHistoryItems = getEmptyTypeMap()
-            updateViews(true)
-            fetchHistoryItems()
-        }
-    }
+    override fun onError(error: Error?, type: Type?) {
+        errorTextView.visibility = View.VISIBLE
 
-    // Toggle dropdown filter visibility and handle updating filters
-    private fun dropdownFilterOnClick() {
-        if (dropdownView.visibility == View.GONE) {
-            filterManager.setViewContent(dropdownView, HistoryItems.filterOptions)
-            dropdownFilter.rotation = 180.toFloat()
-            dropdownView.visibility = View.VISIBLE
-            dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
-        } else {
-            dropdownFilter.rotation = 0.toFloat()
-            dropdownView.startAnimation(loadAnimation(this, R.anim.slide_up))
-            dropdownView.visibility = View.GONE
-
-            val newFilters = filterManager.setFilterOptions(dropdownView)
-            if (!newFilters.equals(HistoryItems.filterOptions)) {
-                HistoryItems.filterOptions = newFilters.copy()
-                filterManager.setPreferences(HistoryItems.filterOptions)
-                updateTypeSelectors()
-                contentManager.filterHistoryItems()
-                updateViews(true)
+        when (error) {
+            Error.FETCH_ERROR -> {
+                retryBtn.visibility = View.VISIBLE
+                errorTextView.text = getString(R.string.fetch_error)
+            } Error.TYPE_ERROR -> {
+                errorTextView.text = getString(R.string.type_error)
+            } Error.FILTER_ERROR -> {
+                errorTextView.text = getString(R.string.filter_error, mapTypeToLabel(type!!))
+            } else -> {
+                errorTextView.visibility = View.GONE
             }
         }
     }
 
-    // Shows and hides type selectors according to filter options
-    private fun updateTypeSelectors() {
+    override fun onDateChanged(date: Date) {
+        dateLabel.text = buildDateForLabel(date)
+    }
+
+    override fun onFiltersChanged(filters: FilterOptions) {
         for ((type, textView) in textViewFilters.filters) {
-            if (HistoryItems.filterOptions.types.contains(type)) textView.visibility = View.VISIBLE
+            if (filters.types.contains(type)) textView.visibility = View.VISIBLE
             else textView.visibility = View.GONE
         }
-
-        // Case where selectedType is no longer in filterOptions, or no types are in filterOptions
-        if (!HistoryItems.filterOptions.types.contains(selectedType)) {
-            if (HistoryItems.filterOptions.types.size == 0) setSelectedType(null)
-            else setSelectedType(HistoryItems.filterOptions.types[0])
-        }
     }
 
-    // Sets current history item type and hides other views
-    private fun setSelectedType(newType: Type?) {
-        selectedType = newType
+    override fun onDropdownOpened() {
+        dropdownFilter.rotation = 180.toFloat()
+        dropdownView.visibility = View.VISIBLE
+        dropdownView.startAnimation(loadAnimation(this, R.anim.slide_down))
+    }
 
+    override fun onDropdownClosed() {
+        dropdownFilter.rotation = 0.toFloat()
+        dropdownView.startAnimation(loadAnimation(this, R.anim.slide_up))
+        dropdownView.visibility = View.GONE
+    }
+
+    override fun onTypeChanged(newType: Type?) {
         for ((type, view) in historyViews.views) {
-            if (type === selectedType) {
+            if (type === newType) {
                 view.visibility = View.VISIBLE
                 textViewFilters.filters[type]!!.setTypeface(null, Typeface.BOLD)
                 textViewFilters.filters[type]!!.setBackgroundResource(R.drawable.border_bottom)
@@ -260,23 +192,14 @@ class MainActivity : AppCompatActivity()  {
                 textViewFilters.filters[type]!!.setBackgroundResource(0)
             }
         }
-
-        checkFilterResults(selectedType)
     }
 
-    // Displays DatePicker and handles calls updateDate with the new selected date
-    private fun showDatePickerDialog() {
-        val date: Calendar = Calendar.getInstance()
-        val selectedYear = date.get(Calendar.YEAR)
-        val selectedMonth = selectedDate.month
-        val selectedDay = selectedDate.day
-
-        DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, month, day ->
-            updateDate(Date(month, day))
-        }, selectedYear, selectedMonth, selectedDay).show()
+    override fun showDatePickerDialog(year: Int, month: Int, day: Int) {
+        DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, m, d ->
+            presenter.setCurrentDate(Date(m, d))
+        }, year, month, day).show()
     }
 
-    // If  WebView is open, back button should close the WebView; otherwise, it should function normally
     override fun onBackPressed() {
         if (webView.visibility == View.VISIBLE) {
             webView.visibility = View.GONE
@@ -287,22 +210,12 @@ class MainActivity : AppCompatActivity()  {
         }
     }
 
-    private fun checkFilterResults(type: Type?) {
-        if (type === null) {
-            errorTextView.visibility = View.VISIBLE
-            errorTextView.text = getString(R.string.type_error)
-        } else if (historyAdapters.adapters[type]!!.itemCount == 0) {
-            errorTextView.visibility = View.VISIBLE
-            errorTextView.text = getString(R.string.filter_error, mapTypeToLabel(type))
-        } else {
-            errorTextView.visibility = View.GONE
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        presenter.onSaveInstanceState(outState)
     }
 
-    // Ensures date is consistent when activity is destroyed/recreated
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState);
-        outState.putString(dateKey, dateToString(selectedDate))
-        outState.putString(typeKey, "$selectedType")
+    override fun recreate() {
+        super.recreate()
     }
 }
