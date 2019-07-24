@@ -2,7 +2,11 @@ package laynekm.bytesize_history
 
 import android.content.Context
 
-class ThemeManager(val context: Context, val recreate: () -> Unit) {
+fun default() {
+    return
+}
+
+class ThemeManager(val context: Context, val recreate: () -> Unit = ::default) {
 
     private val preferencesKey = context.getString(R.string.preferences_key)
     private val themePrefKey = context.getString(R.string.theme_pref_key)

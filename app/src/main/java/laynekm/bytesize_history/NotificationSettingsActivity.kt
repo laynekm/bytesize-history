@@ -1,103 +1,52 @@
 package laynekm.bytesize_history
 
 import android.app.TimePickerDialog
-import android.content.Context
-import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.Toolbar
 import android.widget.Button
 import android.widget.TextView
 
-class NotificationSettingsActivity : AppCompatActivity() {
+class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPresenter.View {
 
-    private var preferencesKey = ""
-    private var notificationEnabledKey = ""
-    private var notificationTimeKey = ""
-    private var notificationTimeDefault = ""
-    private var notificationEnabled: Boolean = false
-    private var notificationTime: String = notificationTimeDefault
-
-    private lateinit var sharedPref: SharedPreferences
+    private lateinit var presenter: NotificationSettingsPresenter
+    private lateinit var toolbar: Toolbar
     private lateinit var notificationSummaryTextView: TextView
     private lateinit var notificationToggleButton: Button
     private lateinit var notificationTimeButton: Button
 
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var themeManager: ThemeManager
-
-    // TODO: Fix time not being formatted when enabled
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Set theme before content is displayed
-        themeManager = ThemeManager(this, ::recreate)
-        themeManager.applyTheme()
+        presenter = NotificationSettingsPresenter(this, this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_settings)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setNavigationOnClickListener { onBackPressed() }
-
-        notificationManager = NotificationManager(this)
-
-        preferencesKey = getString(R.string.preferences_key)
-        notificationEnabledKey = getString(R.string.notification_enabled_pref_key)
-        notificationTimeKey = getString(R.string.notification_time_pref_key)
-        notificationTimeDefault = getString(R.string.notification_time_default)
-
+        toolbar = findViewById(R.id.toolbar)
         notificationSummaryTextView = findViewById(R.id.notification_summary_text)
         notificationToggleButton = findViewById(R.id.notification_toggle_btn)
         notificationTimeButton = findViewById(R.id.notification_time_btn)
 
-        sharedPref = this.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
-        notificationEnabled = sharedPref.getBoolean(notificationEnabledKey,  true)
-        notificationTime = sharedPref.getString(notificationTimeKey, notificationTimeDefault)!!
-
-        if (notificationEnabled) {
-            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, stringTo12HourString(notificationTime))
-            notificationToggleButton.text = getString(R.string.notification_disable)
-        } else {
-            notificationSummaryTextView.text = getString(R.string.notification_summary_disabled)
-            notificationToggleButton.text = getString(R.string.notification_enable)
-            notificationTimeButton.isEnabled = false
-        }
-
-        notificationToggleButton.setOnClickListener { toggleNotification() }
-        notificationTimeButton.setOnClickListener { showTimePickerDialog() }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+        notificationToggleButton.setOnClickListener { presenter.updateNotification() }
+        notificationTimeButton.setOnClickListener { presenter.showTimePickerDialog() }
+        presenter.initializeUI()
     }
 
-    private fun showTimePickerDialog() {
-        val selectedTime = stringToTime(notificationTime)
-        val selectedHour = selectedTime.hour
-        val selectedMinute = selectedTime.minute
-
-        TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { _, hour, minute ->
-            updateTime(Time(hour, minute))
-        }, selectedHour, selectedMinute, false).show()
-    }
-
-    private fun updateTime(time: Time) {
-        if (timesEqual(stringToTime(notificationTime), time)) return
-
-        notificationManager.updateNotification(time)
-        notificationTime = timeToString(time)
-        notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, stringTo12HourString(notificationTime))
-    }
-
-    private fun toggleNotification() {
-        notificationEnabled = !notificationEnabled
-
-        if (notificationEnabled) {
-            notificationManager.updateNotification(stringToTime(notificationTime))
-            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, notificationTime)
+    override fun updateUI(enabled: Boolean, time: Time) {
+        if (enabled) {
+            notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, timeTo12HourString(time))
             notificationToggleButton.text = getString(R.string.notification_disable)
             notificationTimeButton.isEnabled = true
         } else {
-            notificationManager.disableNotification()
             notificationSummaryTextView.text = getString(R.string.notification_summary_disabled)
             notificationToggleButton.text = getString(R.string.notification_enable)
             notificationTimeButton.isEnabled = false
         }
     }
 
+    override fun showTimePickerDialog(hour: Int, minute: Int) {
+        TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { _, h, m ->
+            presenter.updateTime(Time(h, m))
+        }, hour, minute, false).show()
+    }
 }

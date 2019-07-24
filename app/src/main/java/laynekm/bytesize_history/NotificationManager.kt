@@ -8,7 +8,6 @@ import android.widget.Toast
 import java.util.*
 
 // Handles notifications and the shared preferences associated with them
-// TODO: Should notifications abide by the user's preferences? What if they have all eras turned off?
 class NotificationManager(val context: Context) {
 
     private val preferencesKey = context.getString(R.string.preferences_key)
