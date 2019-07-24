@@ -11,18 +11,23 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 
+// Store history items as singleton object so they are shared between activities and preserved onPause/onDestroy
+object HistoryItems {
+    var allHistoryItems = getEmptyTypeMap()
+    var filteredHistoryItems = getEmptyTypeMap()
+    var filterOptions: FilterOptions = FilterOptions()
+}
+
 // Used to return desc and links from parseDescriptionAndLinks
+// TODO: Fetch images for each type when tab is selected so initial load time isn't as long
+// TODO: Figure out why notifications often send 1-10 minutes late
 data class ParseResult(val desc: String, val links: MutableList<Link>)
 
-class ContentProvider {
+class ContentManager {
 
-    private val TAG = "BHContentProvider"
+    private val TAG = "ContentManager"
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
-
-    private var historyItems = getEmptyTypeMap()
-    private var filteredHistoryItems = getEmptyTypeMap()
-    private var selectedFilters = FilterOptions()
 
     private fun connectToURL(url: URL): String {
         var result = ""
@@ -41,36 +46,29 @@ class ContentProvider {
     }
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
-    // TODO: Fetch images for each type when tab is selected so initial load time isn't as long
-    // TODO: Figure out why notifications often send 1-10 minutes late
-    fun fetchHistoryItems(
-        date: Date,
-        filters: FilterOptions,
-        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit,
-        onFetchError: () -> Unit) {
+    fun fetchHistoryItems(date: Date, callback: (Boolean) -> Unit) {
 
-        this.selectedFilters = filters.copy()
         val url = buildURL(buildDateForURL(date))
-        var result = ""
+        var result: String
 
         // Fetch items and put into their respective lists (events, births, deaths)
         doAsync {
             try {
                 result = connectToURL(url)
             } catch (e: Exception) {
-                Log.e("ContentProvider", "$e")
-                uiThread { onFetchError() }
+                Log.e("ContentManager", "$e")
+                uiThread { callback(false) }
                 return@doAsync
             }
 
             val allHistoryItems = parseContent(result)
-            for ((type) in historyItems) {
-                historyItems[type] = filterType(allHistoryItems, type)
-                filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
+            for ((type) in HistoryItems.allHistoryItems) {
+                HistoryItems.allHistoryItems[type] = filterType(allHistoryItems, type)
+                HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
             }
 
             // Callback function that updates recycler views in main thread
-            uiThread { updateRecyclerView(filteredHistoryItems) }
+            uiThread { callback(true) }
         }
     }
 
@@ -78,13 +76,25 @@ class ContentProvider {
     fun fetchDailyHistoryFact(context: Context, pushNotification: (Context, HistoryItem, Date) -> Unit) {
         val date = getToday()
         val url = buildURL(buildDateForURL(date))
-        var result = ""
+        var result: String
         doAsync {
             result = connectToURL(url)
             val allHistoryItems = parseContent(result)
             val randomHistoryItem = getRandomHistoryItem(allHistoryItems, Type.EVENT)
             uiThread { pushNotification(context, randomHistoryItem, date) }
         }
+    }
+
+    // Fetches image URL based on provided webpage links
+    // Some pages might not have images, so keep fetching until one of them does
+    fun fetchImage(links: MutableList<Link>): String {
+        var image = ""
+        links.forEach {
+            image = parseImageURL(buildImageURL(it.title).readText())
+            if (image !== "") return image
+        }
+
+        return image
     }
 
     // Returns random history item of the specified type
@@ -94,18 +104,10 @@ class ContentProvider {
         return filteredItems[randomIndex]
     }
 
-    fun filterHistoryItems(
-        filters: FilterOptions,
-        updateRecyclerView: (MutableMap<Type, MutableList<HistoryItem>>) -> Unit) {
-
-        if (selectedFilters.equals(filters)) return
-        selectedFilters = filters.copy()
-
-        for ((type) in historyItems) {
-            filteredHistoryItems[type] = filterErasAndSort(historyItems[type]!!)
+    fun filterHistoryItems() {
+        for ((type) in HistoryItems.allHistoryItems) {
+            HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
         }
-
-        updateRecyclerView(filteredHistoryItems)
     }
 
     private fun filterType(items: MutableList<HistoryItem>, type: Type): MutableList<HistoryItem> {
@@ -116,8 +118,10 @@ class ContentProvider {
 
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         val filteredItems: MutableList<HistoryItem> = mutableListOf()
-        items.forEach { if (selectedFilters.eras.contains(it.era) || it.era === Era.NONE) filteredItems.add(it) }
-        if (selectedFilters.order === Order.DESCENDING) filteredItems.reverse()
+        items.forEach {
+            if (HistoryItems.filterOptions.eras.contains(it.era) || it.era === Era.NONE) filteredItems.add(it)
+        }
+        if (HistoryItems.filterOptions.order === Order.DESCENDING) filteredItems.reverse()
         return filteredItems
     }
 
@@ -240,18 +244,6 @@ class ContentProvider {
         return --depth
     }
 
-    // Fetches image URL based on provided webpage links
-    // Some pages might not have images, so keep fetching until one of them does
-    fun fetchImage(links: MutableList<Link>): String {
-        var image = ""
-        links.forEach {
-            image = parseImageURL(buildImageURL(it.title).readText())
-            if (image !== "") return image
-        }
-
-        return image
-    }
-
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String, type: Type): ParseResult {
         var desc = line
@@ -328,7 +320,7 @@ class ContentProvider {
             // Remove extra quotes
             url = url.substring(1, url.length - 1)
         } catch (e: Exception) {
-            Log.e("ContentProvider", "parseImageURL error")
+            Log.e("ContentManager", "parseImageURL error")
         }
 
         return url

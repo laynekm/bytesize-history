@@ -20,14 +20,11 @@ import android.widget.LinearLayout
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
-
-
-
-
+// TODO: Preserve WebView onPause/onDestroy
 class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
-    private val contentProvider = ContentProvider()
+    private val contentManager = ContentManager()
     private val toolbar = (context as Activity).findViewById(R.id.toolbar) as Toolbar
     private val webView = (context as Activity).findViewById(R.id.webView) as WebView
     private val progressBar = (context as Activity).findViewById(R.id.progressBar) as ProgressBar
@@ -82,7 +79,6 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         viewHolder.desc.text = item.desc
 
         // Dynamically inflate link items
-        viewHolder.linkView.visibility = View.GONE
         viewHolder.linkView.removeAllViews()
         item.links.forEach {
             val link = LayoutInflater.from(context).inflate(R.layout.link_item, null)
@@ -102,9 +98,17 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
 
         // onClick displays/hides links
         // TODO: Add animation
+        if (item.linksVisible) viewHolder.linkView.visibility = View.VISIBLE
+        else viewHolder.linkView.visibility = View.GONE
         viewHolder.historyItem.setOnClickListener {
-            if (viewHolder.linkView.visibility == View.GONE) viewHolder.linkView.visibility = View.VISIBLE
-            else viewHolder.linkView.visibility = View.GONE
+            if (viewHolder.linkView.visibility == View.GONE) {
+                viewHolder.linkView.visibility = View.VISIBLE
+                item.linksVisible = true
+            }
+            else {
+                viewHolder.linkView.visibility = View.GONE
+                item.linksVisible = false
+            }
         }
 
         // If item already has an image then display it, otherwise fetch the image
@@ -112,7 +116,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         doAsync {
             val image: String
             if (!item.hasFetchedImage) {
-                image = contentProvider.fetchImage(item.links)
+                image = contentManager.fetchImage(item.links)
                 item.image = image
                 item.hasFetchedImage = true
             } else {

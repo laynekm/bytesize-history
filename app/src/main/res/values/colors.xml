@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Non-theme colours (ie. icon) -->
     <color name="colorPrimary">#9C27B0</color>
-    <color name="colorPrimaryDark">#7B1FA2</color>
-    <color name="colorPrimaryLight">#E1BEE7</color>
-    <color name="colorAccent">#e040fb</color>
-    <color name="colorBackground">#ffffff</color>
-    <color name="colorBackgroundDark">#ebebeb</color>
-    <color name="colorText">#808080</color>
-    <color name="colorTextDark">#606060</color>
+
+    <!-- Light theme colours -->
+    <color name="lightPrimary">#9C27B0</color>
+    <color name="lightPrimaryDark">#7B1FA2</color>
+    <color name="lightPrimaryLight">#E1BEE7</color>
+    <color name="lightColorAccent">#E040FB</color>
+    <color name="lightBackground">#FFFFFF</color>
+    <color name="lightBackgroundDark">#EBEBEB</color>
+    <color name="lightText">#808080</color>
+    <color name="lightTextLight">#FFFFFF</color>
+    <color name="lightTextDark">#606060</color>
+
+    <!-- Dark theme colours -->
+    <color name="darkPrimary">#121212</color>
+    <color name="darkPrimaryDark">#000000</color>
+    <color name="darkPrimaryLight">#202020</color>
+    <color name="darkColorAccent">#E040FB</color>
+    <color name="darkBackground">#303030</color>
+    <color name="darkBackgroundDark">#484848</color>
+    <color name="darkText">#EBEBEB</color>
+    <color name="darkTextLight">#EBEBEB</color>
+    <color name="darkTextDark">#EBEBEB</color>
 </resources>

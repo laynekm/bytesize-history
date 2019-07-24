@@ -3,9 +3,6 @@ package laynekm.bytesize_history
 import java.text.DateFormatSymbols
 import java.util.*
 
-data class Date(val month: Int, val day: Int)
-data class Time(val hour: Int, val minute: Int)
-
 fun datesEqual(date1: Date, date2: Date): Boolean {
     return date1.month == date2.month && date1.day == date2.day
 }

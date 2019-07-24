@@ -10,7 +10,7 @@ import java.util.*
 // Handles notifications and the shared preferences associated with them
 class NotificationManager(val context: Context) {
 
-    private val preferencesKey = context.getString(R.string.notification_pref_key)
+    private val preferencesKey = context.getString(R.string.preferences_key)
     private val notificationEnabledKey = context.getString(R.string.notification_enabled_pref_key)
     private val notificationTimeKey = context.getString(R.string.notification_time_pref_key)
     private val notificationTimeDefault = stringToTime(context.getString(R.string.notification_time_default))

@@ -2,6 +2,8 @@
     <string name="app_name">Bytesize History</string>
     <string name="date_settings">Change date</string>
     <string name="theme_settings">Change theme</string>
+    <string name="theme_settings_light">Change to dark theme</string>
+    <string name="theme_settings_dark">Change to light theme</string>
     <string name="notification_settings">Notification settings</string>
     <string name="calendar_view">Calendar</string>
     <string name="filter_view">Filter</string>
@@ -33,10 +35,10 @@
     <string name="era_2000s">🏨 2000s</string>
 
     <!-- Preferences -->
-    <string name="notification_pref_key">notification_preferences</string>
+    <string name="preferences_key">preferences</string>
+    <string name="theme_pref_key">theme</string>
     <string name="notification_enabled_pref_key">send_notifications</string>
     <string name="notification_time_pref_key">notification_time</string>
-    <string name="filter_pref_key">filter_preferences</string>
     <string name="has_filter_prefs_key">has_filter_preferences</string>
 
     <!-- User dialog messages -->

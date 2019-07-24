@@ -2,35 +2,43 @@
 
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" android:layout_width="fill_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/topBar"
+        android:background="?attr/colorPrimaryLight"
         android:minHeight="40dp">
+
     <TextView
             android:id="@+id/eventBtn"
             android:layout_weight="1"
             android:gravity="center"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            android:textColor="?attr/colorTextDark"
             android:text="@string/events_text"/>
     <TextView
             android:id="@+id/birthBtn"
             android:layout_weight="1"
             android:gravity="center"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" android:text="@string/births_text"/>
+            android:textColor="?attr/colorTextDark"
+            android:layout_height="fill_parent"
+            android:text="@string/births_text"/>
     <TextView
             android:id="@+id/deathBtn"
             android:layout_weight="1"
             android:gravity="center"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" android:text="@string/deaths_text"/>
+            android:textColor="?attr/colorTextDark"
+            android:layout_height="fill_parent"
+            android:text="@string/deaths_text"/>
 
     <TextView
             android:id="@+id/observanceBtn"
             android:layout_weight="1"
             android:gravity="center"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" android:text="@string/observances_text"/>
+            android:textColor="?attr/colorTextDark"
+            android:layout_height="fill_parent"
+            android:text="@string/observances_text"/>
 
 </LinearLayout>
