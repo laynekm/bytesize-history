@@ -16,6 +16,10 @@ object HistoryItems {
     var allHistoryItems = getEmptyTypeMap()
     var filteredHistoryItems = getEmptyTypeMap()
     var filterOptions: FilterOptions = FilterOptions()
+
+    fun isEmpty(): Boolean {
+        return mapIsEmpty(allHistoryItems) && mapIsEmpty(filteredHistoryItems)
+    }
 }
 
 // Used to return desc and links from parseDescriptionAndLinks

@@ -27,9 +27,9 @@ class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPr
         notificationTimeButton = findViewById(R.id.notification_time_btn)
 
         toolbar.setNavigationOnClickListener { onBackPressed() }
-        notificationToggleButton.setOnClickListener { presenter.updateNotification() }
+        notificationToggleButton.setOnClickListener { presenter.setNotification() }
         notificationTimeButton.setOnClickListener { presenter.showTimePickerDialog() }
-        presenter.initializeUI()
+        presenter.onViewCreated()
     }
 
     override fun updateUI(enabled: Boolean, time: Time) {
@@ -46,7 +46,7 @@ class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPr
 
     override fun showTimePickerDialog(hour: Int, minute: Int) {
         TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { _, h, m ->
-            presenter.updateTime(Time(h, m))
+            presenter.setTime(Time(h, m))
         }, hour, minute, false).show()
     }
 }

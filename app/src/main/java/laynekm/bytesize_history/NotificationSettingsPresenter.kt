@@ -2,6 +2,7 @@ package laynekm.bytesize_history
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.widget.Toast
 
 class NotificationSettingsPresenter(val context: Context, val view: View) {
 
@@ -11,8 +12,8 @@ class NotificationSettingsPresenter(val context: Context, val view: View) {
     private val notificationTimeDefault: String = context.getString(R.string.notification_time_default)
 
     private val sharedPref: SharedPreferences = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
-    private var notificationEnabled = sharedPref.getBoolean(notificationEnabledKey,  true)
-    private var notificationTime = stringToTime(sharedPref.getString(notificationTimeKey, notificationTimeDefault)!!)
+    private var notificationEnabled: Boolean = sharedPref.getBoolean(notificationEnabledKey,  true)
+    private var notificationTime: Time = stringToTime(sharedPref.getString(notificationTimeKey, notificationTimeDefault)!!)
 
     private val notificationManager = NotificationManager(context)
 
@@ -20,18 +21,19 @@ class NotificationSettingsPresenter(val context: Context, val view: View) {
         ThemeManager(context).applyTheme()
     }
 
-    fun initializeUI() {
+    fun onViewCreated() {
         view.updateUI(notificationEnabled, notificationTime)
     }
 
-    fun updateTime(time: Time) {
+    fun setTime(time: Time) {
         notificationTime = time
         notificationManager.updateNotification(time)
         view.updateUI(notificationEnabled, notificationTime)
     }
 
-    fun updateNotification() {
+    fun setNotification() {
         notificationEnabled = !notificationEnabled
+        if (!notificationEnabled) notificationManager.disableNotification()
         view.updateUI(notificationEnabled, notificationTime)
     }
 

@@ -23,3 +23,9 @@ enum class Era constructor(private val type: String) {
     NONE("None");
     override fun toString(): String = this.type
 }
+
+enum class Error constructor(private val type: String) {
+    FETCH_ERROR("Fetch error"),
+    TYPE_ERROR("Type error"),
+    FILTER_ERROR("Filter error"),
+}
