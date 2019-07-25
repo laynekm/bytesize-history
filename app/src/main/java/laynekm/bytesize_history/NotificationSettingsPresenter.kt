@@ -1,19 +1,8 @@
 package laynekm.bytesize_history
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.widget.Toast
 
 class NotificationSettingsPresenter(val context: Context, val view: View) {
-
-    private val preferencesKey: String = context.getString(R.string.preferences_key)
-    private val notificationEnabledKey: String = context.getString(R.string.notification_enabled_pref_key)
-    private val notificationTimeKey: String = context.getString(R.string.notification_time_pref_key)
-    private val notificationTimeDefault: String = context.getString(R.string.notification_time_default)
-
-    private val sharedPref: SharedPreferences = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
-    private var notificationEnabled: Boolean = sharedPref.getBoolean(notificationEnabledKey,  true)
-    private var notificationTime: Time = stringToTime(sharedPref.getString(notificationTimeKey, notificationTimeDefault)!!)
 
     private val notificationManager = NotificationManager(context)
 
@@ -22,24 +11,23 @@ class NotificationSettingsPresenter(val context: Context, val view: View) {
     }
 
     fun onViewCreated() {
-        view.updateUI(notificationEnabled, notificationTime)
+        view.updateUI(notificationManager.getEnabled(), notificationManager.getTime())
     }
 
     fun setTime(time: Time) {
-        notificationTime = time
-        notificationManager.updateNotification(time)
-        view.updateUI(notificationEnabled, notificationTime)
+        notificationManager.setNotification(time)
+        view.updateUI(notificationManager.getEnabled(), notificationManager.getTime())
     }
 
     fun setNotification() {
-        notificationEnabled = !notificationEnabled
-        if (!notificationEnabled) notificationManager.disableNotification()
-        view.updateUI(notificationEnabled, notificationTime)
+        if (notificationManager.getEnabled()) notificationManager.disableNotification()
+        else notificationManager.setNotification()
+        view.updateUI(notificationManager.getEnabled(), notificationManager.getTime())
     }
 
     fun showTimePickerDialog() {
-        val hour = notificationTime.hour
-        val minute = notificationTime.minute
+        val hour = notificationManager.getTime().hour
+        val minute = notificationManager.getTime().minute
         view.showTimePickerDialog(hour, minute)
     }
 

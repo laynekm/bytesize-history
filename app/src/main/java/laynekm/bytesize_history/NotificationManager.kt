@@ -15,69 +15,66 @@ class NotificationManager(val context: Context) {
     private val notificationTimeKey = context.getString(R.string.notification_time_pref_key)
     private val notificationTimeDefault = stringToTime(context.getString(R.string.notification_time_default))
     private val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
+
+    private var notificationEnabled = sharedPref.getBoolean(notificationEnabledKey, true)
     private var notificationTime = stringToTime(sharedPref.getString(notificationTimeKey, timeToString(notificationTimeDefault))!!)
 
-    // Initializes notification preferences to default values if they do not yet exist and notifications are enabled
+    // Set notification on each init to be safe; it seems to stop working sometimes
+    // TODO: Remove toasts, just here to test
     init {
-        val preferencesEnabled = sharedPref.getBoolean(notificationEnabledKey, true)
-        val missingPreferences = !sharedPref.contains(notificationEnabledKey) || !sharedPref.contains(notificationTimeKey)
-        if (preferencesEnabled && missingPreferences) {
-            setNotificationPreferences(true, notificationTimeDefault)
-            setNotification(notificationTimeDefault)
-        }
-
-        // TODO: Remove these toasts, just here for testing purposes
-        else if (!preferencesEnabled) {
-            Toast.makeText(context, "Notifications are disabled.", Toast.LENGTH_LONG).show()
-        } else if (!missingPreferences) {
-            Toast.makeText(context, "Notification already set for ${timeTo12HourString(notificationTime)}.", Toast.LENGTH_LONG).show()
-        }
+        val alarmActive = this.alarmActive()
+        if (notificationEnabled && !alarmActive) setNotification()
+        else if (alarmActive) Toast.makeText(context, "Alarm already set for $notificationTime", Toast.LENGTH_LONG).show()
+        else Toast.makeText(context, "Notifications disabled.", Toast.LENGTH_LONG).show()
     }
 
     // Sets alarm (ie. notification) that will repeat every 24 hours
-    private fun setNotification(time: Time) {
+    // TODO: Change to AlarmManager.INTERVAL_DAY
+    fun setNotification(time: Time = notificationTime) {
+        notificationEnabled = true
         notificationTime = time
+        setNotificationPreferences(notificationEnabled, notificationTime)
+        cancelNotification()
+
         val calendar: Calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, time.hour)
-            set(Calendar.MINUTE, time.minute)
+            set(Calendar.HOUR_OF_DAY, notificationTime.hour)
+            set(Calendar.MINUTE, notificationTime.minute)
             set(Calendar.SECOND, 0)
         }
 
+        // If time is in past, set it for next day otherwise it will be triggered immediately
+        if (calendar.timeInMillis < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = Intent(context, NotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_HOUR, pendingIntent)
-        // manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
-
-        Toast.makeText(context, "Daily notification set for ${timeTo12HourString(time)}", Toast.LENGTH_LONG).show()
-    }
-
-    // Same as setNotification but uses the existing notificationTime instead of a new value
-    fun setNotification() {
-        setNotification(notificationTime)
-    }
-
-    // Cancels notification
-    private fun cancelNotification() {
-        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = Intent(context, NotificationReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        manager.cancel(pendingIntent)
+        val alarmIntent = Intent(context, NotificationReceiver::class.java).let { intent ->
+            PendingIntent.getBroadcast(context, 0, intent, 0)
+        }
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000 * 60 * 60, alarmIntent)
+        Toast.makeText(context, "Daily notification set for $notificationTime", Toast.LENGTH_LONG).show()
     }
 
     // Cancels notification and disables notifications in user preferences
     fun disableNotification() {
+        notificationEnabled = false
+        setNotificationPreferences(notificationEnabled, notificationTime)
         cancelNotification()
-        setNotificationPreferences(false, notificationTime)
-        Toast.makeText(context, "Daily notification disabled", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Daily notification has been disabled.", Toast.LENGTH_LONG).show()
     }
 
-    // Updates notification time and user preferences (must cancel first)
-    fun updateNotification(time: Time) {
-        cancelNotification()
-        setNotificationPreferences(true, time)
-        setNotification(time)
+    private fun cancelNotification() {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = Intent(context, NotificationReceiver::class.java).let { intent ->
+            PendingIntent.getBroadcast(context, 0, intent, 0)
+        }
+        manager.cancel(alarmIntent)
+    }
+
+    private fun alarmActive(): Boolean {
+        val alarmIntent = Intent(context, NotificationReceiver::class.java)
+        return PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_NO_CREATE) !== null
     }
 
     private fun setNotificationPreferences(enabled: Boolean, time: Time) {
@@ -91,4 +88,7 @@ class NotificationManager(val context: Context) {
             apply()
         }
     }
+
+    fun getEnabled(): Boolean = notificationEnabled
+    fun getTime(): Time = notificationTime
 }

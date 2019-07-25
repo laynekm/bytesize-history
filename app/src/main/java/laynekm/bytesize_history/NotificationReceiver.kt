@@ -23,11 +23,18 @@ class NotificationReceiver : BroadcastReceiver() {
         this.contentManager.fetchDailyHistoryFact(context, ::pushNotification)
     }
 
+    // TODO: Remove "Scheduled to send..." text
     private fun pushNotification(context: Context, historyItem: HistoryItem, date: Date) {
+
+        val preferencesKey = context.getString(R.string.preferences_key)
+        val notificationTimeKey = context.getString(R.string.notification_time_pref_key)
+        val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
+        val notificationTime = stringTo12HourString(sharedPref.getString(notificationTimeKey, "default time")!!)
+
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)
             .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), historyItem.year))
-            .setContentText(historyItem.desc)
+            .setContentText("${historyItem.desc}\n\nScheduled to send at $notificationTime.")
             .setStyle(NotificationCompat.BigTextStyle())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
