@@ -2,10 +2,8 @@ package laynekm.bytesize_history
 
 import android.content.Context
 import android.view.View
-import android.widget.Filter
 import android.widget.Switch
 
-// TODO: Tidy up filter view, make sure content stays on screen, maybe make text larger
 class FilterManager(var context: Context) {
 
     private val preferencesKey = context.getString(R.string.preferences_key)

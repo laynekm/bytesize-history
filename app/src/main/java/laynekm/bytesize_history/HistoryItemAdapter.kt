@@ -70,12 +70,12 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
         (viewHolder.historyItemContainer.layoutParams as MarginLayoutParams).leftMargin = dpMargin
         if (item.depth > 0) viewHolder.historyItemContainer.setBackgroundResource(R.drawable.border_left)
 
-        // Set year
-        if (item.year === null || item.year == 0) viewHolder.year.text = ""
-        else if (item.year < 0) {
-            viewHolder.year.text = context.resources.getString(R.string.BC_text, item.year * -1)
+        // Set year and description
+        when {
+            item.year == null -> viewHolder.year.text = ""
+            item.year < 0 -> viewHolder.year.text = context.resources.getString(R.string.BC_text, item.year * -1)
+            else -> viewHolder.year.text = "${item.year}"
         }
-        else viewHolder.year.text = "${item.year}"
         viewHolder.desc.text = item.desc
 
         // Dynamically inflate link items

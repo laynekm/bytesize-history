@@ -57,5 +57,5 @@
     <string name="notification_enable">Enable</string>
 
     <!-- Notifications -->
-    <string name="notification_title">%1$s: On this day in %2$d...</string>
+    <string name="notification_title">%1$s: On this day in %2$s...</string>
 </resources>

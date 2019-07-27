@@ -17,7 +17,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
     private val contentManager: ContentManager = ContentManager()
 
-    // TODO: Account for negatives (should show BC instead)
     override fun onReceive(context: Context, intent: Intent) {
         this.createNotificationChannel(context)
         this.contentManager.fetchDailyHistoryFact(context, ::pushNotification)
@@ -31,9 +30,15 @@ class NotificationReceiver : BroadcastReceiver() {
         val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
         val notificationTime = stringTo12HourString(sharedPref.getString(notificationTimeKey, "default time")!!)
 
+        val year = when {
+            historyItem.year === null -> "history"
+            historyItem.year < 0 -> context.resources.getString(R.string.BC_text, historyItem.year * -1)
+            else -> "${historyItem.year}"
+        }
+
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)
-            .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), historyItem.year))
+            .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), year))
             .setContentText("${historyItem.desc}\n\nScheduled to send at $notificationTime.")
             .setStyle(NotificationCompat.BigTextStyle())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
