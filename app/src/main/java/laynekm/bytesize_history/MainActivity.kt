@@ -69,8 +69,8 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         menuInflater.inflate(R.menu.menu_main, menu)
         val themeMenuItem = menu.findItem(R.id.changeTheme)
         when (presenter.getTheme()) {
-            "light" -> themeMenuItem.title = getString(R.string.theme_settings_light)
-            "dark" -> themeMenuItem.title = getString(R.string.theme_settings_dark)
+            Theme.LIGHT -> themeMenuItem.title = getString(R.string.theme_settings_light)
+            Theme.DARK -> themeMenuItem.title = getString(R.string.theme_settings_dark)
         }
         return true
     }
@@ -150,7 +150,7 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
             } Error.TYPE_ERROR -> {
                 errorTextView.text = getString(R.string.type_error)
             } Error.FILTER_ERROR -> {
-                errorTextView.text = getString(R.string.filter_error, mapTypeToLabel(type!!))
+                errorTextView.text = getString(R.string.filter_error, typeToString(type!!))
             } else -> {
                 errorTextView.visibility = View.GONE
             }

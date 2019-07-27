@@ -1,45 +1,44 @@
 package laynekm.bytesize_history
 
 import android.content.Context
+import android.content.SharedPreferences
 
-fun default() {
-    return
-}
+fun noop() { return }
 
-class ThemeManager(val context: Context, val recreate: () -> Unit = ::default) {
+class ThemeManager(val context: Context, val recreate: () -> Unit = ::noop) {
 
-    private val preferencesKey = context.getString(R.string.preferences_key)
-    private val themePrefKey = context.getString(R.string.theme_pref_key)
-    private val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
-    private var currentTheme = sharedPref.getString(themePrefKey, "light")
+    private val preferencesKey: String = context.getString(R.string.preferences_key)
+    private val themePrefKey: String = context.getString(R.string.theme_pref_key)
+    private val sharedPref: SharedPreferences = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
+    private var currentTheme: Theme = stringToTheme(sharedPref.getString(themePrefKey, "light"))
 
     // Applies theme from shared preferences
     fun applyTheme() {
         when (currentTheme) {
-            "dark" -> context.setTheme(R.style.AppTheme_Dark)
-            "light" -> context.setTheme(R.style.AppTheme_Light)
+            Theme.DARK -> context.setTheme(R.style.AppTheme_Dark)
+            Theme.LIGHT -> context.setTheme(R.style.AppTheme_Light)
         }
     }
 
-    fun getTheme(): String {
+    fun getTheme(): Theme {
         return this.currentTheme
     }
 
     // Sets theme from argument and updates shared preferences
     fun toggleTheme() {
         when (currentTheme) {
-            "dark" -> {
-                currentTheme = "light"
+            Theme.DARK -> {
+                currentTheme = Theme.LIGHT
                 context.setTheme(R.style.AppTheme_Dark)
             }
-            "light" -> {
-                currentTheme = "dark"
+            Theme.LIGHT -> {
+                currentTheme = Theme.DARK
                 context.setTheme(R.style.AppTheme_Light)
             }
         }
 
         with (sharedPref.edit()) {
-            putString(themePrefKey, currentTheme)
+            putString(themePrefKey, "$currentTheme")
             apply()
         }
 

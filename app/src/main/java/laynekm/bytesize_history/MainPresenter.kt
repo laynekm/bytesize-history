@@ -116,7 +116,7 @@ class MainPresenter(val context: Context, val view: View) {
         view.showDatePickerDialog(year, month, day)
     }
 
-    fun getTheme(): String = themeManager.getTheme()
+    fun getTheme(): Theme = themeManager.getTheme()
 
     fun toggleTheme() {
         themeManager.toggleTheme()

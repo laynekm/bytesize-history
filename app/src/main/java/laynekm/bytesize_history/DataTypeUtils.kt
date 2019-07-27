@@ -11,20 +11,26 @@ fun getEmptyTypeMap(): HashMap<Type, MutableList<HistoryItem>> {
 
 fun stringToType(type: String?): Type? {
     return when (type) {
-        "Event" -> Type.EVENT
         "Birth" -> Type.BIRTH
         "Death" -> Type.DEATH
         "Observance" -> Type.OBSERVANCE
-        else -> null
+        else -> Type.EVENT
     }
 }
 
-fun mapTypeToLabel(type: Type): String {
+fun typeToString(type: Type): String {
     return when (type) {
         Type.EVENT -> "events"
         Type.BIRTH -> "births"
         Type.DEATH -> "deaths"
         Type.OBSERVANCE -> "holidays/observances"
+    }
+}
+
+fun stringToTheme(theme: String?): Theme {
+    return when (theme) {
+        "light" -> Theme.LIGHT
+        else -> Theme.DARK
     }
 }
 

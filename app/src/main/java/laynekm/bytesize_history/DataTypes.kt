@@ -3,6 +3,11 @@ package laynekm.bytesize_history
 data class Date(val month: Int, val day: Int)
 data class Time(val hour: Int, val minute: Int)
 
+enum class Theme constructor(private val theme: String) {
+    LIGHT("light"), DARK("dark");
+    override fun toString(): String = this.theme
+}
+
 enum class Order constructor(private val type: String) {
     ASCENDING("Ascending"), DESCENDING("Descending");
     override fun toString(): String = this.type
