@@ -1,20 +1,29 @@
 package laynekm.bytesize_history
 
 import android.content.Context
+import android.os.Bundle
 
 class NotificationSettingsPresenter(val context: Context, val view: View) {
 
     private val notificationManager = NotificationManager(context)
+    private var timePickerVisible: Boolean = false
+    private val timePickerVisibleKey: String = "timePickerVisible"
 
     init {
         ThemeManager(context).applyTheme()
     }
 
-    fun onViewCreated() {
+    fun onViewCreated(savedInstanceState: Bundle?) {
+        if (savedInstanceState !== null) {
+            timePickerVisible = savedInstanceState.getBoolean(timePickerVisibleKey)
+        }
+
+        if (timePickerVisible) showTimePickerDialog()
         view.updateUI(notificationManager.getEnabled(), notificationManager.getTime())
     }
 
     fun setTime(time: Time) {
+        onCloseTimePickerDialog()
         notificationManager.setNotification(time)
         view.updateUI(notificationManager.getEnabled(), notificationManager.getTime())
     }
@@ -26,9 +35,18 @@ class NotificationSettingsPresenter(val context: Context, val view: View) {
     }
 
     fun showTimePickerDialog() {
+        timePickerVisible = true
         val hour = notificationManager.getTime().hour
         val minute = notificationManager.getTime().minute
         view.showTimePickerDialog(hour, minute)
+    }
+
+    fun onCloseTimePickerDialog() {
+        timePickerVisible = false
+    }
+
+    fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(timePickerVisibleKey, timePickerVisible)
     }
 
     interface View {

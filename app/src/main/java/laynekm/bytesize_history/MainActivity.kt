@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     private lateinit var dropdownView: View
     private lateinit var progressBar: ProgressBar
     private lateinit var webView: WebView
+    private lateinit var datePickerDialog: DatePickerDialog
 
     // TODO: Allow user to go back in WebView without closing it (move logic to MainPresenter?)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -200,9 +201,11 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     }
 
     override fun showDatePickerDialog(year: Int, month: Int, day: Int) {
-        DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, m, d ->
+        datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, m, d ->
             presenter.setCurrentDate(Date(m, d))
-        }, year, month, day).show()
+        }, year, month, day)
+        datePickerDialog.setOnDismissListener { presenter.onCloseDatePickerDialog() }
+        datePickerDialog.show()
     }
 
     override fun onBackPressed() {
@@ -222,5 +225,10 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
 
     override fun recreate() {
         super.recreate()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (::datePickerDialog.isInitialized) datePickerDialog.dismiss()
     }
 }

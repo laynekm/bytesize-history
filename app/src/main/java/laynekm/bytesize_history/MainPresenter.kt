@@ -2,6 +2,7 @@ package laynekm.bytesize_history
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import java.util.Calendar
 
 class MainPresenter(val context: Context, val view: View) {
@@ -13,11 +14,16 @@ class MainPresenter(val context: Context, val view: View) {
 
     private var currentDate: Date = getToday()
     private var currentType: Type? = HistoryItems.filterOptions.types[0]
+
     private var fetching: Boolean = false
     private var fetchError: Boolean = false
+    private var filterDropdownVisible: Boolean = false
+    private var datePickerVisible: Boolean = false
 
     private val dateKey: String = "selectedDate"
     private val typeKey: String = "selectedType"
+    private val filterDropdownVisibleKey: String = "filtersVisible"
+    private val datePickerVisibleKey: String = "datePickerVisible"
 
     init {
         themeManager.applyTheme()
@@ -32,7 +38,12 @@ class MainPresenter(val context: Context, val view: View) {
         if (savedInstanceState !== null) {
             currentDate = stringToDate(savedInstanceState.getString(dateKey))
             currentType = stringToType(savedInstanceState.getString(typeKey))
+            filterDropdownVisible = savedInstanceState.getBoolean(filterDropdownVisibleKey)
+            datePickerVisible = savedInstanceState.getBoolean(datePickerVisibleKey)
         }
+
+        if (filterDropdownVisible) view.onDropdownOpened()
+        if (datePickerVisible) showDatePickerDialog()
 
         view.onTypeChanged(currentType)
         view.onDateChanged(currentDate)
@@ -44,16 +55,18 @@ class MainPresenter(val context: Context, val view: View) {
 
     // Update date if app is resumed but the date has changed
     fun onViewResumed() {
-        setCurrentDate(getToday())
+        setCurrentDate(getToday(), false)
     }
 
     fun setCurrentType(type: Type?) {
         if (type === currentType) return
         currentType = type
         view.onTypeChanged(currentType)
+        checkForErrors()
     }
 
-    fun setCurrentDate(date: Date) {
+    fun setCurrentDate(date: Date, updateDatePickerVisibility: Boolean = true) {
+        if (updateDatePickerVisibility) onCloseDatePickerDialog()
         if (datesEqual(date, currentDate)) return
         currentDate = date
         view.onDateChanged(currentDate)
@@ -79,10 +92,12 @@ class MainPresenter(val context: Context, val view: View) {
     fun toggleFilterDropdown(dropdownView: android.view.View) {
         if (dropdownView.visibility == android.view.View.GONE) {
             filterManager.setViewContent(dropdownView, HistoryItems.filterOptions)
+            filterDropdownVisible = true
             view.onDropdownOpened()
             return
         }
 
+        filterDropdownVisible = false
         view.onDropdownClosed()
         val newFilters = filterManager.setFilterOptions(dropdownView)
         if (!newFilters.equals(HistoryItems.filterOptions)) {
@@ -114,10 +129,15 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     fun showDatePickerDialog() {
+        datePickerVisible = true
         val year = Calendar.getInstance().get(Calendar.YEAR)
         val month = currentDate.month
         val day = currentDate.day
         view.showDatePickerDialog(year, month, day)
+    }
+
+    fun onCloseDatePickerDialog() {
+        datePickerVisible = false
     }
 
     fun getTheme(): Theme = themeManager.getTheme()
@@ -130,6 +150,8 @@ class MainPresenter(val context: Context, val view: View) {
     fun onSaveInstanceState(outState: Bundle) {
         outState.putString(dateKey, dateToString(currentDate))
         outState.putString(typeKey, "$currentType")
+        outState.putBoolean(filterDropdownVisibleKey, filterDropdownVisible)
+        outState.putBoolean(datePickerVisibleKey, datePickerVisible)
     }
 
     interface View {

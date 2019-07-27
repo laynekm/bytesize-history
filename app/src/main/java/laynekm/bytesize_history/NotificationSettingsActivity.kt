@@ -14,6 +14,7 @@ class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPr
     private lateinit var notificationSummaryTextView: TextView
     private lateinit var notificationToggleButton: Button
     private lateinit var notificationTimeButton: Button
+    private lateinit var timePickerDialog: TimePickerDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         presenter = NotificationSettingsPresenter(this, this)
@@ -29,7 +30,7 @@ class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPr
         toolbar.setNavigationOnClickListener { onBackPressed() }
         notificationToggleButton.setOnClickListener { presenter.setNotification() }
         notificationTimeButton.setOnClickListener { presenter.showTimePickerDialog() }
-        presenter.onViewCreated()
+        presenter.onViewCreated(savedInstanceState)
     }
 
     override fun updateUI(enabled: Boolean, time: Time) {
@@ -45,8 +46,20 @@ class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPr
     }
 
     override fun showTimePickerDialog(hour: Int, minute: Int) {
-        TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { _, h, m ->
+        timePickerDialog = TimePickerDialog(this, TimePickerDialog.OnTimeSetListener { _, h, m ->
             presenter.setTime(Time(h, m))
-        }, hour, minute, false).show()
+        }, hour, minute, false)
+        timePickerDialog.setOnDismissListener { presenter.onCloseTimePickerDialog() }
+        timePickerDialog.show()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        presenter.onSaveInstanceState(outState)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (::timePickerDialog.isInitialized) timePickerDialog.dismiss()
     }
 }
