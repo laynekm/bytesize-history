@@ -13,7 +13,8 @@ import android.webkit.WebView
 import android.support.v7.widget.Toolbar
 import android.view.animation.AnimationUtils.loadAnimation
 import android.content.Intent
-import android.util.Log
+import android.graphics.Bitmap
+import android.webkit.WebViewClient
 import android.widget.*
 
 class HistoryViews(var views: HashMap<Type, RecyclerView>)
@@ -53,6 +54,14 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         dropdownFilter = findViewById(R.id.dropdownFilter)
         datePickerButton = findViewById(R.id.calendarView)
         webView = findViewById(R.id.webView)
+
+        webView.webViewClient = object: WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                presenter.setWebViewUrl(url)
+                progressBar.visibility = View.GONE
+            }
+        }
 
         setSupportActionBar(toolbar)
         retryBtn.setOnClickListener { presenter.fetchHistoryItems() }
@@ -104,10 +113,10 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         ))
 
         historyAdapters = HistoryAdapters(hashMapOf(
-            Type.EVENT to HistoryItemAdapter(this, mutableListOf()),
-            Type.BIRTH to HistoryItemAdapter(this, mutableListOf()),
-            Type.DEATH to HistoryItemAdapter(this, mutableListOf()),
-            Type.OBSERVANCE to HistoryItemAdapter(this, mutableListOf())
+            Type.EVENT to HistoryItemAdapter(this, presenter, mutableListOf()),
+            Type.BIRTH to HistoryItemAdapter(this, presenter, mutableListOf()),
+            Type.DEATH to HistoryItemAdapter(this, presenter, mutableListOf()),
+            Type.OBSERVANCE to HistoryItemAdapter(this, presenter, mutableListOf())
         ))
 
         for ((type, adapter) in historyViews.views) {
@@ -208,12 +217,28 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         datePickerDialog.show()
     }
 
+    override fun showWebView() {
+        progressBar.visibility = View.VISIBLE
+        webView.visibility = View.VISIBLE
+        toolbar.setNavigationIcon(R.drawable.back_arrow)
+    }
+
+    override fun hideWebView() {
+        webView.visibility = View.GONE
+        webView.clearHistory()
+        toolbar.navigationIcon = null
+    }
+
+    override fun goBackWebView() {
+        webView.goBack()
+    }
+
+    override fun loadUrlToWebView(url: String) {
+        webView.loadUrl(url)
+    }
+
     override fun onBackPressed() {
-        if (webView.visibility == View.VISIBLE) {
-            webView.visibility = View.GONE
-            webView.loadUrl("about:blank")
-            toolbar.navigationIcon = null
-        } else {
+        if (!presenter.onBackPressed(webView)) {
             super.onBackPressed()
         }
     }
@@ -230,5 +255,6 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     override fun onPause() {
         super.onPause()
         if (::datePickerDialog.isInitialized) datePickerDialog.dismiss()
+        if (::webView.isInitialized) webView.onPause()
     }
 }

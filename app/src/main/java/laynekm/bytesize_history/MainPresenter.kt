@@ -2,7 +2,7 @@ package laynekm.bytesize_history
 
 import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
+import android.webkit.WebView
 import java.util.Calendar
 
 class MainPresenter(val context: Context, val view: View) {
@@ -19,11 +19,15 @@ class MainPresenter(val context: Context, val view: View) {
     private var fetchError: Boolean = false
     private var filterDropdownVisible: Boolean = false
     private var datePickerVisible: Boolean = false
+    private var webViewVisible: Boolean = false
+    private var webViewUrl: String? = null
 
     private val dateKey: String = "selectedDate"
     private val typeKey: String = "selectedType"
     private val filterDropdownVisibleKey: String = "filtersVisible"
     private val datePickerVisibleKey: String = "datePickerVisible"
+    private val webViewVisibleKey: String = "webViewVisible"
+    private val webViewUrlKey: String = "webViewUrlKey"
 
     init {
         themeManager.applyTheme()
@@ -34,16 +38,20 @@ class MainPresenter(val context: Context, val view: View) {
         else filterManager.setPreferences(HistoryItems.filterOptions)
     }
 
+    // TODO: Preserve webView state onPause
     fun onViewCreated(savedInstanceState: Bundle?) {
         if (savedInstanceState !== null) {
             currentDate = stringToDate(savedInstanceState.getString(dateKey))
             currentType = stringToType(savedInstanceState.getString(typeKey))
             filterDropdownVisible = savedInstanceState.getBoolean(filterDropdownVisibleKey)
             datePickerVisible = savedInstanceState.getBoolean(datePickerVisibleKey)
+            webViewVisible = savedInstanceState.getBoolean(webViewVisibleKey)
+            webViewUrl = savedInstanceState.getString(webViewUrlKey)
         }
 
         if (filterDropdownVisible) view.onDropdownOpened()
         if (datePickerVisible) showDatePickerDialog()
+        if (webViewVisible) showWebView(webViewUrl)
 
         view.onTypeChanged(currentType)
         view.onDateChanged(currentDate)
@@ -140,6 +148,44 @@ class MainPresenter(val context: Context, val view: View) {
         datePickerVisible = false
     }
 
+    fun showWebView(url: String? = null) {
+        webViewVisible = true
+        view.showWebView()
+        if (url != null) {
+            setWebViewUrl(url)
+            view.loadUrlToWebView(url)
+        }
+    }
+
+    fun setWebViewUrl(url: String?) {
+        webViewUrl = url
+    }
+
+    // Call webView's canGoBack method if the previous url is not "about:blank"
+    // Otherwise, hide the webView and load "about:blank"
+    // TODO: Preserve webViewList onPause so user can go back to previous webpage
+    fun onBackPressed(webView: WebView): Boolean {
+        val webViewList = webView.copyBackForwardList()
+        val lastIndex = webViewList.getItemAtIndex(webViewList.currentIndex - 1)
+        val lastUrl = when (lastIndex) {
+            null -> ""
+            else -> lastIndex.url
+        }
+        val canGoBack = lastIndex != null && lastUrl != "about:blank"
+
+        if (webViewVisible && canGoBack) {
+            view.goBackWebView()
+            return true
+        } else if (webViewVisible && !canGoBack) {
+            webViewVisible = false
+            view.hideWebView()
+            view.loadUrlToWebView("about:blank")
+            return true
+        }
+
+        return false
+    }
+
     fun getTheme(): Theme = themeManager.getTheme()
 
     fun toggleTheme() {
@@ -152,6 +198,8 @@ class MainPresenter(val context: Context, val view: View) {
         outState.putString(typeKey, "$currentType")
         outState.putBoolean(filterDropdownVisibleKey, filterDropdownVisible)
         outState.putBoolean(datePickerVisibleKey, datePickerVisible)
+        outState.putBoolean(webViewVisibleKey, webViewVisible)
+        outState.putString(webViewUrlKey, webViewUrl)
     }
 
     interface View {
@@ -165,6 +213,10 @@ class MainPresenter(val context: Context, val view: View) {
         fun onDropdownOpened()
         fun onDropdownClosed()
         fun showDatePickerDialog(year: Int, month: Int, day: Int)
+        fun showWebView()
+        fun hideWebView()
+        fun loadUrlToWebView(url: String)
+        fun goBackWebView()
         fun recreate()
     }
 }

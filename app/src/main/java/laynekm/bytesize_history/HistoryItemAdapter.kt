@@ -21,7 +21,10 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
 // TODO: Preserve WebView onPause/onDestroy
-class HistoryItemAdapter(private val context: Context, private var items: MutableList<HistoryItem>)
+class HistoryItemAdapter(
+    private val context: Context,
+    private val presenter: MainPresenter,
+    private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
     private val contentManager = ContentManager()
@@ -40,14 +43,6 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.history_item, parent, false)
-
-        webView.webViewClient = object: WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                progressBar.visibility = View.GONE
-            }
-        }
-
         return ViewHolder(view)
     }
 
@@ -88,12 +83,7 @@ class HistoryItemAdapter(private val context: Context, private var items: Mutabl
             linkText.text = it.title
 
             // Attach onClick handler to open link
-            link.setOnClickListener {
-                progressBar.visibility = View.VISIBLE
-                webView.visibility = View.VISIBLE
-                webView.loadUrl(url)
-                toolbar.setNavigationIcon(R.drawable.back_arrow)
-            }
+            link.setOnClickListener { presenter.showWebView(url) }
         }
 
         // onClick displays/hides links
