@@ -120,6 +120,7 @@ class ContentManager {
         return filteredItems
     }
 
+    // TODO: Group depths > 0 together with their parent when sorting
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         val filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach {

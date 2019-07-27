@@ -65,6 +65,11 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         presenter.onViewCreated(savedInstanceState)
     }
 
+    override fun onResume() {
+        super.onResume()
+        presenter.onViewResumed()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         val themeMenuItem = menu.findItem(R.id.changeTheme)

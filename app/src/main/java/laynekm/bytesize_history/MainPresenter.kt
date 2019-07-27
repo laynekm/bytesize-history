@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import java.util.Calendar
 
-// TODO: Set new date if app is loaded on a new day without being closed the day before
 class MainPresenter(val context: Context, val view: View) {
 
     private val contentManager: ContentManager = ContentManager()
@@ -41,6 +40,11 @@ class MainPresenter(val context: Context, val view: View) {
 
         if (HistoryItems.isEmpty()) fetchHistoryItems()
         else view.onContentChanged(HistoryItems.filteredHistoryItems)
+    }
+
+    // Update date if app is resumed but the date has changed
+    fun onViewResumed() {
+        setCurrentDate(getToday())
     }
 
     fun setCurrentType(type: Type?) {
