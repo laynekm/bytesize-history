@@ -19,17 +19,16 @@ class NotificationManager(val context: Context) {
     private var notificationEnabled = sharedPref.getBoolean(notificationEnabledKey, true)
     private var notificationTime = stringToTime(sharedPref.getString(notificationTimeKey, timeToString(notificationTimeDefault))!!)
 
-    // Set notification on each init to be safe; it seems to stop working sometimes
+    // Sets notification if it is enabled in user preferences but is not active for whatever reason
     // TODO: Remove toasts, just here to test
-    init {
+    fun checkNotification() {
         val alarmActive = this.alarmActive()
         if (notificationEnabled && !alarmActive) setNotification()
-        else if (alarmActive) Toast.makeText(context, "Alarm already set for $notificationTime", Toast.LENGTH_LONG).show()
+        else if (alarmActive) Toast.makeText(context, "Alarm already set for ${timeTo12HourString(notificationTime)}", Toast.LENGTH_LONG).show()
         else Toast.makeText(context, "Notifications disabled.", Toast.LENGTH_LONG).show()
     }
 
     // Sets alarm (ie. notification) that will repeat every 24 hours
-    // TODO: Change to AlarmManager.INTERVAL_DAY
     fun setNotification(time: Time = notificationTime) {
         notificationEnabled = true
         notificationTime = time
@@ -52,8 +51,8 @@ class NotificationManager(val context: Context) {
         val alarmIntent = Intent(context, NotificationReceiver::class.java).let { intent ->
             PendingIntent.getBroadcast(context, 0, intent, 0)
         }
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000 * 60 * 60, alarmIntent)
-        Toast.makeText(context, "Daily notification set for $notificationTime", Toast.LENGTH_LONG).show()
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000 * 60 * 60 * 24, alarmIntent)
+        Toast.makeText(context, "Daily notification set for ${timeTo12HourString(notificationTime)}", Toast.LENGTH_LONG).show()
     }
 
     // Cancels notification and disables notifications in user preferences

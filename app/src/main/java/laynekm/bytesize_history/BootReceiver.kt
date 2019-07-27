@@ -9,8 +9,7 @@ import android.content.Intent
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == "android.intent.action.BOOT_COMPLETED") {
-            val notificationManager = NotificationManager(context)
-            notificationManager.setNotification()
+            NotificationManager(context).checkNotification()
         }
     }
 }

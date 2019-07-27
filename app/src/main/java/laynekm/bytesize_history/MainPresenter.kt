@@ -22,6 +22,7 @@ class MainPresenter(val context: Context, val view: View) {
 
     init {
         themeManager.applyTheme()
+        notificationManager.checkNotification()
 
         // Load filters from preferences or, if they don't exist, set default filters as preferences
         if (filterManager.hasPreferences()) HistoryItems.filterOptions = filterManager.getPreferences()
