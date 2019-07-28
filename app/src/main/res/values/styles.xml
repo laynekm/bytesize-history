@@ -58,4 +58,10 @@
     <style name="dialogThemeDark" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/darkPrimaryLight</item>
     </style>
+
+    <!-- Shared styles -->
+    <style name="SwitchTheme" parent="Base.Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:colorForeground">@color/lightText</item>
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>
