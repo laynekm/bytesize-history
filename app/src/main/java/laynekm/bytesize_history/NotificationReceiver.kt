@@ -22,7 +22,7 @@ class NotificationReceiver : BroadcastReceiver() {
         this.contentManager.fetchDailyHistoryFact(context, ::pushNotification)
     }
 
-    // TODO: Remove "Scheduled to send..." text
+    // REMINDER: Remove "Scheduled to send..." text
     private fun pushNotification(context: Context, historyItem: HistoryItem, date: Date) {
 
         val preferencesKey = context.getString(R.string.preferences_key)

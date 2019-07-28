@@ -20,7 +20,7 @@ class NotificationManager(val context: Context) {
     private var notificationTime = stringToTime(sharedPref.getString(notificationTimeKey, timeToString(notificationTimeDefault))!!)
 
     // Sets notification if it is enabled in user preferences but is not active for whatever reason
-    // TODO: Remove toasts, just here to test
+    // REMINDER: Remove toasts, just here to test
     fun checkNotification() {
         val alarmActive = this.alarmActive()
         if (notificationEnabled && !alarmActive) setNotification()

@@ -291,8 +291,8 @@ class ContentManager {
         while (desc.contains("{{")) {
             val innerText = desc.substringBetween("{{", "}}")
 
-            // Don't bother converting values, just show the value and the first given unit (ie. km)
-            // TODO: Maybe add support for converting values
+            // Don't bother converting values for now, just show value and first given unit (ie. km)
+            // TODO: Add support for converting values
             if (innerText.contains("convert")) {
                 val splitText = innerText.split("|").toTypedArray()
                 desc = desc.replaceFirst(innerText, splitText[1] + " " + splitText[2])

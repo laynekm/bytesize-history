@@ -86,7 +86,7 @@ class HistoryItemAdapter(
         }
 
         // onClick displays/hides links
-        // TODO: Add animation
+        // TODO: Add animation, maybe a chevron to indicate it is clickable
         if (item.linksVisible) viewHolder.linkView.visibility = View.VISIBLE
         else viewHolder.linkView.visibility = View.GONE
         viewHolder.historyItem.setOnClickListener {
