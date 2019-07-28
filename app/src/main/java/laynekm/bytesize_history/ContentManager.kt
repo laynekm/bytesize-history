@@ -123,12 +123,20 @@ class ContentManager {
 
     // TODO: Group depths > 0 together with their parent when sorting
     private fun filterErasAndSort(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
-        val filteredItems: MutableList<HistoryItem> = mutableListOf()
+        var filteredItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach {
             if (HistoryItems.filterOptions.eras.contains(it.era) || it.era === Era.NONE) filteredItems.add(it)
         }
-        if (HistoryItems.filterOptions.order === Order.DESCENDING) filteredItems.reverse()
+        if (HistoryItems.filterOptions.order === Order.DESCENDING) {
+            filteredItems = reverseOrderRespectingDepth(filteredItems)
+        }
         return filteredItems
+    }
+
+    private fun reverseOrderRespectingDepth(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
+        val reversedItems: MutableList<HistoryItem> = mutableListOf()
+        items.forEach { reversedItems.add(it.depth, it) }
+        return reversedItems
     }
 
     // Builds URL for the initial API call to Wikipedia
