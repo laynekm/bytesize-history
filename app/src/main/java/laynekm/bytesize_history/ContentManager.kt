@@ -35,6 +35,7 @@ class ContentManager {
     private val yearDescSeparators = listOf("&ndash;", "&#x2013;", " – ")
 
     private fun connectToURL(url: URL): String {
+        Log.d(TAG, "Connecting to $url")
         var result = ""
         val connection = url.openConnection() as HttpURLConnection
         connection.connectTimeout = 10000
@@ -61,7 +62,7 @@ class ContentManager {
             try {
                 result = connectToURL(url)
             } catch (e: Exception) {
-                Log.e("ContentManager", "$e")
+                Log.e(TAG, "$e")
                 uiThread { callback(false) }
                 return@doAsync
             }
@@ -96,9 +97,8 @@ class ContentManager {
         var image = ""
         links.forEach {
             image = parseImageURL(buildImageURL(it.title).readText())
-            if (image !== "") return image
         }
-
+        Log.d(TAG, "Fetched image ($image) from $links")
         return image
     }
 
@@ -110,6 +110,7 @@ class ContentManager {
     }
 
     fun filterHistoryItems() {
+        Log.d(TAG, "Filtering history items")
         for ((type) in HistoryItems.allHistoryItems) {
             HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
         }
@@ -151,7 +152,7 @@ class ContentManager {
             .appendQueryParameter("titles", searchParam)
             .build()
 
-        Log.d(TAG, "buildURL: $uri")
+        Log.d(TAG, "Built initial Wikipedia URL: $uri")
         return URL(uri.toString())
     }
 
@@ -166,7 +167,7 @@ class ContentManager {
             .appendQueryParameter("titles", searchParam)
             .build()
 
-        Log.d(TAG, "buildImageURL: $uri")
+        Log.d(TAG, "Built image URL: $uri")
         return URL(uri.toString())
     }
 
@@ -176,7 +177,7 @@ class ContentManager {
             .appendPath(searchParam)
             .build()
 
-        Log.d(TAG, "buildWebURL: $uri")
+        Log.d(TAG, "Built additional link URL: $uri")
         return uri.toString()
     }
 
@@ -196,9 +197,8 @@ class ContentManager {
         // Content itself is not in json format but can be split into an array
         val lines = content.split("\\n").toTypedArray()
 
-        lines.forEach {
-            Log.wtf(TAG, it)
-        }
+        Log.d(TAG, "Parsed content for $json")
+        lines.forEach { Log.d(TAG, it) }
 
         // Split array into events, births, and deaths; assumes this order is respected
         // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
@@ -230,9 +230,13 @@ class ContentManager {
         if (type === Type.OBSERVANCE) return null
 
         var yearSection = ""
-        yearDescSeparators.forEach {
-            if (line.contains(it)) yearSection = line.substringBefore(it)
+        for (separator in yearDescSeparators) {
+            if (line.contains(separator)) {
+                yearSection = line.substringBefore(separator)
+                break
+            }
         }
+
         if (yearSection == "") return null
 
         if (yearSection.contains("(")) {
@@ -245,8 +249,17 @@ class ContentManager {
             yearSection = yearSection.replace(secondaryYear, "")
         }
 
-        var yearInt = Regex("[^0-9]").replace(yearSection, "").toInt()
+        var yearInt: Int?
+        try {
+            yearInt = Regex("[^0-9]").replace(yearSection, "").toInt()
+        } catch (e: Exception) {
+            Log.e(TAG, "$e")
+            return null
+        }
+
+
         if (yearSection.contains("BC")) yearInt *= -1
+        Log.d(TAG, "Parsed $yearInt from $line")
         return yearInt
     }
 
@@ -322,6 +335,7 @@ class ContentManager {
             if (type !== Type.OBSERVANCE) desc = desc.replaceFirst(" ", "")
         }
 
+        Log.d(TAG, "Parsed desc ($desc) and links ($links) from $line")
         return ParseResult(desc, links)
     }
 
@@ -339,9 +353,10 @@ class ContentManager {
             // Remove extra quotes
             url = url.substring(1, url.length - 1)
         } catch (e: Exception) {
-            Log.e("ContentManager", "parseImageURL error")
+            Log.e(TAG, "parseImageURL error")
         }
 
+        Log.d(TAG,"Parsed image URL: $url")
         return url
     }
 
