@@ -15,7 +15,6 @@
     <string name="births_text">Births</string>
     <string name="deaths_text">Deaths</string>
     <string name="observances_text">Holidays</string>
-    <string name="BC_text">%1$d BC</string>
 
     <!-- Filter dropdown -->
     <string name="order_header">Order</string>

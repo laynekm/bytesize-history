@@ -65,11 +65,7 @@ class HistoryItemAdapter(
         if (item.depth > 0) viewHolder.historyItemContainer.setBackgroundResource(R.drawable.border_left)
 
         // Set year and description
-        when {
-            item.year == null -> viewHolder.year.text = ""
-            item.year < 0 -> viewHolder.year.text = context.resources.getString(R.string.BC_text, item.year * -1)
-            else -> viewHolder.year.text = "${item.year}"
-        }
+        viewHolder.year.text = item.formattedYear
         viewHolder.desc.text = item.desc
 
         // Dynamically inflate link items

@@ -29,12 +29,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val notificationTimeKey = context.getString(R.string.notification_time_pref_key)
         val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
         val notificationTime = stringTo12HourString(sharedPref.getString(notificationTimeKey, "default time")!!)
-
-        val year = when {
-            historyItem.year === null -> "history"
-            historyItem.year < 0 -> context.resources.getString(R.string.BC_text, historyItem.year * -1)
-            else -> "${historyItem.year}"
-        }
+        val year = historyItem.formattedYear
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)

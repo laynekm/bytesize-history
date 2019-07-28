@@ -9,13 +9,23 @@ class HistoryItem (
 
     var image: String = ""
     var hasFetchedImage: Boolean = false
+    var formattedYear = formatYear(year)
     var era: Era = determineEra(year)
     var linksVisible = false
 
-    private fun determineEra(year: Int?): Era {
-        if (year === null) return Era.NONE
-
+    private fun formatYear(year: Int?): String {
         return when {
+            year == null && type == Type.OBSERVANCE -> ""
+            year == null -> "history"
+            year < 0 -> "$year BC"
+            year in 0..500 -> "$year AD"
+            else -> "$year"
+        }
+    }
+
+    private fun determineEra(year: Int?): Era {
+        return when {
+            year == null -> Era.NONE
             year < 500 -> Era.ANCIENT
             year in 500..1499 -> Era.MEDIEVAL
             year in 1500..1799 -> Era.EARLYMODERN
