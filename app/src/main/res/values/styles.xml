@@ -1,6 +1,5 @@
 <resources>
     <!-- Light theme -->
-    <!-- TODO: Fix switches not being styled when turned off -->
     <style name="AppTheme.Light" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowDisablePreview">true</item>
 
