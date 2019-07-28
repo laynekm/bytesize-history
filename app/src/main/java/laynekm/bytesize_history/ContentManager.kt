@@ -24,10 +24,6 @@ object HistoryItems {
 
 // Used to return desc and links from parseDescriptionAndLinks
 // TODO: Fetch images for each type when tab is selected so initial load time isn't as long
-/*
-    TODO: Fix parsing
-    - July 28 event
- */
 data class ParseResult(val desc: String, val links: MutableList<Link>)
 
 class ContentManager {
@@ -35,6 +31,8 @@ class ContentManager {
     private val TAG = "ContentManager"
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
+
+    private val yearDescSeparators = listOf("&ndash;", "&#x2013;", " – ")
 
     private fun connectToURL(url: URL): String {
         var result = ""
@@ -225,8 +223,9 @@ class ContentManager {
         if (type === Type.OBSERVANCE) return null
 
         var yearSection = ""
-        if (line.contains("&ndash;")) yearSection = line.substringBefore("&ndash;")
-        else if (line.contains(" – ")) yearSection = line.substringBefore(" – ")
+        yearDescSeparators.forEach {
+            if (line.contains(it)) yearSection = line.substringBefore(it)
+        }
         if (yearSection == "") return null
 
         if (yearSection.contains("(")) {
@@ -255,7 +254,11 @@ class ContentManager {
     // Parse line and return description and links
     private fun parseDescriptionAndLinks(line: String, type: Type): ParseResult {
         var desc = line
-        if (type !== Type.OBSERVANCE) desc = line.substringAfter("&ndash; ")
+        if (type !== Type.OBSERVANCE) {
+            yearDescSeparators.forEach {
+                if (line.contains(it)) desc = line.substringAfter(it)
+            }
+        }
         val links = mutableListOf<Link>()
 
         // Loop until all square brackets are removed
@@ -301,11 +304,11 @@ class ContentManager {
             desc = desc.replaceFirst("}}", "")
         }
 
-        // Remove remaining unwanted characters
+        // Remove/replace remaining unwanted characters
         desc = desc.replace("|", "")
         desc = desc.replace("\\", "")
         desc = desc.replace("&nbsp;", " ")
-
+        desc = desc.trim()
         if (desc.contains("*")) {
             desc = desc.replace("*", "")
             if (type !== Type.OBSERVANCE) desc = desc.replaceFirst(" ", "")
