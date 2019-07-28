@@ -18,6 +18,8 @@ class MainPresenter(val context: Context, val view: View) {
 
     private var fetching: Boolean = false
     private var fetchError: Boolean = false
+    private var fetchedTypes: MutableSet<Type> = mutableSetOf()
+
     private var filterDropdownVisible: Boolean = false
     private var datePickerVisible: Boolean = false
     private var webViewVisible: Boolean = false
@@ -71,6 +73,10 @@ class MainPresenter(val context: Context, val view: View) {
         if (type === currentType) return
         currentType = type
         view.onTypeChanged(currentType)
+        if (type != null && !fetchedTypes.contains(type)) {
+            fetchedTypes.add(type)
+            view.onContentChanged(HistoryItems.filteredHistoryItems, type)
+        }
         checkForErrors()
     }
 
@@ -94,7 +100,9 @@ class MainPresenter(val context: Context, val view: View) {
         fetching = false
         view.onFetchFinished()
         fetchError = !success
-        if (success) view.onContentChanged(HistoryItems.filteredHistoryItems)
+        if (success) {
+            view.onContentChanged(HistoryItems.filteredHistoryItems, currentType)
+        }
         checkForErrors()
     }
 
@@ -199,7 +207,7 @@ class MainPresenter(val context: Context, val view: View) {
     interface View {
         fun onTypeChanged(type: Type?)
         fun onDateChanged(date: Date)
-        fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>)
+        fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>, type: Type? = null)
         fun onFiltersChanged(filters: FilterOptions)
         fun onFetchStarted()
         fun onFetchFinished()
@@ -209,6 +217,8 @@ class MainPresenter(val context: Context, val view: View) {
         fun showDatePickerDialog(year: Int, month: Int, day: Int)
         fun showWebView()
         fun hideWebView()
+        fun showRecyclerView(type: Type)
+        fun hideRecyclerView(type: Type)
         fun loadUrlToWebView(url: String)
         fun goBackWebView()
         fun recreate()

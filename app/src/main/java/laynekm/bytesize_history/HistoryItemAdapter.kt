@@ -16,6 +16,7 @@ import android.graphics.Bitmap
 import android.widget.*
 import com.squareup.picasso.Callback
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.widget.LinearLayout
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
@@ -106,17 +107,22 @@ class HistoryItemAdapter(
             }
 
             uiThread {
-                if (image === "") viewHolder.image.setImageResource(R.drawable.default_image)
+                if (image === "") { viewHolder.image.setImageResource(R.drawable.default_image) }
                 else Picasso.get()
                     .load(image)
                     .resize(100, 100)
                     .centerCrop()
                     .into(viewHolder.image, object: Callback {
-                        override fun onSuccess() { viewHolder.historyItem.visibility = View.VISIBLE }
-                        override fun onError(exception: Exception) { viewHolder.historyItem.visibility = View.VISIBLE }
+                        override fun onSuccess() { onFetchFinished(viewHolder) }
+                        override fun onError(exception: Exception) { onFetchFinished(viewHolder) }
                     })
             }
         }
+    }
+
+    // Display RecyclerView only if all images have been fetched
+    private fun onFetchFinished(viewHolder: ViewHolder) {
+        viewHolder.historyItem.visibility = View.VISIBLE
     }
 
     override fun getItemCount(): Int {

@@ -148,9 +148,14 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         progressBar.visibility = View.GONE
     }
 
-    override fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>) {
-        for ((type, adapter) in historyAdapters.adapters) {
-            adapter.setItems(items[type]!!)
+    // If type is not null, update adapter of specified type; otherwise, update all adapters
+    override fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>, type: Type?) {
+        if (type != null) {
+            historyAdapters.adapters[type]!!.setItems(items[type]!!)
+        } else {
+            for ((actualType, adapter) in historyAdapters.adapters) {
+                adapter.setItems(items[actualType]!!)
+            }
         }
     }
 
@@ -206,6 +211,14 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
                 textViewFilters.filters[type]!!.setBackgroundResource(0)
             }
         }
+    }
+
+    override fun showRecyclerView(type: Type) {
+        historyViews.views[type]!!.visibility = View.VISIBLE
+    }
+
+    override fun hideRecyclerView(type: Type) {
+        historyViews.views[type]!!.visibility = View.GONE
     }
 
     override fun showDatePickerDialog(year: Int, month: Int, day: Int) {
