@@ -255,6 +255,5 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     override fun onPause() {
         super.onPause()
         if (::datePickerDialog.isInitialized) datePickerDialog.dismiss()
-        if (::webView.isInitialized) webView.onPause()
     }
 }
