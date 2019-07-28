@@ -13,7 +13,7 @@ class MainPresenter(val context: Context, val view: View) {
     private var notificationManager: NotificationManager = NotificationManager(context)
 
     private var currentDate: Date = getToday()
-    private var currentType: Type? = HistoryItems.filterOptions.types[0]
+    private var currentType: Type? = null
 
     private var fetching: Boolean = false
     private var fetchError: Boolean = false
@@ -48,6 +48,7 @@ class MainPresenter(val context: Context, val view: View) {
         if (datePickerVisible) showDatePickerDialog()
         if (webViewVisible) showWebView()
 
+        currentType = HistoryItems.filterOptions.types[0]
         view.onTypeChanged(currentType)
         view.onDateChanged(currentDate)
         view.onFiltersChanged(HistoryItems.filterOptions)
