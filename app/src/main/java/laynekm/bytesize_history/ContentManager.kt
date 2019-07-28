@@ -293,6 +293,7 @@ class ContentManager {
 
             // Don't bother converting values for now, just show value and first given unit (ie. km)
             // TODO: Add support for converting values
+            // Examples: July 28 1976
             if (innerText.contains("convert")) {
                 val splitText = innerText.split("|").toTypedArray()
                 desc = desc.replaceFirst(innerText, splitText[1] + " " + splitText[2])

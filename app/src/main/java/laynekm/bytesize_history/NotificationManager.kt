@@ -51,8 +51,10 @@ class NotificationManager(val context: Context) {
         val alarmIntent = Intent(context, NotificationReceiver::class.java).let { intent ->
             PendingIntent.getBroadcast(context, 0, intent, 0)
         }
+
+        // REMINDER: Remove all caps
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000 * 60 * 60 * 24, alarmIntent)
-        Toast.makeText(context, "Daily notification set for ${timeTo12HourString(notificationTime)}", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "NOTIFICATION SET FOR ${timeTo12HourString(notificationTime)}.", Toast.LENGTH_LONG).show()
     }
 
     // Cancels notification and disables notifications in user preferences
