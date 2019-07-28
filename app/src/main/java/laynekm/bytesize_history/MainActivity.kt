@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     private lateinit var webView: WebView
     private lateinit var datePickerDialog: DatePickerDialog
 
-    // TODO: Allow user to go back in WebView without closing it (move logic to MainPresenter?)
     override fun onCreate(savedInstanceState: Bundle?) {
         presenter = MainPresenter(this, this)
 
@@ -53,12 +52,12 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         progressBar = findViewById(R.id.progressBar)
         dropdownFilter = findViewById(R.id.dropdownFilter)
         datePickerButton = findViewById(R.id.calendarView)
-        webView = findViewById(R.id.webView)
 
+        webView = findViewById(R.id.webView)
+        if (savedInstanceState !== null) webView.restoreState(savedInstanceState)
         webView.webViewClient = object: WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
-                presenter.setWebViewUrl(url)
                 progressBar.visibility = View.GONE
             }
         }
@@ -246,6 +245,7 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         presenter.onSaveInstanceState(outState)
+        webView.saveState(outState)
     }
 
     override fun recreate() {

@@ -20,7 +20,6 @@ import android.widget.LinearLayout
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
-// TODO: Preserve WebView onPause/onDestroy
 class HistoryItemAdapter(
     private val context: Context,
     private val presenter: MainPresenter,
