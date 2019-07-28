@@ -27,9 +27,6 @@ class HistoryItemAdapter(
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
     private val contentManager = ContentManager()
-    private val toolbar = (context as Activity).findViewById(R.id.toolbar) as Toolbar
-    private val webView = (context as Activity).findViewById(R.id.webView) as WebView
-    private val progressBar = (context as Activity).findViewById(R.id.progressBar) as ProgressBar
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal var historyItemContainer: LinearLayout = itemView.findViewById(R.id.historyItemContainer)

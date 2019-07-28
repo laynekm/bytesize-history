@@ -12,6 +12,7 @@ class MainPresenter(val context: Context, val view: View) {
     private var filterManager: FilterManager = FilterManager(context)
     private var notificationManager: NotificationManager = NotificationManager(context)
 
+    private var today: Date = getToday()
     private var currentDate: Date = getToday()
     private var currentType: Type? = null
 
@@ -59,7 +60,11 @@ class MainPresenter(val context: Context, val view: View) {
 
     // Update date if app is resumed but the date has changed
     fun onViewResumed() {
-        setCurrentDate(getToday(), false)
+        val updatedToday = getToday()
+        if (!datesEqual(today, updatedToday)) {
+            today = updatedToday
+            setCurrentDate(updatedToday, false)
+        }
     }
 
     fun setCurrentType(type: Type?) {
