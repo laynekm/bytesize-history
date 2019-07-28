@@ -17,7 +17,7 @@ class HistoryItem (
         return when {
             year == null && type == Type.OBSERVANCE -> ""
             year == null -> "history"
-            year < 0 -> "$year BC"
+            year < 0 -> "${year * -1} BC"
             year in 0..500 -> "$year AD"
             else -> "$year"
         }
