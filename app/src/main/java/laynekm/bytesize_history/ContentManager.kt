@@ -16,6 +16,7 @@ object HistoryItems {
     var allHistoryItems = getEmptyTypeMap()
     var filteredHistoryItems = getEmptyTypeMap()
     var filterOptions: FilterOptions = FilterOptions()
+    var fetchedTypes: MutableSet<Type> = mutableSetOf()
 
     fun isEmpty(): Boolean {
         return mapIsEmpty(allHistoryItems) && mapIsEmpty(filteredHistoryItems)

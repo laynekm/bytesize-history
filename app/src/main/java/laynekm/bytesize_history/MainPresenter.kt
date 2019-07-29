@@ -17,8 +17,6 @@ class MainPresenter(val context: Context, val view: View) {
     private var currentType: Type? = null
 
     private var fetchError: Boolean = false
-    private var fetchedTypes: MutableSet<Type> = mutableSetOf()
-
     private var filterDropdownVisible: Boolean = false
     private var datePickerVisible: Boolean = false
     private var webViewVisible: Boolean = false
@@ -72,8 +70,8 @@ class MainPresenter(val context: Context, val view: View) {
         if (type === currentType) return
         currentType = type
         view.onTypeChanged(currentType)
-        if (type != null && !fetchedTypes.contains(type)) {
-            fetchedTypes.add(type)
+        if (type != null && !HistoryItems.fetchedTypes.contains(type)) {
+            HistoryItems.fetchedTypes.add(type)
             fetchImages(type)
         }
         checkForErrors()
@@ -89,7 +87,7 @@ class MainPresenter(val context: Context, val view: View) {
 
     fun fetchHistoryItems() {
         fetchError = false
-        fetchedTypes = mutableSetOf()
+        HistoryItems.fetchedTypes = mutableSetOf()
         view.onContentChanged(getEmptyTypeMap())
         view.onFetchStarted()
         contentManager.fetchHistoryItems(currentDate, ::fetchHistoryItemsCallback)
@@ -98,7 +96,7 @@ class MainPresenter(val context: Context, val view: View) {
     private fun fetchHistoryItemsCallback(success: Boolean) {
         fetchError = !success
         if (success) {
-            fetchedTypes.add(currentType!!)
+            HistoryItems.fetchedTypes.add(currentType!!)
             fetchImages(currentType)
         }
         checkForErrors()
