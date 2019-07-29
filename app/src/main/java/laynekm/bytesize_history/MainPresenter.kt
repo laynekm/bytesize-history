@@ -89,6 +89,7 @@ class MainPresenter(val context: Context, val view: View) {
 
     fun fetchHistoryItems() {
         fetchError = false
+        fetchedTypes = mutableSetOf()
         view.onContentChanged(getEmptyTypeMap())
         view.onFetchStarted()
         contentManager.fetchHistoryItems(currentDate, ::fetchHistoryItemsCallback)
