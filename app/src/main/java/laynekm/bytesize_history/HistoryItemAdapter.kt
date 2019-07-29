@@ -27,8 +27,6 @@ class HistoryItemAdapter(
     private var items: MutableList<HistoryItem>)
     : RecyclerView.Adapter<HistoryItemAdapter.ViewHolder>() {
 
-    private val contentManager = ContentManager()
-
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal var historyItemContainer: LinearLayout = itemView.findViewById(R.id.historyItemContainer)
         internal var historyItem: ConstraintLayout = itemView.findViewById(R.id.historyItem)
@@ -49,7 +47,8 @@ class HistoryItemAdapter(
         // Clear existing resources
         viewHolder.image.setImageResource(0)
         viewHolder.historyItemContainer.setBackgroundResource(0)
-        if (!item.hasFetchedImage) { viewHolder.historyItem.visibility = View.GONE }
+        viewHolder.historyItem.visibility = View.GONE
+//        if (!item.hasFetchedImage) { viewHolder.historyItem.visibility = View.GONE }
 
         // Add margins based on history item depth, include left border if depth > 0
         val margin = item.depth * 25
@@ -93,21 +92,9 @@ class HistoryItemAdapter(
             }
         }
 
-        // If item already has an image then display it, otherwise fetch the image
-        // Set hasFetchedImage boolean rather than check image since some items don't have images and will refetch
-        // TODO: Show progress bar and hide recycler view until all content is loaded
-        if (!item.hasFetchedImage) {
-            contentManager.fetchImage(item, viewHolder, ::fetchImageCallback)
-        }
-    }
-
-    private fun fetchImageCallback(item: HistoryItem, viewHolder: ViewHolder, imageURL: String) {
-        item.hasFetchedImage = true
-        item.image = imageURL
-
         if (item.image == "") viewHolder.image.setImageResource(R.drawable.default_image)
         else Picasso.get()
-            .load(imageURL)
+            .load(item.image)
             .resize(100, 100)
             .centerCrop()
             .into(viewHolder.image, object: Callback {
@@ -116,7 +103,6 @@ class HistoryItemAdapter(
             })
     }
 
-    // Display RecyclerView only if all images have been fetched
     private fun onFetchFinished(viewHolder: ViewHolder) {
         viewHolder.historyItem.visibility = View.VISIBLE
     }

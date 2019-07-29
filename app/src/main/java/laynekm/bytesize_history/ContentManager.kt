@@ -94,8 +94,7 @@ class ContentManager {
     // Some pages might not have images, so keep fetching until one of them does
     fun fetchImage(
         item: HistoryItem,
-        viewHolder: HistoryItemAdapter.ViewHolder,
-        callback: (HistoryItem, HistoryItemAdapter.ViewHolder, String) -> Unit) {
+        callback: (HistoryItem, String) -> Unit) {
         var imageURL = ""
         doAsync {
             try {
@@ -110,7 +109,7 @@ class ContentManager {
 
             uiThread {
                 Log.d(TAG, "Fetched image URL ($imageURL) from $item.links")
-                callback(item, viewHolder, imageURL)
+                callback(item, imageURL)
             }
         }
     }
