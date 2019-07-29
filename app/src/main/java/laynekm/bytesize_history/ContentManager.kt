@@ -95,8 +95,9 @@ class ContentManager {
     // Some pages might not have images, so keep fetching until one of them does
     fun fetchImage(links: MutableList<Link>): String {
         var image = ""
-        links.forEach {
-            image = parseImageURL(buildImageURL(it.title).readText())
+        for (link in links) {
+            image = parseImageURL(buildImageURL(link.title).readText())
+            if (image != "") break
         }
         Log.d(TAG, "Fetched image ($image) from $links")
         return image

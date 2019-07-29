@@ -87,8 +87,7 @@ class HistoryItemAdapter(
             if (viewHolder.linkView.visibility == View.GONE) {
                 viewHolder.linkView.visibility = View.VISIBLE
                 item.linksVisible = true
-            }
-            else {
+            } else {
                 viewHolder.linkView.visibility = View.GONE
                 item.linksVisible = false
             }
@@ -107,7 +106,7 @@ class HistoryItemAdapter(
             }
 
             uiThread {
-                if (image === "") { viewHolder.image.setImageResource(R.drawable.default_image) }
+                if (image == "") viewHolder.image.setImageResource(R.drawable.default_image)
                 else Picasso.get()
                     .load(image)
                     .resize(100, 100)
