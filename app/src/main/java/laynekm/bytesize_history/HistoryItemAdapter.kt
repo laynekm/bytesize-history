@@ -41,6 +41,7 @@ class HistoryItemAdapter(
         return ViewHolder(view)
     }
 
+    // TODO: Add animation on dropdown select
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
         val item = items[index]
 
@@ -48,7 +49,6 @@ class HistoryItemAdapter(
         viewHolder.image.setImageResource(0)
         viewHolder.historyItemContainer.setBackgroundResource(0)
         viewHolder.historyItem.visibility = View.GONE
-//        if (!item.hasFetchedImage) { viewHolder.historyItem.visibility = View.GONE }
 
         // Add margins based on history item depth, include left border if depth > 0
         val margin = item.depth * 25
@@ -79,7 +79,6 @@ class HistoryItemAdapter(
         }
 
         // onClick displays/hides links
-        // TODO: Add animation, maybe a chevron to indicate it is clickable
         if (item.linksVisible) viewHolder.linkView.visibility = View.VISIBLE
         else viewHolder.linkView.visibility = View.GONE
         viewHolder.historyItem.setOnClickListener {
@@ -92,7 +91,10 @@ class HistoryItemAdapter(
             }
         }
 
-        if (item.image == "") viewHolder.image.setImageResource(R.drawable.default_image)
+        if (item.image == "") {
+            viewHolder.image.setImageResource(R.drawable.default_image)
+            onFetchFinished(viewHolder)
+        }
         else Picasso.get()
             .load(item.image)
             .resize(100, 100)
