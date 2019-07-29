@@ -75,6 +75,7 @@ class MainPresenter(val context: Context, val view: View) {
         view.onTypeChanged(currentType)
         if (type != null && !fetchedTypes.contains(type)) {
             fetchedTypes.add(type)
+//            view.onFetchStarted()
             view.onContentChanged(HistoryItems.filteredHistoryItems, type)
         }
         checkForErrors()

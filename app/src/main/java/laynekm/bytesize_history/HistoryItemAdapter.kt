@@ -96,28 +96,24 @@ class HistoryItemAdapter(
         // If item already has an image then display it, otherwise fetch the image
         // Set hasFetchedImage boolean rather than check image since some items don't have images and will refetch
         // TODO: Show progress bar and hide recycler view until all content is loaded
-        doAsync {
-            val image: String
-            if (!item.hasFetchedImage) {
-                image = contentManager.fetchImage(item.links)
-                item.image = image
-                item.hasFetchedImage = true
-            } else {
-                image = item.image
-            }
-
-            uiThread {
-                if (image == "") viewHolder.image.setImageResource(R.drawable.default_image)
-                else Picasso.get()
-                    .load(image)
-                    .resize(100, 100)
-                    .centerCrop()
-                    .into(viewHolder.image, object: Callback {
-                        override fun onSuccess() { onFetchFinished(viewHolder) }
-                        override fun onError(exception: Exception) { onFetchFinished(viewHolder) }
-                    })
-            }
+        if (!item.hasFetchedImage) {
+            contentManager.fetchImage(item, viewHolder, ::fetchImageCallback)
         }
+    }
+
+    private fun fetchImageCallback(item: HistoryItem, viewHolder: ViewHolder, imageURL: String) {
+        item.hasFetchedImage = true
+        item.image = imageURL
+
+        if (item.image == "") viewHolder.image.setImageResource(R.drawable.default_image)
+        else Picasso.get()
+            .load(imageURL)
+            .resize(100, 100)
+            .centerCrop()
+            .into(viewHolder.image, object: Callback {
+                override fun onSuccess() { onFetchFinished(viewHolder) }
+                override fun onError(exception: Exception) { onFetchFinished(viewHolder) }
+            })
     }
 
     // Display RecyclerView only if all images have been fetched
