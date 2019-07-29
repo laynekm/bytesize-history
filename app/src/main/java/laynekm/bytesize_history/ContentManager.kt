@@ -23,7 +23,6 @@ object HistoryItems {
 }
 
 // Used to return desc and links from parseDescriptionAndLinks
-// TODO: Fetch images for each type when tab is selected so initial load time isn't as long
 data class ParseResult(val desc: String, val links: MutableList<Link>)
 
 class ContentManager {

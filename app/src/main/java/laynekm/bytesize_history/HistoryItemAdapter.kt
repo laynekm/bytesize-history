@@ -95,6 +95,7 @@ class HistoryItemAdapter(
 
         // If item already has an image then display it, otherwise fetch the image
         // Set hasFetchedImage boolean rather than check image since some items don't have images and will refetch
+        // TODO: Show progress bar and hide recycler view until all content is loaded
         doAsync {
             val image: String
             if (!item.hasFetchedImage) {
