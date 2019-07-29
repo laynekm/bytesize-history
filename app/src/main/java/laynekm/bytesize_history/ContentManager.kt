@@ -33,7 +33,7 @@ class ContentManager {
 
     private val yearDescSeparators = listOf("&ndash;", "&#x2013;", " – ")
 
-    private fun connectToURL(url: URL): String {
+    private fun fetchFromURL(url: URL): String {
         Log.d(TAG, "Connecting to $url")
         var result = ""
         val connection = url.openConnection() as HttpURLConnection
@@ -59,7 +59,7 @@ class ContentManager {
         // Fetch items and put into their respective lists (events, births, deaths)
         doAsync {
             try {
-                result = connectToURL(url)
+                result = fetchFromURL(url)
             } catch (e: Exception) {
                 Log.e(TAG, "$e")
                 uiThread { callback(false) }
@@ -83,7 +83,7 @@ class ContentManager {
         val url = buildURL(buildDateForURL(date))
         var result: String
         doAsync {
-            result = connectToURL(url)
+            result = fetchFromURL(url)
             val allHistoryItems = parseContent(result)
             val randomHistoryItem = getRandomHistoryItem(allHistoryItems, Type.EVENT)
             uiThread { pushNotification(context, randomHistoryItem, date) }
@@ -92,14 +92,26 @@ class ContentManager {
 
     // Fetches image URL based on provided webpage links
     // Some pages might not have images, so keep fetching until one of them does
-    fun fetchImage(links: MutableList<Link>): String {
-        var image = ""
-        for (link in links) {
-            image = parseImageURL(buildImageURL(link.title).readText())
-            if (image != "") break
+    fun fetchImage(
+        item: HistoryItem,
+        callback: (HistoryItem, String) -> Unit) {
+        var imageURL = ""
+        doAsync {
+            try {
+                for (link in item.links) {
+                    imageURL = parseImageURL(fetchFromURL(buildImageURL(link.title)))
+                    if (imageURL != "") break
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "$e")
+                return@doAsync
+            }
+
+            uiThread {
+                Log.d(TAG, "Fetched image URL ($imageURL) from $item.links")
+                callback(item, imageURL)
+            }
         }
-        Log.d(TAG, "Fetched image ($image) from $links")
-        return image
     }
 
     // Returns random history item of the specified type

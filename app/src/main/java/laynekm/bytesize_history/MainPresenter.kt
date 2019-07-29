@@ -16,7 +16,6 @@ class MainPresenter(val context: Context, val view: View) {
     private var currentDate: Date = getToday()
     private var currentType: Type? = null
 
-    private var fetching: Boolean = false
     private var fetchError: Boolean = false
     private var fetchedTypes: MutableSet<Type> = mutableSetOf()
 
@@ -50,8 +49,8 @@ class MainPresenter(val context: Context, val view: View) {
         if (filterDropdownVisible) view.onDropdownOpened()
         if (datePickerVisible) showDatePickerDialog()
         if (webViewVisible) showWebView()
+        if (currentType == null) currentType = HistoryItems.filterOptions.types[0]
 
-        currentType = HistoryItems.filterOptions.types[0]
         view.onTypeChanged(currentType)
         view.onDateChanged(currentDate)
         view.onFiltersChanged(HistoryItems.filterOptions)
@@ -75,7 +74,7 @@ class MainPresenter(val context: Context, val view: View) {
         view.onTypeChanged(currentType)
         if (type != null && !fetchedTypes.contains(type)) {
             fetchedTypes.add(type)
-            view.onContentChanged(HistoryItems.filteredHistoryItems, type)
+            fetchImages(type)
         }
         checkForErrors()
     }
@@ -89,7 +88,6 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     fun fetchHistoryItems() {
-        fetching = true
         fetchError = false
         view.onContentChanged(getEmptyTypeMap())
         view.onFetchStarted()
@@ -97,13 +95,29 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     private fun fetchHistoryItemsCallback(success: Boolean) {
-        fetching = false
-        view.onFetchFinished()
         fetchError = !success
         if (success) {
-            view.onContentChanged(HistoryItems.filteredHistoryItems, currentType)
+            fetchedTypes.add(currentType!!)
+            fetchImages(currentType)
         }
         checkForErrors()
+    }
+
+    private fun fetchImages(type: Type?) {
+        view.onFetchStarted()
+        HistoryItems.filteredHistoryItems[type]!!.forEach {
+            contentManager.fetchImage(it, ::fetchImagesCallback)
+        }
+    }
+
+    private fun fetchImagesCallback(item: HistoryItem, imageURL: String) {
+        item.hasFetchedImage = true
+        item.image = imageURL
+
+        if (HistoryItems.filteredHistoryItems[item.type]!!.all { it.hasFetchedImage }) {
+            view.onContentChanged(HistoryItems.filteredHistoryItems, item.type)
+            view.onFetchFinished()
+        }
     }
 
     fun toggleFilterDropdown(dropdownView: android.view.View) {
