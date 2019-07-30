@@ -45,11 +45,6 @@ class HistoryItemAdapter(
     override fun onBindViewHolder(viewHolder: ViewHolder, index: Int) {
         val item = items[index]
 
-        // Clear existing resources
-        viewHolder.image.setImageResource(0)
-        viewHolder.historyItemContainer.setBackgroundResource(0)
-        viewHolder.historyItem.visibility = View.GONE
-
         // Add margins based on history item depth, include left border if depth > 0
         val margin = item.depth * 25
         val dpMargin = TypedValue.applyDimension(
@@ -93,20 +88,12 @@ class HistoryItemAdapter(
 
         if (item.image == "") {
             viewHolder.image.setImageResource(R.drawable.default_image)
-            onFetchFinished(viewHolder)
         }
         else Picasso.get()
             .load(item.image)
             .resize(100, 100)
             .centerCrop()
-            .into(viewHolder.image, object: Callback {
-                override fun onSuccess() { onFetchFinished(viewHolder) }
-                override fun onError(exception: Exception) { onFetchFinished(viewHolder) }
-            })
-    }
-
-    private fun onFetchFinished(viewHolder: ViewHolder) {
-        viewHolder.historyItem.visibility = View.VISIBLE
+            .into(viewHolder.image)
     }
 
     override fun getItemCount(): Int {
