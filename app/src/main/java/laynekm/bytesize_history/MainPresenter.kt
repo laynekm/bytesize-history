@@ -124,6 +124,7 @@ class MainPresenter(val context: Context, val view: View) {
         }
     }
 
+    // TODO: Fix default images appearing for a moment if toggle switched on
     fun toggleFilterDropdown(dropdownView: android.view.View) {
         if (dropdownView.visibility == android.view.View.GONE) {
             filterManager.setViewContent(dropdownView, HistoryItems.filterOptions)
@@ -139,6 +140,7 @@ class MainPresenter(val context: Context, val view: View) {
             HistoryItems.filterOptions = newFilters.copy()
             filterManager.setPreferences(HistoryItems.filterOptions)
             contentManager.filterHistoryItems()
+            view.onContentChanged(HistoryItems.filteredHistoryItems)
             view.onFiltersChanged(HistoryItems.filterOptions)
 
             // If currentType is no longer in filterOptions, set currentType to first type or null
