@@ -12,6 +12,5 @@
         <attr name="colorTextDark" format="color" />
         <attr name="colorButton" format="color" />
         <attr name="colorBorderBottom" format="color" />
-        <attr name="colorBorderLeft" format="color" />
     </declare-styleable>
 </resources>

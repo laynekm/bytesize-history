@@ -19,7 +19,6 @@
 
         <item name="colorButton">@color/lightPrimary</item>
         <item name="colorBorderBottom">@color/lightPrimary</item>
-        <item name="colorBorderLeft">@color/lightBackgroundDark</item>
 
         <item name="android:datePickerDialogTheme">@style/dialogThemeLight</item>
         <item name="android:timePickerDialogTheme">@style/dialogThemeLight</item>
@@ -48,7 +47,6 @@
 
         <item name="colorButton">@color/darkPrimaryLight</item>
         <item name="colorBorderBottom">@color/darkColorAccent</item>
-        <item name="colorBorderLeft">@color/darkText</item>
 
         <item name="android:datePickerDialogTheme">@style/dialogThemeDark</item>
         <item name="android:timePickerDialogTheme">@style/dialogThemeDark</item>
