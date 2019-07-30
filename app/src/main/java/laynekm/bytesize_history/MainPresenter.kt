@@ -97,10 +97,13 @@ class MainPresenter(val context: Context, val view: View) {
 
     private fun fetchHistoryItemsCallback(success: Boolean) {
         fetchError = !success
-        if (success) {
+        if (success && currentType != null) {
             HistoryItems.fetchedTypes.add(currentType!!)
             fetchImages(currentType)
+        } else {
+            view.onFetchFinished()
         }
+
         checkForErrors()
     }
 
