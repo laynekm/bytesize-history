@@ -47,7 +47,9 @@ class MainPresenter(val context: Context, val view: View) {
         if (filterDropdownVisible) view.onDropdownOpened()
         if (datePickerVisible) showDatePickerDialog()
         if (webViewVisible) showWebView()
-        if (currentType == null) currentType = HistoryItems.filterOptions.types[0]
+        if (currentType == null && HistoryItems.filterOptions.types.size > 0) {
+            currentType = HistoryItems.filterOptions.types[0]
+        }
 
         view.onTypeChanged(currentType)
         view.onDateChanged(currentDate)
