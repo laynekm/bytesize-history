@@ -34,6 +34,23 @@ fun stringToDate(date: String?): Date {
     return Date(date!!.substringBefore("-").toInt(), date.substringAfter("-").toInt())
 }
 
+fun generateAllDatesInYear(): MutableList<Date> {
+    val daysInMonthMap: Map<Int, Int> = mapOf(
+        1 to 31, 2 to 29, 3 to 31, 4 to 30, 5 to 31, 6 to 30,
+        7 to 31, 8 to 31, 9 to 30, 10 to 31, 11 to 30, 12 to 31
+    )
+
+    val dates: MutableList<Date> = mutableListOf()
+    for (month in 1..daysInMonthMap.keys.size) {
+        for (day in 1..daysInMonthMap.getValue(month)) {
+            dates.add(Date(month, day))
+        }
+    }
+
+    System.out.println(dates)
+    return dates
+}
+
 fun timesEqual(time1: Time, time2: Time): Boolean {
     return time1.hour == time2.hour && time1.minute == time2.minute
 }

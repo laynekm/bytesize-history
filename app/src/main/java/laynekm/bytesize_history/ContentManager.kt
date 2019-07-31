@@ -78,6 +78,25 @@ class ContentManager {
         }
     }
 
+    // Does the same as above but also returns a locally generated list of history items (used to test parsing)
+    fun fetchHistoryItemsTest(date: Date, callBack: (Boolean, historyItemList: MutableList<HistoryItem>) -> Unit) {
+        val historyItems: MutableList<HistoryItem> = mutableListOf()
+        val url = buildURL(buildDateForURL(date))
+        var result: String
+
+        doAsync {
+            try {
+                result = fetchFromURL(url)
+            } catch (e: Exception) {
+                uiThread { callBack(false, historyItems) }
+                return@doAsync
+            }
+
+            historyItems.addAll(parseContent(result))
+            uiThread { callBack(true, historyItems) }
+        }
+    }
+
     // Returns a single history event for the user's daily notification
     fun fetchDailyHistoryFact(context: Context, pushNotification: (Context, HistoryItem, Date) -> Unit) {
         val date = getToday()
@@ -154,6 +173,7 @@ class ContentManager {
 
     // Builds URL for the initial API call to Wikipedia
     private fun buildURL(searchParam: String): URL {
+        print(API_BASE_URL)
         val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
             .appendQueryParameter("action", "query")
             .appendQueryParameter("prop", "revisions")
