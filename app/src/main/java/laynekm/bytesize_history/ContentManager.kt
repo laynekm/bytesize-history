@@ -109,7 +109,7 @@ class ContentManager {
             }
 
             uiThread {
-                Log.d(TAG, "Fetched image URL ($imageURL) from $item.links")
+                Log.d(TAG, "Fetched image URL ($imageURL) from ${item.links}")
                 callback(item, imageURL)
             }
         }
@@ -218,11 +218,22 @@ class ContentManager {
         val historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
         for (line in lines) {
-            if (line.contains("==Events==")) type = Type.EVENT
-            if (line.contains("==Births==")) type = Type.BIRTH
-            if (line.contains("==Deaths==")) type = Type.DEATH
-            if (line.contains("==Holidays and observances==")) type = Type.OBSERVANCE
-            if (line.contains("==References==")) break
+            if (line.contains("==Events==") || line.contains("== Events ==")) {
+                type = Type.EVENT
+            }
+            if (line.contains("==Births==") || line.contains("== Births ==")) {
+                type = Type.BIRTH
+            }
+            if (line.contains("==Deaths==") || line.contains("== Deaths ==")) {
+                type = Type.DEATH
+            }
+            if (line.contains("==Holidays and observances==") || line.contains("== Holidays and observances ==")) {
+                type = Type.OBSERVANCE
+            }
+            if (line.contains("==References==") || line.contains("== References ==")
+                || line.contains("==External links==") || line.contains("== External links ==")) {
+                break
+            }
             if (type != null && line.contains("*")) {
                 historyItems.add(buildHistoryItem(line, type))
             }
