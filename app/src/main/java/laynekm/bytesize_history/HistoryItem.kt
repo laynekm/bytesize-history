@@ -2,6 +2,7 @@ package laynekm.bytesize_history
 
 class HistoryItem (
     val type: Type,
+    val date: Date,
     val year: Int?,
     var desc: String,
     val links: MutableList<Link>,

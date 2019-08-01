@@ -1,11 +1,7 @@
 package laynekm.bytesize_history
 
-import android.content.Context
-import android.net.Uri
 import android.util.Log
 import com.google.gson.JsonParser
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import java.net.URL
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -52,67 +48,72 @@ class ContentManager {
     }
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
-    fun fetchHistoryItems(date: Date, callback: (Boolean) -> Unit) {
-
+    fun fetchHistoryItems(date: Date): HashMap<Type, MutableList<HistoryItem>>? {
         val url = buildURL(buildDateForURL(date))
-        var result: String
+        val result: String
 
-        // Fetch items and put into their respective lists (events, births, deaths)
-        doAsync {
-            try {
-                result = fetchFromURL(url)
-            } catch (e: Exception) {
-                Log.e(TAG, "$e")
-                uiThread { callback(false) }
-                return@doAsync
-            }
-
-            val allHistoryItems = parseContent(result)
-            for ((type) in HistoryItems.allHistoryItems) {
-                HistoryItems.allHistoryItems[type] = filterType(allHistoryItems, type)
-                HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
-            }
-
-            // Callback function that updates recycler views in main thread
-            uiThread { callback(true) }
+        try {
+            result = fetchFromURL(url)
+        } catch (e: Exception) {
+            Log.e(TAG, "$e")
+            return null
         }
+
+        val allHistoryItems = parseContent(result, date)
+        for ((type) in HistoryItems.allHistoryItems) {
+            HistoryItems.allHistoryItems[type] = filterType(allHistoryItems, type)
+            HistoryItems.filteredHistoryItems[type] = filterErasAndSort(HistoryItems.allHistoryItems[type]!!)
+        }
+
+        return HistoryItems.filteredHistoryItems
+    }
+
+    // Fetches history items as above but returns a locally generated map instead of reassigning the global ones
+    // Used in ContentManagerTest to make sure content for every day of year is fetched and parsed correctly
+    fun fetchHistoryItemsTest(date: Date): HashMap<Type, MutableList<HistoryItem>>? {
+        val url = buildURL(buildDateForURL(date))
+        val result: String
+        try {
+           result = fetchFromURL(url)
+        } catch (e: Exception) {
+            return null
+        }
+
+        val allHistoryItems = parseContent(result, date)
+        val mappedHistoryItems = getEmptyTypeMap()
+        for ((type) in mappedHistoryItems) {
+            mappedHistoryItems[type] = filterType(allHistoryItems, type)
+        }
+
+        return mappedHistoryItems
     }
 
     // Returns a single history event for the user's daily notification
-    fun fetchDailyHistoryFact(context: Context, pushNotification: (Context, HistoryItem, Date) -> Unit) {
+    fun fetchDailyHistoryFact(): HistoryItem {
         val date = getToday()
         val url = buildURL(buildDateForURL(date))
-        var result: String
-        doAsync {
-            result = fetchFromURL(url)
-            val allHistoryItems = parseContent(result)
-            val randomHistoryItem = getRandomHistoryItem(allHistoryItems, Type.EVENT)
-            uiThread { pushNotification(context, randomHistoryItem, date) }
-        }
+        val result = fetchFromURL(url)
+        val allHistoryItems = parseContent(result, date)
+        return getRandomHistoryItem(allHistoryItems, Type.EVENT)
     }
 
     // Fetches image URL based on provided webpage links
     // Some pages might not have images, so keep fetching until one of them does
-    fun fetchImage(
-        item: HistoryItem,
-        callback: (HistoryItem, String) -> Unit) {
+    fun fetchImage(item: HistoryItem): HistoryItem {
         var imageURL = ""
-        doAsync {
-            try {
-                for (link in item.links) {
-                    imageURL = parseImageURL(fetchFromURL(buildImageURL(link.title)))
-                    if (imageURL != "") break
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "$e")
-                return@doAsync
+        try {
+            for (link in item.links) {
+                imageURL = parseImageURL(fetchFromURL(buildImageURL(link.title)))
+                if (imageURL != "") break
             }
-
-            uiThread {
-                Log.d(TAG, "Fetched image URL ($imageURL) from ${item.links}")
-                callback(item, imageURL)
-            }
+        } catch (e: Exception) {
+            Log.e(TAG, "$e")
+            return item
         }
+
+        item.image = imageURL
+        item.hasFetchedImage = true
+        return item
     }
 
     // Returns random history item of the specified type
@@ -154,48 +155,45 @@ class ContentManager {
 
     // Builds URL for the initial API call to Wikipedia
     private fun buildURL(searchParam: String): URL {
-        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
-            .appendQueryParameter("action", "query")
-            .appendQueryParameter("prop", "revisions")
-            .appendQueryParameter("rvprop", "content")
-            .appendQueryParameter("rvslots", "main")
-            .appendQueryParameter("rvlimit", "1")
-            .appendQueryParameter("format", "json")
-            .appendQueryParameter("formatversion", "2")
-            .appendQueryParameter("titles", searchParam)
-            .build()
+        var urlString: String = API_BASE_URL
+        urlString += "?action=query"
+        urlString += "&prop=revisions"
+        urlString += "&rvprop=content"
+        urlString += "&rvslots=main"
+        urlString += "&rvlimit=1"
+        urlString += "&format=json"
+        urlString += "&formatversion=2"
+        urlString += "&titles=$searchParam"
 
-        Log.d(TAG, "Built initial Wikipedia URL: $uri")
-        return URL(uri.toString())
+        Log.d(TAG, "Built initial Wikipedia URL: $urlString")
+        return URL(urlString)
     }
 
     // Builds URL to get images for each history item
     private fun buildImageURL(searchParam: String): URL {
-        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
-            .appendQueryParameter("action", "query")
-            .appendQueryParameter("prop", "pageimages")
-            .appendQueryParameter("pithumbsize", "200")
-            .appendQueryParameter("format", "json")
-            .appendQueryParameter("formatversion", "2")
-            .appendQueryParameter("titles", searchParam)
-            .build()
+        var urlString: String = API_BASE_URL
+        urlString += "?action=query"
+        urlString += "&prop=pageimages"
+        urlString += "&pithumbsize=200"
+        urlString += "&format=json"
+        urlString += "&formatversion=2"
+        urlString += "&titles=$searchParam"
 
-        Log.d(TAG, "Built image URL: $uri")
-        return URL(uri.toString())
+        Log.d(TAG, "Built image URL: $urlString")
+        return URL(urlString)
     }
 
     // Build URL for each Wikipedia link item, needs to be string since it's passed into WebView.loadUrl
     private fun buildWebURL(searchParam: String): String {
-        val uri: Uri = Uri.parse(WEB_BASE_URL).buildUpon()
-            .appendPath(searchParam)
-            .build()
+        var urlString: String = WEB_BASE_URL
+        urlString += "/$searchParam"
 
-        Log.d(TAG, "Built additional link URL: $uri")
-        return uri.toString()
+        Log.d(TAG, "Built additional link URL: $urlString")
+        return urlString
     }
 
     // Builds HistoryItem objects from json string input
-    private fun parseContent(json: String): MutableList<HistoryItem> {
+    private fun parseContent(json: String, date: Date): MutableList<HistoryItem> {
 
         // Extract content property from json
         val content = JsonParser().parse(json)
@@ -235,18 +233,18 @@ class ContentManager {
                 break
             }
             if (type != null && line.contains("*")) {
-                historyItems.add(buildHistoryItem(line, type))
+                historyItems.add(buildHistoryItem(line, type, date))
             }
         }
 
         return historyItems
     }
 
-    private fun buildHistoryItem(line: String, type: Type): HistoryItem {
+    private fun buildHistoryItem(line: String, type: Type, date: Date): HistoryItem {
         val year = parseYear(line, type)
         val depth = parseDepth(line)
         val (desc, links) = parseDescriptionAndLinks(line, type)
-        return HistoryItem(type, year, desc, links, depth)
+        return HistoryItem(type, date, year, desc, links, depth)
     }
 
     // Parse out unneeded chars and return integer representation of year (BC will be negative)
