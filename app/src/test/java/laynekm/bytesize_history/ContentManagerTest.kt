@@ -1,10 +1,8 @@
 package laynekm.bytesize_history
 
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
+import junit.framework.Assert.*
 import org.junit.Test
 
-// TODO: Add test that fetches data for every day of the year and makes sure HistoryItems are generated
 class ContentManagerTest {
 
     @Test
@@ -14,12 +12,10 @@ class ContentManagerTest {
         val allDates = generateAllDatesInYear()
         assertEquals(366, allDates.size)
         allDates.forEach {
-            contentManager.fetchHistoryItemsTest(it, ::callbackTest)
+            val historyItems = contentManager.fetchHistoryItemsTest(it)
+            print("${buildDateForURL(it)}: ${historyItems!!.size} items\n")
+
+            assertNotNull(historyItems)
         }
-
-    }
-
-    private fun callbackTest(success: Boolean, historyItems: MutableList<HistoryItem>) {
-        assertTrue(success)
     }
 }

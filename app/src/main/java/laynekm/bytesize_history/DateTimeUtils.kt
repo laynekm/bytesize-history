@@ -36,12 +36,12 @@ fun stringToDate(date: String?): Date {
 
 fun generateAllDatesInYear(): MutableList<Date> {
     val daysInMonthMap: Map<Int, Int> = mapOf(
-        1 to 31, 2 to 29, 3 to 31, 4 to 30, 5 to 31, 6 to 30,
-        7 to 31, 8 to 31, 9 to 30, 10 to 31, 11 to 30, 12 to 31
+        0 to 31, 1 to 29, 2 to 31, 3 to 30, 4 to 31, 5 to 30,
+        6 to 31, 7 to 31, 8 to 30, 9 to 31, 10 to 30, 11 to 31
     )
 
     val dates: MutableList<Date> = mutableListOf()
-    for (month in 1..daysInMonthMap.keys.size) {
+    for (month in 0..11) {
         for (day in 1..daysInMonthMap.getValue(month)) {
             dates.add(Date(month, day))
         }

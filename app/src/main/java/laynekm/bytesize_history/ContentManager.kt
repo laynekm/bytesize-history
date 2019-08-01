@@ -52,8 +52,8 @@ class ContentManager {
     }
 
     // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
+    // TODO: Move async out of ContentManager, remove need for callbacks, merge with filterHistoryItemsTest
     fun fetchHistoryItems(date: Date, callback: (Boolean) -> Unit) {
-
         val url = buildURL(buildDateForURL(date))
         var result: String
 
@@ -79,22 +79,18 @@ class ContentManager {
     }
 
     // Does the same as above but also returns a locally generated list of history items (used to test parsing)
-    fun fetchHistoryItemsTest(date: Date, callBack: (Boolean, historyItemList: MutableList<HistoryItem>) -> Unit) {
+    fun fetchHistoryItemsTest(date: Date): MutableList<HistoryItem>? {
         val historyItems: MutableList<HistoryItem> = mutableListOf()
         val url = buildURL(buildDateForURL(date))
         var result: String
-
-        doAsync {
-            try {
-                result = fetchFromURL(url)
-            } catch (e: Exception) {
-                uiThread { callBack(false, historyItems) }
-                return@doAsync
-            }
-
-            historyItems.addAll(parseContent(result))
-            uiThread { callBack(true, historyItems) }
+        try {
+           result = fetchFromURL(url)
+        } catch (e: Exception) {
+            return null
         }
+
+        historyItems.addAll(parseContent(result))
+        return historyItems
     }
 
     // Returns a single history event for the user's daily notification
@@ -173,45 +169,65 @@ class ContentManager {
 
     // Builds URL for the initial API call to Wikipedia
     private fun buildURL(searchParam: String): URL {
-        print(API_BASE_URL)
-        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
-            .appendQueryParameter("action", "query")
-            .appendQueryParameter("prop", "revisions")
-            .appendQueryParameter("rvprop", "content")
-            .appendQueryParameter("rvslots", "main")
-            .appendQueryParameter("rvlimit", "1")
-            .appendQueryParameter("format", "json")
-            .appendQueryParameter("formatversion", "2")
-            .appendQueryParameter("titles", searchParam)
-            .build()
+//        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
+//            .appendQueryParameter("action", "query")
+//            .appendQueryParameter("prop", "revisions")
+//            .appendQueryParameter("rvprop", "content")
+//            .appendQueryParameter("rvslots", "main")
+//            .appendQueryParameter("rvlimit", "1")
+//            .appendQueryParameter("format", "json")
+//            .appendQueryParameter("formatersion", "2")
+//            .appendQueryParameter("titles", searchParam)
+//            .build()
 
-        Log.d(TAG, "Built initial Wikipedia URL: $uri")
-        return URL(uri.toString())
+        var urlString: String = API_BASE_URL
+        urlString += "?action=query"
+        urlString += "&prop=revisions"
+        urlString += "&rvprop=content"
+        urlString += "&rvslots=main"
+        urlString += "&rvlimit=1"
+        urlString += "&format=json"
+        urlString += "&formatversion=2"
+        urlString += "&titles=$searchParam"
+
+        Log.d(TAG, "Built initial Wikipedia URL: $urlString")
+        return URL(urlString)
     }
 
     // Builds URL to get images for each history item
     private fun buildImageURL(searchParam: String): URL {
-        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
-            .appendQueryParameter("action", "query")
-            .appendQueryParameter("prop", "pageimages")
-            .appendQueryParameter("pithumbsize", "200")
-            .appendQueryParameter("format", "json")
-            .appendQueryParameter("formatversion", "2")
-            .appendQueryParameter("titles", searchParam)
-            .build()
+//        val uri: Uri = Uri.parse(API_BASE_URL).buildUpon()
+//            .appendQueryParameter("action", "query")
+//            .appendQueryParameter("prop", "pageimages")
+//            .appendQueryParameter("pithumbsize", "200")
+//            .appendQueryParameter("format", "json")
+//            .appendQueryParameter("formatversion", "2")
+//            .appendQueryParameter("titles", searchParam)
+//            .build()
 
-        Log.d(TAG, "Built image URL: $uri")
-        return URL(uri.toString())
+        var urlString: String = API_BASE_URL
+        urlString += "?action=query"
+        urlString += "&prop=pageimages"
+        urlString += "&pithumbsize=200"
+        urlString += "&format=json"
+        urlString += "&formatversion=2"
+        urlString += "&titles=$searchParam"
+
+        Log.d(TAG, "Built image URL: $urlString")
+        return URL(urlString)
     }
 
     // Build URL for each Wikipedia link item, needs to be string since it's passed into WebView.loadUrl
     private fun buildWebURL(searchParam: String): String {
-        val uri: Uri = Uri.parse(WEB_BASE_URL).buildUpon()
-            .appendPath(searchParam)
-            .build()
+//        val uri: Uri = Uri.parse(WEB_BASE_URL).buildUpon()
+//            .appendPath(searchParam)
+//            .build()
 
-        Log.d(TAG, "Built additional link URL: $uri")
-        return uri.toString()
+        var urlString: String = WEB_BASE_URL
+        urlString += "/$searchParam"
+
+        Log.d(TAG, "Built additional link URL: $urlString")
+        return urlString
     }
 
     // Builds HistoryItem objects from json string input
