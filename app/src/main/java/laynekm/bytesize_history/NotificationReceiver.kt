@@ -10,6 +10,8 @@ import android.os.Build
 import android.support.v4.app.NotificationCompat
 
 import laynekm.bytesize_history.R.mipmap.ic_launcher
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 class NotificationReceiver : BroadcastReceiver() {
 
@@ -19,17 +21,21 @@ class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         this.createNotificationChannel(context)
-        this.contentManager.fetchDailyHistoryFact(context, ::pushNotification)
+        doAsync {
+            val historyItem = ContentManager().fetchDailyHistoryFact()
+            uiThread { pushNotification(context, historyItem) }
+        }
     }
 
     // REMINDER: Remove "Scheduled to send..." text
-    private fun pushNotification(context: Context, historyItem: HistoryItem, date: Date) {
+    private fun pushNotification(context: Context, historyItem: HistoryItem) {
 
         val preferencesKey = context.getString(R.string.preferences_key)
         val notificationTimeKey = context.getString(R.string.notification_time_pref_key)
         val sharedPref = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
         val notificationTime = stringTo12HourString(sharedPref.getString(notificationTimeKey, "default time")!!)
         val year = historyItem.formattedYear
+        val date = historyItem.date
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)

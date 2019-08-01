@@ -3,6 +3,8 @@ package laynekm.bytesize_history
 import android.content.Context
 import android.os.Bundle
 import android.webkit.WebView
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import java.util.Calendar
 
 class MainPresenter(val context: Context, val view: View) {
@@ -92,10 +94,14 @@ class MainPresenter(val context: Context, val view: View) {
         HistoryItems.fetchedTypes = mutableSetOf()
         view.onContentChanged(getEmptyTypeMap())
         view.onFetchStarted()
-        contentManager.fetchHistoryItems(currentDate, ::fetchHistoryItemsCallback)
+
+        doAsync {
+            val fetchedItems = contentManager.fetchHistoryItems(currentDate)
+            uiThread { onFetchHistoryItemsFinished(fetchedItems != null) }
+        }
     }
 
-    private fun fetchHistoryItemsCallback(success: Boolean) {
+    private fun onFetchHistoryItemsFinished(success: Boolean) {
         fetchError = !success
         if (success && currentType != null) {
             HistoryItems.fetchedTypes.add(currentType!!)
@@ -109,15 +115,16 @@ class MainPresenter(val context: Context, val view: View) {
 
     private fun fetchImages(type: Type?) {
         view.onFetchStarted()
+
         HistoryItems.filteredHistoryItems[type]!!.forEach {
-            contentManager.fetchImage(it, ::fetchImagesCallback)
+            doAsync {
+                val item = contentManager.fetchImage(it)
+                uiThread { onFetchImagesFinished(item) }
+            }
         }
     }
 
-    private fun fetchImagesCallback(item: HistoryItem, imageURL: String) {
-        item.hasFetchedImage = true
-        item.image = imageURL
-
+    private fun onFetchImagesFinished(item: HistoryItem) {
         if (HistoryItems.filteredHistoryItems[item.type]!!.all { it.hasFetchedImage }) {
             view.onContentChanged(HistoryItems.filteredHistoryItems, item.type)
             view.onFetchFinished()
