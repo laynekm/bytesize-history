@@ -47,7 +47,6 @@ fun generateAllDatesInYear(): MutableList<Date> {
         }
     }
 
-    System.out.println(dates)
     return dates
 }
 

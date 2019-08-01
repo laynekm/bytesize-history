@@ -68,19 +68,24 @@ class ContentManager {
         return HistoryItems.filteredHistoryItems
     }
 
-    // Does the same as above but also returns a locally generated list of history items (used to test parsing)
-    fun fetchHistoryItemsTest(date: Date): MutableList<HistoryItem>? {
-        val historyItems: MutableList<HistoryItem> = mutableListOf()
+    // Fetches history items as above but returns a locally generated map instead of reassigning the global ones
+    // Used in ContentManagerTest to make sure content for every day of year is fetched and parsed correctly
+    fun fetchHistoryItemsTest(date: Date): HashMap<Type, MutableList<HistoryItem>>? {
         val url = buildURL(buildDateForURL(date))
-        var result: String
+        val result: String
         try {
            result = fetchFromURL(url)
         } catch (e: Exception) {
             return null
         }
 
-        historyItems.addAll(parseContent(result, date))
-        return historyItems
+        val allHistoryItems = parseContent(result, date)
+        val mappedHistoryItems = getEmptyTypeMap()
+        for ((type) in mappedHistoryItems) {
+            mappedHistoryItems[type] = filterType(allHistoryItems, type)
+        }
+
+        return mappedHistoryItems
     }
 
     // Returns a single history event for the user's daily notification
