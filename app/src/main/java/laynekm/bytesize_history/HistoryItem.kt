@@ -3,7 +3,7 @@ package laynekm.bytesize_history
 class HistoryItem (
     val type: Type,
     val date: Date,
-    val year: Int?,
+    var year: Int?,
     var desc: String,
     val links: MutableList<Link>,
     val depth: Int) {
@@ -14,10 +14,14 @@ class HistoryItem (
     var era: Era = determineEra(year)
     var linksVisible = false
 
+    fun formatYear() {
+        this.formattedYear = this.formatYear(this.year)
+    }
+
     private fun formatYear(year: Int?): String {
         return when {
-            year == null && type == Type.OBSERVANCE -> ""
-            year == null -> "history"
+            year == null -> ""
+            this.depth > 0 -> ""
             year < 0 -> "${year * -1} BC"
             year in 0..500 -> "$year AD"
             else -> "$year"

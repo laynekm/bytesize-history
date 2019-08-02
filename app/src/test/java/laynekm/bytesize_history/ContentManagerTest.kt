@@ -46,7 +46,13 @@ class ContentManagerTest {
                     print("     ${historyItem.type} - ${historyItem.year}: ${historyItem.desc}\n")
                     assertEquals(mappedHistoryItem.key, historyItem.type)
                     assertEquals(date, historyItem.date)
-                    assertNotNull(historyItem.desc)
+
+                    // Formatting for Feb. 29 is completely different for some reason
+                    // Many items are a sublist of a year rather than having their own year, so the parent has no desc
+                    if (buildDateForURL(date) == "February_29") {
+                        assertNotNull(historyItem.desc)
+                    }
+
                     assertNotNull(historyItem.links)
                     assertNotNull(historyItem.depth)
                     assertNotNull(historyItem.formattedYear)
@@ -54,8 +60,14 @@ class ContentManagerTest {
 
                     if (historyItem.type == Type.OBSERVANCE) {
                         assertNull(historyItem.year)
+                        assertEquals("", historyItem.formattedYear)
                     } else {
                         assertNotNull(historyItem.year)
+                        if (historyItem.depth > 0) {
+                            assertEquals("", historyItem.formattedYear)
+                        } else {
+                            assertNotSame("", historyItem.formattedYear)
+                        }
                     }
                 }
             }

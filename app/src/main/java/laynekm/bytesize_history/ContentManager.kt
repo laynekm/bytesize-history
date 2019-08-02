@@ -28,7 +28,9 @@ class ContentManager {
     private val API_BASE_URL = "https://en.wikipedia.org/w/api.php"
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
-    private val yearDescSeparators = listOf("&ndash;", "&#x2013;", " – ")
+    // All the possible values that can be used to split year and desc
+    // Some of these are edge cases found in literally one improperly formatted date; most use "&ndash;"
+    private val yearDescSeparators = listOf("&ndash;", "&#x2013;", "{{snd}}", " – ", " - ", ": ", "[[1927|–]]")
 
     private fun fetchFromURL(url: URL): String {
         Log.d(TAG, "Connecting to $url")
@@ -213,14 +215,18 @@ class ContentManager {
 
         // Split array into events, births, and deaths; assumes this order is respected
         // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
+        // Set eventsAdded boolean to true after initial events added; some dates have a second event list
+        // following holidays/observances that we don't want in events; they are better fitted as holidays/observations
         val historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
+        var eventsAdded = false
         for (line in lines) {
-            if (line.contains("==Events==") || line.contains("== Events ==")) {
+            if ((line.contains("==Events==") || line.contains("== Events ==")) && !eventsAdded) {
                 type = Type.EVENT
             }
             if (line.contains("==Births==") || line.contains("== Births ==")) {
                 type = Type.BIRTH
+                eventsAdded = true
             }
             if (line.contains("==Deaths==") || line.contains("== Deaths ==")) {
                 type = Type.DEATH
@@ -229,11 +235,23 @@ class ContentManager {
                 type = Type.OBSERVANCE
             }
             if (line.contains("==References==") || line.contains("== References ==")
-                || line.contains("==External links==") || line.contains("== External links ==")) {
+                || line.contains("==External links==") || line.contains("== External links ==")
+                || line.contains("==See also==") || line.contains("== See also ==")) {
                 break
             }
-            if (type != null && line.contains("*")) {
+            if (type != null && line.contains("*") && !line.contains("<!--") && line.length > 1) {
                 historyItems.add(buildHistoryItem(line, type, date))
+            }
+        }
+
+        // If item depth > 0, assign it the year of its most recent parent of depth 0 (except for holidays/observances)
+        var parentYear: Int? = null
+        for (item in historyItems) {
+            if (item.type == Type.OBSERVANCE) continue
+            if (item.depth == 0) parentYear = item.year
+            else {
+                item.year = parentYear
+                item.formatYear()
             }
         }
 
@@ -259,7 +277,18 @@ class ContentManager {
             }
         }
 
-        if (yearSection == "") return null
+        // It's possible the line is just a year with no desc so attempt to parse directly, otherwise return null
+        if (yearSection == "") {
+            val yearInt: Int?
+            try {
+                yearInt = Regex("[^0-9]").replace(line, "").toInt()
+            } catch (e: Exception) {
+                Log.e(TAG, "$e")
+                return null
+            }
+
+            return yearInt
+        }
 
         if (yearSection.contains("(")) {
             val secondaryYear = yearSection.substringBetween("(", ")")
@@ -297,12 +326,17 @@ class ContentManager {
     private fun parseDescriptionAndLinks(line: String, type: Type): ParseResult {
         var desc = line
         if (type !== Type.OBSERVANCE) {
-            yearDescSeparators.forEach {
-                if (line.contains(it)) desc = line.substringAfter(it)
+            for (separator in yearDescSeparators) {
+                if (line.contains(separator)) {
+                    desc = line.substringAfter(separator)
+                    break
+                }
             }
+
         }
         val links = mutableListOf<Link>()
 
+        Log.d(TAG, desc)
         // Loop until all square brackets are removed
         // Link text is on the left side, text to display is on the right
         while (desc.contains("[[")) {
@@ -351,7 +385,7 @@ class ContentManager {
         desc = desc.replace("|", "")
         desc = desc.replace("\\", "")
         desc = desc.replace("&nbsp;", " ")
-        desc = desc.trim()
+        desc = desc.trim('*', ' ')
         if (desc.contains("*")) {
             desc = desc.replace("*", "")
             if (type !== Type.OBSERVANCE) desc = desc.replaceFirst(" ", "")
