@@ -420,7 +420,21 @@ class ContentManager {
 
     // Misc. helper methods
     private fun shouldConstructHistoryItem(line: String): Boolean {
-        return line.contains("*") && !line.contains("<!--") && line.length > 1
+        var shouldConstruct = true
+
+        if (!line.contains("*") || line.contains("<!--") || line.length <= 1) {
+            shouldConstruct = false
+        }
+
+        for (separator in yearDescSeparators) {
+            if (line.contains(separator)) {
+                val yearSection = line.substringBefore(separator)
+                if (yearSection.contains(" to ")) shouldConstruct = false
+                break
+            }
+        }
+
+        return shouldConstruct
     }
 
     private fun formatText(text: String): String {
