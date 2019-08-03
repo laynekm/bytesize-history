@@ -39,6 +39,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)
             .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), year))
+            .setContentText(historyItem.desc)
             // .setContentText("${historyItem.desc}\n\nScheduled to send at $notificationTime.")
             .setStyle(NotificationCompat.BigTextStyle())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
