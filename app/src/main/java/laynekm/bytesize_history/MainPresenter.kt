@@ -58,9 +58,6 @@ class MainPresenter(val context: Context, val view: View) {
         if (filterDropdownVisible) view.onDropdownOpened()
         if (datePickerVisible) showDatePickerDialog()
         if (webViewVisible) showWebView()
-        if (currentType == null && HistoryItems.filterOptions.types.size > 0) {
-            currentType = HistoryItems.filterOptions.types[0]
-        }
 
         view.onTypeChanged(currentType)
         view.onDateChanged(currentDate)
@@ -125,10 +122,10 @@ class MainPresenter(val context: Context, val view: View) {
 
     // Fetches all images for given type, uiThread will not be updated until all images are fetched
     private fun fetchImages(type: Type?) {
+        if (type == null) return
+
         view.onFetchStarted()
-
-//        if (HistoryItems.allImagesFetched(type)) return
-
+        view.hideRecyclerView(type)
         HistoryItems.filteredHistoryItems[type]!!.forEach {
             doAsync {
                 val item = contentManager.fetchImage(it)
@@ -140,6 +137,7 @@ class MainPresenter(val context: Context, val view: View) {
     private fun onFetchImagesFinished(item: HistoryItem) {
         if (HistoryItems.filteredHistoryItems[item.type]!!.all { it.hasFetchedImage }) {
             view.onContentChanged(HistoryItems.filteredHistoryItems, item.type)
+            view.showRecyclerView(currentType!!)
             view.onFetchFinished()
         }
     }
@@ -171,6 +169,11 @@ class MainPresenter(val context: Context, val view: View) {
                 // Need to call fetchImages because the new items being displayed may not have had images fetched
                 if (!HistoryItems.allImagesFetched(currentType)) fetchImages(currentType)
                 else view.onContentChanged(HistoryItems.filteredHistoryItems, currentType)
+            }
+
+            // Update content for all other types, their images will be fetched once they become the current type
+            for (type in HistoryItems.filterOptions.types) {
+                view.onContentChanged(HistoryItems.filteredHistoryItems, type)
             }
 
             checkForErrors()
