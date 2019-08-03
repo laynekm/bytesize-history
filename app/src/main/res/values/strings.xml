@@ -18,21 +18,22 @@
     <string name="observances_text">Holidays</string>
 
     <!-- Filter dropdown -->
+    <string name="filters_title">Preferences</string>
     <string name="order_header">Order</string>
     <string name="order_ascending">Ascending</string>
     <string name="order_descending">Descending</string>
     <string name="type_header">Types</string>
-    <string name="type_events">⚔ Events</string>
-    <string name="type_births">👶 Births</string>
-    <string name="type_deaths">🌹 Deaths</string>
-    <string name="type_observances">👀 Holidays/observances</string>
+    <string name="type_events">Events</string>
+    <string name="type_births">Births</string>
+    <string name="type_deaths">Deaths</string>
+    <string name="type_observances">Holidays/observances</string>
     <string name="era_header">Time Periods</string>
-    <string name="era_ancient">🏛️ Ancient (before 500 AD)</string>
-    <string name="era_medieval">🏰 Medieval (500-1500 AD)</string>
-    <string name="era_modern">⛪ Early Modern (1500-1800 AD)</string>
-    <string name="era_1800s">🏭 1800s</string>
-    <string name="era_1900s">🏘️ 1900s</string>
-    <string name="era_2000s">🏨 2000s</string>
+    <string name="era_ancient">Ancient (before 500 AD)</string>
+    <string name="era_medieval">Medieval (500-1500 AD)</string>
+    <string name="era_modern">Early Modern (1500-1800 AD)</string>
+    <string name="era_1800s">1800s</string>
+    <string name="era_1900s">1900s</string>
+    <string name="era_2000s">2000s</string>
 
     <!-- Preferences -->
     <string name="preferences_key">preferences</string>
