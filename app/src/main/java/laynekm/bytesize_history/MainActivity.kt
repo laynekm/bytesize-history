@@ -148,6 +148,7 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         progressBar.visibility = View.GONE
     }
 
+    // TODO: Split into two methods
     // If type is not null, update adapter of specified type; otherwise, update all adapters
     override fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>, type: Type?) {
         if (type != null) {

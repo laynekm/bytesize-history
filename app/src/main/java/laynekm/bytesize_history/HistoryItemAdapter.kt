@@ -21,6 +21,7 @@ import android.widget.LinearLayout
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
+// TODO: Make it so items only appear when images loaded, default images always last
 class HistoryItemAdapter(
     private val context: Context,
     private val presenter: MainPresenter,
@@ -88,8 +89,7 @@ class HistoryItemAdapter(
 
         if (item.image == "") {
             viewHolder.image.setImageResource(R.drawable.default_image)
-        }
-        else Picasso.get()
+        } else Picasso.get()
             .load(item.image)
             .resize(100, 100)
             .centerCrop()
