@@ -21,6 +21,12 @@ class HistoryViews(var views: HashMap<Type, RecyclerView>)
 class HistoryAdapters(var adapters: HashMap<Type, HistoryItemAdapter>)
 class TextViewFilters(var filters: HashMap<Type, TextView>)
 
+/*
+    Functions as the view for the MainPresenter class
+    This activity contains most of the UI elements of the app
+    Contains recycler views of history items, a dropdown menu of filter options, a DatePicker, etc.
+ */
+
 class MainActivity : AppCompatActivity(), MainPresenter.View  {
 
     private lateinit var presenter: MainPresenter
@@ -148,18 +154,19 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         progressBar.visibility = View.GONE
     }
 
-    // TODO: Split into two methods
-    // If type is not null, update adapter of specified type; otherwise, update all adapters
+    // Update adapter of specified type
     override fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>, type: Type?) {
-        if (type != null) {
-            historyAdapters.adapters[type]!!.setItems(items[type]!!)
-        } else {
-            for ((actualType, adapter) in historyAdapters.adapters) {
-                adapter.setItems(items[actualType]!!)
-            }
+        historyAdapters.adapters[type]!!.setItems(items[type]!!)
+    }
+
+    // Update all adapters
+    override fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>) {
+        for ((actualType, adapter) in historyAdapters.adapters) {
+            adapter.setItems(items[actualType]!!)
         }
     }
 
+    // Display error message based on provided error type
     override fun onError(error: Error?, type: Type?) {
         errorTextView.visibility = View.VISIBLE
 
@@ -222,6 +229,7 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
         historyViews.views[type]!!.visibility = View.GONE
     }
 
+    // Displays DatePicker dialog and assigns callback functions
     override fun showDatePickerDialog(year: Int, month: Int, day: Int) {
         datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, _, m, d ->
             presenter.setCurrentDate(Date(m, d))

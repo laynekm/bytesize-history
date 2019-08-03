@@ -4,6 +4,8 @@ private val defaultOrder: Order = Order.ASCENDING
 private val defaultTypes: MutableList<Type> = mutableListOf(Type.EVENT, Type.BIRTH, Type.DEATH, Type.OBSERVANCE)
 private val defaultEras: MutableList<Era> = mutableListOf(Era.ANCIENT, Era.MEDIEVAL, Era.EARLYMODERN, Era.EIGHTEENS, Era.NINETEENS, Era.TWOTHOUSANDS, Era.NONE)
 
+// Filter options include order, types, and eras
+// If any of these are not specified, default values will be used
 class FilterOptions(
     var order: Order = defaultOrder,
     var types: MutableList<Type> = defaultTypes,

@@ -13,11 +13,11 @@ import laynekm.bytesize_history.R.mipmap.ic_launcher
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
+// Receives notification broadcast and pushes notification
+// Should be called once per day if user has notifications enabled
 class NotificationReceiver : BroadcastReceiver() {
 
     private val CHANNEL_ID = "NotificationReceiver"
-
-    private val contentManager: ContentManager = ContentManager()
 
     override fun onReceive(context: Context, intent: Intent) {
         this.createNotificationChannel(context)
@@ -27,7 +27,6 @@ class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    // REMINDER: Remove "Scheduled to send..." text
     private fun pushNotification(context: Context, historyItem: HistoryItem) {
 
         val preferencesKey = context.getString(R.string.preferences_key)
@@ -40,7 +39,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)
             .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), year))
-            .setContentText("${historyItem.desc}\n\nScheduled to send at $notificationTime.")
+            // .setContentText("${historyItem.desc}\n\nScheduled to send at $notificationTime.")
             .setStyle(NotificationCompat.BigTextStyle())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)

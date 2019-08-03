@@ -7,6 +7,13 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.util.Calendar
 
+/*
+    Functions as the presenter for MainActivity
+    - Retrieves data from various models/managers (Content, Theme, Filter, Notification)
+    - Formats data and sends to View
+    - Determines behaviour when user interacts with View
+ */
+
 class MainPresenter(val context: Context, val view: View) {
 
     private val contentManager: ContentManager = ContentManager()
@@ -28,6 +35,7 @@ class MainPresenter(val context: Context, val view: View) {
     private val datePickerVisibleKey: String = "datePickerVisible"
     private val webViewVisibleKey: String = "webViewVisible"
 
+    // Initializes managers, this will be called before MainActivity has content so can't update View here
     init {
         themeManager.applyTheme()
         notificationManager.checkNotification()
@@ -37,6 +45,7 @@ class MainPresenter(val context: Context, val view: View) {
         else filterManager.setPreferences(HistoryItems.filterOptions)
     }
 
+    // Retrieve saved state and initialize values set the View's initial state
     fun onViewCreated(savedInstanceState: Bundle?) {
         if (savedInstanceState !== null) {
             currentDate = stringToDate(savedInstanceState.getString(dateKey))
@@ -70,6 +79,7 @@ class MainPresenter(val context: Context, val view: View) {
         }
     }
 
+    // Updates currentType, fetching images for that type if necessary
     fun setCurrentType(type: Type?) {
         if (type === currentType) return
         currentType = type
@@ -81,6 +91,7 @@ class MainPresenter(val context: Context, val view: View) {
         checkForErrors()
     }
 
+    // Updates currentDate, will always trigger a fetch for history items on that date
     fun setCurrentDate(date: Date, updateDatePickerVisibility: Boolean = true) {
         if (updateDatePickerVisibility) onCloseDatePickerDialog()
         if (datesEqual(date, currentDate)) return
@@ -89,6 +100,8 @@ class MainPresenter(val context: Context, val view: View) {
         fetchHistoryItems()
     }
 
+    // Clears existing content and fetches history items for currentDate
+    // uiThread is updated when the async call is finished
     fun fetchHistoryItems() {
         fetchError = false
         HistoryItems.fetchedTypes = mutableSetOf()
@@ -113,6 +126,7 @@ class MainPresenter(val context: Context, val view: View) {
         checkForErrors()
     }
 
+    // Fetches all images for given type, uiThread will not be updated until all images are fetched
     private fun fetchImages(type: Type?) {
         view.onFetchStarted()
 
@@ -131,6 +145,8 @@ class MainPresenter(val context: Context, val view: View) {
         }
     }
 
+    // Handles logic around opening/closing the filter dropdown menu
+    // If dropdown is closed, may need to filter history items and fetch new images
     fun toggleFilterDropdown(dropdownView: android.view.View) {
         if (dropdownView.visibility == android.view.View.GONE) {
             filterManager.setViewContent(dropdownView, HistoryItems.filterOptions)
@@ -236,7 +252,8 @@ class MainPresenter(val context: Context, val view: View) {
     interface View {
         fun onTypeChanged(type: Type?)
         fun onDateChanged(date: Date)
-        fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>, type: Type? = null)
+        fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>, type: Type?)
+        fun onContentChanged(items: HashMap<Type, MutableList<HistoryItem>>)
         fun onFiltersChanged(filters: FilterOptions)
         fun onFetchStarted()
         fun onFetchFinished()

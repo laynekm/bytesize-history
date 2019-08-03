@@ -7,6 +7,11 @@ import android.support.v7.widget.Toolbar
 import android.widget.Button
 import android.widget.TextView
 
+/*
+    Functions as the view for the NotificationSettingsPresenter class
+    Displays user preferences surrounding notifications (ie. enabled/disabled and time)
+ */
+
 class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPresenter.View {
 
     private lateinit var presenter: NotificationSettingsPresenter

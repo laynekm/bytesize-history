@@ -7,7 +7,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 
-// Store history items as singleton object so they are shared between activities and preserved onPause/onDestroy
+// Store HistoryItems in singleton object so they are shared between activities and preserved through lifecycle
 object HistoryItems {
     var allHistoryItems = getEmptyTypeMap()
     var filteredHistoryItems = getEmptyTypeMap()
@@ -19,9 +19,7 @@ object HistoryItems {
     }
 }
 
-// Used to return desc and links from parseDescriptionAndLinks
-data class ParseResult(val desc: String, val links: MutableList<Link>)
-
+// Handles the fetching, parsing, and filtering of data into HistoryItems
 class ContentManager {
 
     private val TAG = "ContentManager"
@@ -29,9 +27,20 @@ class ContentManager {
     private val WEB_BASE_URL = "https://en.wikipedia.org/wiki"
 
     // All the possible values that can be used to split year and desc
-    // Some of these are edge cases found in literally one improperly formatted date; most use "&ndash;"
+    // Some of these are edge cases found in literally one improperly formatted date, most use "&ndash;"
     private val yearDescSeparators = listOf("&ndash;", "&#x2013;", "{{snd}}", " – ", " - ", ": ", "[[1927|–]]")
 
+    // Indicators of when lists of different history item types begin
+    private val eventIndicators = listOf("==Events==", "== Events ==")
+    private val birthIndicators = listOf("==Births==", "== Births ==")
+    private val deathIndicators = listOf("==Deaths==", "== Deaths ==")
+    private val observationIndicators = listOf("==Holidays and observances==", "== Holidays and observances ==")
+    private val endOfContentIndicators = listOf(
+        "==References==", "== References ==",
+        "==External links==", "== External links ==",
+        "==See also==", "== See also ==")
+
+    // Fetches data and returns data from given endpoint, should only be called in async thread
     private fun fetchFromURL(url: URL): String {
         Log.d(TAG, "Connecting to $url")
         var result = ""
@@ -49,7 +58,7 @@ class ContentManager {
         return result
     }
 
-    // Fetches history data, parses into lists, fetches their images, returns them to MainActivity
+    // Fetches data for given date, parses the data, returns filtered lists
     fun fetchHistoryItems(date: Date): HashMap<Type, MutableList<HistoryItem>>? {
         val url = buildURL(buildDateForURL(date))
         val result: String
@@ -99,8 +108,9 @@ class ContentManager {
         return getRandomHistoryItem(allHistoryItems, Type.EVENT)
     }
 
-    // Fetches image URL based on provided webpage links
-    // Some pages might not have images, so keep fetching until one of them does
+    // Fetches image links from list of related facts
+    // Some pages may not have images to keep fetching until one hopefully does
+    // Note that item.image is assigned a direct URL associated with an image, not the image itself
     fun fetchImage(item: HistoryItem): HistoryItem {
         var imageURL = ""
         try {
@@ -149,13 +159,14 @@ class ContentManager {
         return filteredItems
     }
 
+    // Reverses order of items while making sure items of depth > 0 still appear beneath their parent
     private fun reverseOrderRespectingDepth(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         val reversedItems: MutableList<HistoryItem> = mutableListOf()
         items.forEach { reversedItems.add(it.depth, it) }
         return reversedItems
     }
 
-    // Builds URL for the initial API call to Wikipedia
+    // Builds URL for the initial call to Wikipedia
     private fun buildURL(searchParam: String): URL {
         var urlString: String = API_BASE_URL
         urlString += "?action=query"
@@ -171,7 +182,7 @@ class ContentManager {
         return URL(urlString)
     }
 
-    // Builds URL to get images for each history item
+    // Builds URL to get the image link corresponding to each Wikipedia page
     private fun buildImageURL(searchParam: String): URL {
         var urlString: String = API_BASE_URL
         urlString += "?action=query"
@@ -185,7 +196,8 @@ class ContentManager {
         return URL(urlString)
     }
 
-    // Build URL for each Wikipedia link item, needs to be string since it's passed into WebView.loadUrl
+    // Builds URL for each Wikipedia link that appears in the dropdown menu of related facts
+    // Needs to be a string since it's passed into WebView.loadUrl
     private fun buildWebURL(searchParam: String): String {
         var urlString: String = WEB_BASE_URL
         urlString += "/$searchParam"
@@ -214,37 +226,27 @@ class ContentManager {
         lines.forEach { Log.d(TAG, it) }
 
         // Split array into events, births, and deaths; assumes this order is respected
-        // Only care about strings starting with an asterisk, sublists indicated by multiple asterisks
-        // Set eventsAdded boolean to true after initial events added; some dates have a second event list
-        // following holidays/observances that we don't want in events; they are better fitted as holidays/observations
+        // Only care about strings starting with an asterisk, sublists are indicated by multiple asterisks
+        // Set eventAdded after events added because some dates have second events list that's better suited as holidays/observations
         val historyItems = mutableListOf<HistoryItem>()
         var type: Type? = null
         var eventsAdded = false
         for (line in lines) {
-            if ((line.contains("==Events==") || line.contains("== Events ==")) && !eventsAdded) {
-                type = Type.EVENT
-            }
-            if (line.contains("==Births==") || line.contains("== Births ==")) {
+            if (line.containsAny(eventIndicators) && !eventsAdded) type = Type.EVENT
+            if (line.containsAny(birthIndicators)) {
                 type = Type.BIRTH
                 eventsAdded = true
             }
-            if (line.contains("==Deaths==") || line.contains("== Deaths ==")) {
-                type = Type.DEATH
-            }
-            if (line.contains("==Holidays and observances==") || line.contains("== Holidays and observances ==")) {
-                type = Type.OBSERVANCE
-            }
-            if (line.contains("==References==") || line.contains("== References ==")
-                || line.contains("==External links==") || line.contains("== External links ==")
-                || line.contains("==See also==") || line.contains("== See also ==")) {
-                break
-            }
-            if (type != null && line.contains("*") && !line.contains("<!--") && line.length > 1) {
+            if (line.containsAny(deathIndicators)) type = Type.DEATH
+            if (line.containsAny(observationIndicators)) type = Type.OBSERVANCE
+            if (line.containsAny(endOfContentIndicators)) break
+
+            if (type !== null && shouldConstructHistoryItem(line)) {
                 historyItems.add(buildHistoryItem(line, type, date))
             }
         }
 
-        // If item depth > 0, assign it the year of its most recent parent of depth 0 (except for holidays/observances)
+        // If depth > 0, assign it the year of its parent (ie. most recent previous item with depth == 0), except observances
         var parentYear: Int? = null
         for (item in historyItems) {
             if (item.type == Type.OBSERVANCE) continue
@@ -265,7 +267,7 @@ class ContentManager {
         return HistoryItem(type, date, year, desc, links, depth)
     }
 
-    // Parse out unneeded chars and return integer representation of year (BC will be negative)
+    // Parse out unneeded chars and return integer representation of year, BC will be negative
     private fun parseYear(line: String, type: Type): Int? {
         if (type === Type.OBSERVANCE) return null
 
@@ -314,7 +316,7 @@ class ContentManager {
         return yearInt
     }
 
-    // Depth of the item is determined by the number of asterisks (ie. one item might have its own list)
+    // Depth of the item is determined by the number of asterisks (ie. item might have its own sublist)
     // Subtract 1 because root depth should be 0
     private fun parseDepth(line: String): Int {
         var depth = 0
@@ -334,9 +336,10 @@ class ContentManager {
             }
 
         }
-        val links = mutableListOf<Link>()
 
+        val links = mutableListOf<Link>()
         Log.d(TAG, desc)
+
         // Loop until all square brackets are removed
         // Link text is on the left side, text to display is on the right
         while (desc.contains("[[")) {
@@ -368,8 +371,7 @@ class ContentManager {
             val innerText = desc.substringBetween("{{", "}}")
 
             // Don't bother converting values for now, just show value and first given unit (ie. km)
-            // TODO: Add support for converting values
-            // Examples: July 28 1976
+            // TODO: Add support for converting values (example: July 28 1976)
             if (innerText.contains("convert")) {
                 val splitText = innerText.split("|").toTypedArray()
                 desc = desc.replaceFirst(innerText, splitText[1] + " " + splitText[2])
@@ -416,9 +418,19 @@ class ContentManager {
         return url
     }
 
-    // Capitalizes the first letter if it isn't already
+    // Misc. helper methods
+    private fun shouldConstructHistoryItem(line: String): Boolean {
+        return line.contains("*") && !line.contains("<!--") && line.length > 1
+    }
+
     private fun formatText(text: String): String {
         return text.capitalize()
+    }
+
+    private fun String.containsAny(list: List<String>): Boolean {
+        var contains = false
+        for (it in list) { if (this.contains(it)) contains = true }
+        return contains
     }
 
     private fun String.substringBetween(str1: String, str2: String): String

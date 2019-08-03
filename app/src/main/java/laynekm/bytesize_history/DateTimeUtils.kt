@@ -50,10 +50,6 @@ fun generateAllDatesInYear(): MutableList<Date> {
     return dates
 }
 
-fun timesEqual(time1: Time, time2: Time): Boolean {
-    return time1.hour == time2.hour && time1.minute == time2.minute
-}
-
 fun timeToString(time: Time): String {
     return "${time.hour}:${time.minute.toString().padStart(2, '0')}"
 }

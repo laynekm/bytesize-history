@@ -3,6 +3,13 @@ package laynekm.bytesize_history
 import android.content.Context
 import android.os.Bundle
 
+/*
+    Functions as the presenter for NotificationSettingsActivity
+    - Retrieves data from NotificationManager
+    - Formats data and sends to View
+    - Determines behaviour when user interacts with View
+ */
+
 class NotificationSettingsPresenter(val context: Context, val view: View) {
 
     private val notificationManager = NotificationManager(context)

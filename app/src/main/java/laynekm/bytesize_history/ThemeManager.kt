@@ -3,9 +3,8 @@ package laynekm.bytesize_history
 import android.content.Context
 import android.content.SharedPreferences
 
-fun noop() { return }
-
-class ThemeManager(val context: Context, val recreate: () -> Unit = ::noop) {
+// Handles themes (light and dark) and the shared preferences associated with them
+class ThemeManager(val context: Context) {
 
     private val preferencesKey: String = context.getString(R.string.preferences_key)
     private val themePrefKey: String = context.getString(R.string.theme_pref_key)
@@ -41,7 +40,5 @@ class ThemeManager(val context: Context, val recreate: () -> Unit = ::noop) {
             putString(themePrefKey, "$currentTheme")
             apply()
         }
-
-        recreate()
     }
 }

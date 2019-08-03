@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.Switch
 
+// Handles filters and the shared preferences associated with them
 class FilterManager(var context: Context) {
 
     private val preferencesKey = context.getString(R.string.preferences_key)

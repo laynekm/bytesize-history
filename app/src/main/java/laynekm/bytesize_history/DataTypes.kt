@@ -2,6 +2,7 @@ package laynekm.bytesize_history
 
 data class Date(val month: Int, val day: Int)
 data class Time(val hour: Int, val minute: Int)
+data class ParseResult(val desc: String, val links: MutableList<Link>)
 
 enum class Theme constructor(private val theme: String) {
     LIGHT("light"), DARK("dark");

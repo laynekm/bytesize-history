@@ -1,27 +1,18 @@
 package laynekm.bytesize_history
 
-import android.app.Activity
 import android.content.Context
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import com.squareup.picasso.Picasso
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
-import android.graphics.Bitmap
 import android.widget.*
-import com.squareup.picasso.Callback
-import android.support.v7.widget.Toolbar
-import android.util.Log
 import android.widget.LinearLayout
 import android.view.ViewGroup.MarginLayoutParams
 import android.util.TypedValue
 
-// TODO: Make it so items only appear when images loaded, default images always last
+// Adapter that is used for all recycler views in MainActivity
 class HistoryItemAdapter(
     private val context: Context,
     private val presenter: MainPresenter,
