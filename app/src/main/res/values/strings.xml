@@ -1,4 +1,5 @@
 <resources>
+    <!-- TODO: Move hardcoded strings throughout the app to here -->
     <string name="app_name">Bytesize History</string>
     <string name="date_settings">Change date</string>
     <string name="theme_settings">Change theme</string>
