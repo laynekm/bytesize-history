@@ -163,9 +163,6 @@ class MainPresenter(val context: Context, val view: View) {
             contentManager.filterHistoryItems()
             view.onFiltersChanged(HistoryItems.filterOptions)
 
-            if (!HistoryItems.allImagesFetched(currentType)) fetchImages(currentType)
-            else view.onContentChanged(HistoryItems.filteredHistoryItems, currentType)
-
             // If currentType is no longer in filterOptions, set currentType to first type or null
             if (!HistoryItems.filterOptions.types.contains(currentType)) {
                 if (HistoryItems.filterOptions.types.size == 0) setCurrentType(null)
