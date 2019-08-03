@@ -12,10 +12,13 @@ object HistoryItems {
     var allHistoryItems = getEmptyTypeMap()
     var filteredHistoryItems = getEmptyTypeMap()
     var filterOptions: FilterOptions = FilterOptions()
-    var fetchedTypes: MutableSet<Type> = mutableSetOf()
 
     fun isEmpty(): Boolean {
         return mapIsEmpty(allHistoryItems) && mapIsEmpty(filteredHistoryItems)
+    }
+
+    fun allImagesFetched(type: Type?): Boolean {
+        return filteredHistoryItems[type]!!.all { it.hasFetchedImage }
     }
 }
 

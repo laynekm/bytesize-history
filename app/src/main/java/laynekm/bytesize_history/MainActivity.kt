@@ -170,6 +170,8 @@ class MainActivity : AppCompatActivity(), MainPresenter.View  {
     override fun onError(error: Error?, type: Type?) {
         errorTextView.visibility = View.VISIBLE
 
+        if (error != null) progressBar.visibility = View.GONE
+
         when (error) {
             Error.FETCH_ERROR -> {
                 retryBtn.visibility = View.VISIBLE

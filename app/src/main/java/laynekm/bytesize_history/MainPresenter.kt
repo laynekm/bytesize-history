@@ -84,8 +84,7 @@ class MainPresenter(val context: Context, val view: View) {
         if (type === currentType) return
         currentType = type
         view.onTypeChanged(currentType)
-        if (type != null && !HistoryItems.fetchedTypes.contains(type)) {
-            HistoryItems.fetchedTypes.add(type)
+        if (type != null && !HistoryItems.allImagesFetched(type)) {
             fetchImages(type)
         }
         checkForErrors()
@@ -104,7 +103,6 @@ class MainPresenter(val context: Context, val view: View) {
     // uiThread is updated when the async call is finished
     fun fetchHistoryItems() {
         fetchError = false
-        HistoryItems.fetchedTypes = mutableSetOf()
         view.onContentChanged(getEmptyTypeMap())
         view.onFetchStarted()
 
@@ -117,7 +115,6 @@ class MainPresenter(val context: Context, val view: View) {
     private fun onFetchHistoryItemsFinished(success: Boolean) {
         fetchError = !success
         if (success && currentType != null) {
-            HistoryItems.fetchedTypes.add(currentType!!)
             fetchImages(currentType)
         } else {
             view.onFetchFinished()
@@ -129,6 +126,8 @@ class MainPresenter(val context: Context, val view: View) {
     // Fetches all images for given type, uiThread will not be updated until all images are fetched
     private fun fetchImages(type: Type?) {
         view.onFetchStarted()
+
+//        if (HistoryItems.allImagesFetched(type)) return
 
         HistoryItems.filteredHistoryItems[type]!!.forEach {
             doAsync {
@@ -164,15 +163,17 @@ class MainPresenter(val context: Context, val view: View) {
             contentManager.filterHistoryItems()
             view.onFiltersChanged(HistoryItems.filterOptions)
 
-            // Only call onContentChanged for types with fetched images, otherwise onFetchImagesFinished will handle this
-            for (type in HistoryItems.fetchedTypes) {
-                view.onContentChanged(HistoryItems.filteredHistoryItems, type)
-            }
+            if (!HistoryItems.allImagesFetched(currentType)) fetchImages(currentType)
+            else view.onContentChanged(HistoryItems.filteredHistoryItems, currentType)
 
             // If currentType is no longer in filterOptions, set currentType to first type or null
             if (!HistoryItems.filterOptions.types.contains(currentType)) {
                 if (HistoryItems.filterOptions.types.size == 0) setCurrentType(null)
                 else setCurrentType(HistoryItems.filterOptions.types[0])
+            } else {
+                // Need to call fetchImages because the new items being displayed may not have had images fetched
+                if (!HistoryItems.allImagesFetched(currentType)) fetchImages(currentType)
+                else view.onContentChanged(HistoryItems.filteredHistoryItems, currentType)
             }
 
             checkForErrors()
