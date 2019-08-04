@@ -54,6 +54,7 @@
     <!-- TODO: Style dialog for dark theme -->
     <style name="dialogThemeDark" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/darkPrimaryLight</item>
+        <item name="android:textColor">@color/lightTextDark</item>
     </style>
 
     <!-- Shared styles -->
