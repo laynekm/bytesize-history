@@ -2,6 +2,7 @@ package laynekm.bytesize_history
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
@@ -36,6 +37,14 @@ class NotificationReceiver : BroadcastReceiver() {
         val year = historyItem.formattedYear
         val date = historyItem.date
 
+        // Set up intent to launch app when notification is tapped
+        val notifyIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val notifyPendingIntent = PendingIntent.getActivity(
+            context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(ic_launcher)
             .setContentTitle(context.getString(R.string.notification_title, buildDateForNotification(date), year))
@@ -44,6 +53,7 @@ class NotificationReceiver : BroadcastReceiver() {
             .setStyle(NotificationCompat.BigTextStyle())
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
+            .setContentIntent(notifyPendingIntent)
 
         val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(1, builder.build())
