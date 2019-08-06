@@ -165,7 +165,10 @@ class ContentManager {
     // Reverses order of items while making sure items of depth > 0 still appear beneath their parent
     private fun reverseOrderRespectingDepth(items: MutableList<HistoryItem>): MutableList<HistoryItem> {
         val reversedItems: MutableList<HistoryItem> = mutableListOf()
-        items.forEach { reversedItems.add(it.depth, it) }
+        items.forEach {
+            if (it.depth > reversedItems.size) reversedItems.add(reversedItems.size, it)
+            else reversedItems.add(it.depth, it)
+        }
         return reversedItems
     }
 
