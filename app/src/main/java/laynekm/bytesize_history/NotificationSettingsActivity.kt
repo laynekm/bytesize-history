@@ -43,10 +43,12 @@ class NotificationSettingsActivity : AppCompatActivity(), NotificationSettingsPr
             notificationSummaryTextView.text = getString(R.string.notification_summary_enabled, timeTo12HourString(time))
             notificationToggleButton.text = getString(R.string.notification_disable)
             notificationTimeButton.isEnabled = true
+            notificationTimeButton.alpha = 1f
         } else {
             notificationSummaryTextView.text = getString(R.string.notification_summary_disabled)
             notificationToggleButton.text = getString(R.string.notification_enable)
             notificationTimeButton.isEnabled = false
+            notificationTimeButton.alpha = .5f
         }
     }
 
