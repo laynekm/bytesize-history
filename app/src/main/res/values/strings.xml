@@ -37,6 +37,7 @@
 
     <!-- Preferences -->
     <string name="preferences_key">preferences</string>
+    <string name="current_type_pref_key">current_type</string>
     <string name="theme_pref_key">theme</string>
     <string name="notification_enabled_pref_key">send_notifications</string>
     <string name="notification_time_pref_key">notification_time</string>

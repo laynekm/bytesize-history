@@ -1,6 +1,7 @@
 package laynekm.bytesize_history
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.webkit.WebView
 import org.jetbrains.anko.doAsync
@@ -20,6 +21,10 @@ class MainPresenter(val context: Context, val view: View) {
     private val themeManager: ThemeManager = ThemeManager(context)
     private var filterManager: FilterManager = FilterManager(context)
     private var notificationManager: NotificationManager = NotificationManager(context)
+
+    private val preferencesKey: String = context.getString(R.string.preferences_key)
+    private val currentTypePrefKey: String = context.getString(R.string.current_type_pref_key)
+    private val sharedPref: SharedPreferences = context.getSharedPreferences(preferencesKey, Context.MODE_PRIVATE)
 
     private var today: Date = getToday()
     private var currentDate: Date = getToday()
@@ -55,8 +60,10 @@ class MainPresenter(val context: Context, val view: View) {
             webViewVisible = savedInstanceState.getBoolean(webViewVisibleKey)
         }
 
+        // Try to extract currentType from savedInstanceState then sharedPreferences, otherwise set to default
         if (currentType == null && HistoryItems.filterOptions.types.size > 0) {
-            currentType = HistoryItems.filterOptions.types[0]
+            val defaultType = typeToString(HistoryItems.filterOptions.types[0])
+            currentType = stringToType(sharedPref.getString(currentTypePrefKey, defaultType))
         }
 
         if (filterDropdownVisible) view.onDropdownOpened()
@@ -72,7 +79,7 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     // Update date if app is resumed but the date has changed
-    // TODO: This doesn't seem to work every time
+    // TODO: This doesn't always seem to work
     fun onViewResumed() {
         val updatedToday = getToday()
         if (!datesEqual(today, updatedToday)) {
@@ -82,7 +89,6 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     // Updates currentType, fetching images for that type if necessary
-    // TODO: Save current type in shared preferences
     fun setCurrentType(type: Type?) {
         if (type === currentType) return
         currentType = type
@@ -91,6 +97,11 @@ class MainPresenter(val context: Context, val view: View) {
             fetchImages(type)
         }
         checkForErrors()
+
+        with (sharedPref.edit()) {
+            putString(currentTypePrefKey, "$currentType")
+            apply()
+        }
     }
 
     // Updates currentDate, will always trigger a fetch for history items on that date
