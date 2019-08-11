@@ -23,7 +23,7 @@ class ThemeManager(val context: Context) {
         return this.currentTheme
     }
 
-    // Sets theme from argument and updates shared preferences
+    // Sets theme and updates shared preferences
     fun toggleTheme() {
         when (currentTheme) {
             Theme.DARK -> {
