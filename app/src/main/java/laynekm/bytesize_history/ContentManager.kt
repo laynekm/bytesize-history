@@ -31,7 +31,7 @@ class ContentManager {
 
     // All the possible values that can be used to split year and desc
     // Some of these are edge cases found in literally one improperly formatted date, most use "&ndash;"
-    private val yearDescSeparators = listOf("&ndash;", "&#x2013;", "{{snd}}", " – ", " - ", ": ", "[[1927|–]]")
+    private val yearDescSeparators = listOf("&ndash;", "&#x2013;", "{{snd}}", " – ", " - ", "--", ": ", "[[1927|–]]")
 
     // Indicators of when lists of different history item types begin
     private val eventIndicators = listOf("==Events==", "== Events ==")
@@ -305,7 +305,21 @@ class ContentManager {
 
         if (yearSection.contains("|")) {
             val secondaryYear = yearSection.substringAfter("|")
-            yearSection = yearSection.replace(secondaryYear, "")
+
+            // In some instances we want the secondary year (ex. [[32nd century BC|3114 BC]], otherwise it will parse 32 BC)
+            if (secondaryYear.contains("BC")) {
+                yearSection = yearSection.replace(yearSection.substringBefore("|"), "")
+            } else {
+                yearSection = yearSection.replace(secondaryYear, "")
+            }
+        }
+
+        // Very specific edge case - can hopefully remove this at some point when the formatting is fixed
+        if (yearSection.contains("]/[")) {
+            yearSection = yearSection.replace(yearSection.substringAfter("]/["), "")
+            if (yearSection.contains(" ")) {
+                yearSection = yearSection.replace(yearSection.substringBefore(" "), "")
+            }
         }
 
         var yearInt: Int?

@@ -72,6 +72,7 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     // Update date if app is resumed but the date has changed
+    // TODO: This doesn't seem to work every time
     fun onViewResumed() {
         val updatedToday = getToday()
         if (!datesEqual(today, updatedToday)) {
@@ -81,6 +82,7 @@ class MainPresenter(val context: Context, val view: View) {
     }
 
     // Updates currentType, fetching images for that type if necessary
+    // TODO: Save current type in shared preferences
     fun setCurrentType(type: Type?) {
         if (type === currentType) return
         currentType = type
