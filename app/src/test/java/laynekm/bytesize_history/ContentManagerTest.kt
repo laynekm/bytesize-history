@@ -2,6 +2,7 @@ package laynekm.bytesize_history
 
 import junit.framework.Assert.*
 import org.junit.Test
+import java.util.*
 
 // Tests every date in year to make sure history items are fetched and parsed correctly
 class ContentManagerTest {
@@ -44,15 +45,10 @@ class ContentManagerTest {
             for (mappedHistoryItem in mappedHistoryItems) {
                 for (historyItem in mappedHistoryItem.value) {
                     print("     ${historyItem.type} - ${historyItem.year}: ${historyItem.desc}\n")
+
                     assertEquals(mappedHistoryItem.key, historyItem.type)
                     assertEquals(date, historyItem.date)
-
-                    // Formatting for Feb. 29 is completely different for some reason
-                    // Many items are a sublist of a year rather than having their own year, so the parent has no desc
-                    if (buildDateForURL(date) == "February_29") {
-                        assertNotNull(historyItem.desc)
-                    }
-
+                    assertNotNull(historyItem.desc)
                     assertNotNull(historyItem.links)
                     assertNotNull(historyItem.depth)
                     assertNotNull(historyItem.formattedYear)
@@ -62,7 +58,10 @@ class ContentManagerTest {
                         assertNull(historyItem.year)
                         assertEquals("", historyItem.formattedYear)
                     } else {
+                        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+
                         assertNotNull(historyItem.year)
+                        assertTrue(historyItem.year!! > -4000 && historyItem.year!! <= currentYear)
                         if (historyItem.depth > 0) {
                             assertEquals("", historyItem.formattedYear)
                         } else {

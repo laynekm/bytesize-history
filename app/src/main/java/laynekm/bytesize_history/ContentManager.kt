@@ -32,6 +32,7 @@ class ContentManager {
     // All the possible values that can be used to split year and desc
     // Some of these are edge cases found in literally one improperly formatted date, most use "&ndash;"
     private val yearDescSeparators = listOf("&ndash;", "&#x2013;", "{{snd}}", " – ", " - ", "--", ": ", "[[1927|–]]")
+    private val yearYearSeparators = listOf("]/[", "] [", "or ")
 
     // Indicators of when lists of different history item types begin
     private val eventIndicators = listOf("==Events==", "== Events ==")
@@ -274,6 +275,7 @@ class ContentManager {
     }
 
     // Parse out unneeded chars and return integer representation of year, BC will be negative
+    // TODO: Maybe add support for multiple dates: see March 21, 543
     private fun parseYear(line: String, type: Type): Int? {
         if (type === Type.OBSERVANCE) return null
 
@@ -303,6 +305,12 @@ class ContentManager {
             yearSection = yearSection.replace(secondaryYear, "")
         }
 
+        // Remove any embedded ref tags
+        if (yearSection.contains("<ref")) {
+            val embeddedRef = yearSection.substringBetween("<ref", "</ref>")
+            yearSection = yearSection.replace(embeddedRef, "")
+        }
+
         if (yearSection.contains("|")) {
             val secondaryYear = yearSection.substringAfter("|")
 
@@ -314,11 +322,15 @@ class ContentManager {
             }
         }
 
-        // Very specific edge case - can hopefully remove this at some point when the formatting is fixed
-        if (yearSection.contains("]/[")) {
-            yearSection = yearSection.replace(yearSection.substringAfter("]/["), "")
-            if (yearSection.contains(" ")) {
-                yearSection = yearSection.replace(yearSection.substringBefore(" "), "")
+        // If more than one date is given, just use the first
+        for (separator in yearYearSeparators) {
+            if (yearSection.contains(separator)) {
+                yearSection = yearSection.replace(yearSection.substringAfter(separator), "")
+                if (yearSection.contains(" ")) {
+                    yearSection = yearSection.replace(yearSection.substringBefore(" "), "")
+                }
+
+                break
             }
         }
 
