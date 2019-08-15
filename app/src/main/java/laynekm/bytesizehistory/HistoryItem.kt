@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 class HistoryItem (
     val type: Type,

@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 import junit.framework.Assert.*
 import org.junit.Test

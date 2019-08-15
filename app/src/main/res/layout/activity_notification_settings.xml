@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="laynekm.bytesize_history.NotificationSettingsActivity">
+    tools:context="laynekm.bytesizehistory.NotificationSettingsActivity">
 
     <android.support.design.widget.AppBarLayout
             android:layout_height="wrap_content"

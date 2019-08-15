@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 
-import laynekm.bytesize_history.R.mipmap.ic_launcher
+import laynekm.bytesizehistory.R.mipmap.ic_launcher
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 

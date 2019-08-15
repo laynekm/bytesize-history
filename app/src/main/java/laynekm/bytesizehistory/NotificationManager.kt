@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 import android.app.AlarmManager
 import android.app.PendingIntent

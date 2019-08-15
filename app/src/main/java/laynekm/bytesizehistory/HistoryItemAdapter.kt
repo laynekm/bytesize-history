@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 import android.content.Context
 import android.support.constraint.ConstraintLayout

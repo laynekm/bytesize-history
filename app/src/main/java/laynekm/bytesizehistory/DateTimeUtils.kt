@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 import java.text.DateFormatSymbols
 import java.util.*

@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 import android.app.TimePickerDialog
 import android.support.v7.app.AppCompatActivity

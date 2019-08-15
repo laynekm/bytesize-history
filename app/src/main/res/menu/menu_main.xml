@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="laynekm.bytesize_history.MainActivity" >
+    tools:context="laynekm.bytesizehistory.MainActivity" >
 
     <item android:id="@+id/changeNotification"
           android:title="@string/notification_settings"

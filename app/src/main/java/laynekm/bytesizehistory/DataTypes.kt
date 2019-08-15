@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 data class Date(val month: Int, val day: Int)
 data class Time(val hour: Int, val minute: Int)

@@ -1,4 +1,4 @@
-package laynekm.bytesize_history
+package laynekm.bytesizehistory
 
 fun getEmptyTypeMap(): HashMap<Type, MutableList<HistoryItem>> {
     return hashMapOf(
