@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("laynekm.dailyhistory", appContext.packageName)
+        assertEquals("laynekm.bytesizehistory", appContext.packageName)
     }
 }
